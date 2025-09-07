@@ -5,24 +5,25 @@ A class should have only one reason to change.
 
 When we say “a class should have one reason to change”, the trick is to recognize that "reasons to change" are not about the domain entity’s responsibilities (e.g., a user in real life can register, login, pay, order, etc.). Instead, they’re about axes of change in the software.
 
-1. Think in Responsibilities, not Actions
-A responsibility is not "all the things a user can do."
-It’s about who will request changes to that class.
+Software OOP does not have to mirror reality exactly. In fact, trying to force it to do so is often a recipe for bad, inflexible code (like the User god object).
 
-Example with User:
-- Login behavior might change if the security team updates authentication policies.
-- Payment behavior might change if the finance team changes billing logic.
-- Ordering behavior might change if the sales team changes workflows.
-👉 Already, that’s three different reasons to change. That’s why stuffing them all in one User class makes it fragile.
+The goal of OOP isn't to create a perfect simulation of the real world. The goal is to create a model that effectively solves a problem within a specific context. This model is built around behaviors and interactions, not just real-world nouns.
+
+This is why we have classes like AuthService, PaymentController, OrderRepository, and EmailNotifier. You won't find these exact things "in reality," but they are excellent, SRP-compliant solutions within a software system.
 
 
-2. Look at Business Concerns vs. Technical Concerns
+Naive OOP (Mirrors Reality)	 
+A User	A User class with methods login(), order(), pay(), updateProfile()
+The Act of Logging In	A method inside the User class.
+The Act of Placing an Order	A method inside the User class.
+The Act of Payment	A method inside the User class.
 
-Axes of change often come from different concerns:
-- Business rules: discounts, order approvals, invoice calculations.
-- Technical rules: caching, database persistence, API calls.
-- Cross-cutting rules: logging, validation, notifications.
-If a class mixes multiple concerns, it has multiple axes of change.
+
+Effective OOP (Solves a Problem)
+A User A User data class (or entity) that just holds data: id, name, email.
+The Act of Logging In   A separate AuthService class with a login(username, password) method. It uses the User data object.
+The Act of Placing an Order  A separate OrderService class with a placeOrder(userId, items) method. It uses the User data object.
+The Act of Payment A separate PaymentProcessor class with a processPayment(orderId, cardDetails) method.
 
 
 Analogy
@@ -50,6 +51,8 @@ So in code:
 - AuthService = login/register.
 - PaymentService = pay.
 - OrderService = order/cancel.
+
+
 
 ---
 
