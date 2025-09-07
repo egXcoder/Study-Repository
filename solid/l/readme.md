@@ -7,7 +7,7 @@ this is typically a rule for inheritance when you define contract. all subclasse
 ---
 
 ## 🔧 Theoretical
-The whole point of having FlyableBird as parent class is that you trust any flyable birds can fly. I don’t care if it’s Owl or Eagle, or whatever — as long as it fly(). If some implementations don’t behave the same, like Penguine. this will make the caller confused, he uses penguine he expects penguine to fly and the he surprised penguine can't fly so why did it inherit flyablebird from the beginning? i understand it maybe because some shared code but it require deeper thought to refactor this penguine shouldnt ever inherit flyablebird .. you need to look for alternative approach..
+The whole point of having FlyableBird as parent class is that you trust any flyable bird can fly. I don’t care if it’s Owl or Eagle, or whatever — as long as it fly(). If some implementations don’t behave the same, like Penguine. this will make the caller confused, he uses penguine he expects penguine to fly and the he surprised penguine can't fly so why did it inherit flyablebird from the beginning? i understand it maybe because some shared code but i think it required deeper thought to refactor this as penguine shouldnt ever inherit flyablebird .. you need to look for alternative approach..
 
 ---
 
