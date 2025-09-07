@@ -1,9 +1,7 @@
 <?php
 
 // 3. Notifications (Email, SMS, Slack, …)
-
 // Laravel itself applies OCP here.
-
 // Instead of:
 class ReportNotifier
 {

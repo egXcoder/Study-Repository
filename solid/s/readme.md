@@ -1,6 +1,55 @@
 # SRP – Single Responsibility Principle
 
-> **A class should have only one reason to change.**
+A class should have only one reason to change.
+
+
+When we say “a class should have one reason to change”, the trick is to recognize that "reasons to change" are not about the domain entity’s responsibilities (e.g., a user in real life can register, login, pay, order, etc.). Instead, they’re about axes of change in the software.
+
+1. Think in Responsibilities, not Actions
+A responsibility is not "all the things a user can do."
+It’s about who will request changes to that class.
+
+Example with User:
+- Login behavior might change if the security team updates authentication policies.
+- Payment behavior might change if the finance team changes billing logic.
+- Ordering behavior might change if the sales team changes workflows.
+👉 Already, that’s three different reasons to change. That’s why stuffing them all in one User class makes it fragile.
+
+
+2. Look at Business Concerns vs. Technical Concerns
+
+Axes of change often come from different concerns:
+- Business rules: discounts, order approvals, invoice calculations.
+- Technical rules: caching, database persistence, API calls.
+- Cross-cutting rules: logging, validation, notifications.
+If a class mixes multiple concerns, it has multiple axes of change.
+
+
+Analogy
+👤 Imagine a Real-Life User (a person): A person in real life can do many things:
+
+- Log in to a website (enter credentials).
+- Pay for something (use their credit card).
+- Place an order.
+- Cancel an order.
+- Leave a review.
+
+If you try to stuff all these responsibilities into the single User entity (class), it’s like saying: This person must carry all tools (laptop, wallet, shopping cart, cancellation forms, etc.) with them everywhere.
+
+✅ SRP Version
+
+Instead, in the real world, a user doesn’t do everything by themselves.
+- They authenticate through a login system (Auth service).
+- They pay through a payment processor (Stripe, PayPal, etc.).
+- They order through an ordering system.
+- They cancel through a cancellation workflow.
+- The person (User) just initiates actions, but the specialized systems handle them.
+
+So in code:
+- User class = identity + profile (who the person is).
+- AuthService = login/register.
+- PaymentService = pay.
+- OrderService = order/cancel.
 
 ---
 
