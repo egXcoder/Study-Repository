@@ -1,6 +1,6 @@
 # Liskov Substitution Principle (LSP)
 
-this is typically a rule for inheritance.. when you use inheritance. all subclasses must follow the expectations set by the parent. then any subclass can replace his parent without breaking the code.. 
+this is inheritance rule.. whenever you use inheritance. all subclasses must follow the expectations set by the parent. then any subclass can replace his parent without breaking the code.. 
 
 
 ---
