@@ -1,6 +1,6 @@
 # Liskov Substitution Principle (LSP)
 
-Subclasses **shouldn't change the contract or expectations** set by the parent.  
+Subclasses shouldn't change the expectations set by the parent.  
 
 👉 If class **B** extends or implements **A**, you should be able to use **B** anywhere **A** is expected **without breaking things**.
 
