@@ -1,14 +1,17 @@
 # Open–Closed Principle (OCP)
+
 A class/module should be open for extension but closed for modification.
 
 ---
 
 ## Open For Extenstion  
+
 When you want to add a new behavior, you shouldn't edit existing, tested code — instead, you extend it.
 
 ---
 
 ## Closed For Modification
+
 You modify a closed class for reasons that are not about adding new behaviour:
 
 - **Fix a bug** → e.g., if `Circle::getArea()` is wrong, you fix it.  
