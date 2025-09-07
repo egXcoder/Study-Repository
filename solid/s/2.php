@@ -5,7 +5,7 @@ class GenerateReportJob implements ShouldQueue
 {
     public function handle()
     {
-        // Generate report
+        // get report from db
         $data = Report::all();
 
         // Save as CSV
@@ -18,7 +18,7 @@ class GenerateReportJob implements ShouldQueue
     private function toCsv($data) { /* ... */ }
 }
 
-//Trial .. Better
+//first trial .. Better
 //issues:
 //1- csv formatting is inside the job, i think it can be encapsulated in another object
 //2- class name need to be more expressive such as GenerateSaveThenNotifyReport
