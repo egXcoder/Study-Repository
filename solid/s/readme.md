@@ -2,7 +2,6 @@
 
 A class should have only one reason to change.
 
-
 When we say “a class should have one reason to change”, the trick is to recognize that "reasons to change" are not about the domain entity’s responsibilities (e.g., a user in real life can register, login, pay, order, etc.). Instead, they’re about axes of change in the software.
 
 Software OOP does not have to mirror reality exactly. In fact, trying to force it to do so is often a recipe for bad, inflexible code (like the User god object).
@@ -13,17 +12,17 @@ This is why we have classes like AuthService, PaymentController, OrderRepository
 
 
 Naive OOP (Mirrors Reality)	 
-A User	A User class with methods login(), order(), pay(), updateProfile()
-The Act of Logging In	A method inside the User class.
-The Act of Placing an Order	A method inside the User class.
-The Act of Payment	A method inside the User class.
+A User ...	A User class with methods login(), order(), pay(), updateProfile()
+The Act of Logging In ...	A method inside the User class.
+The Act of Placing an Order ...	A method inside the User class.
+The Act of Payment ...	A method inside the User class.
 
 
 Effective OOP (Solves a Problem)
-A User A User data class (or entity) that just holds data: id, name, email.
-The Act of Logging In   A separate AuthService class with a login(username, password) method. It uses the User data object.
-The Act of Placing an Order  A separate OrderService class with a placeOrder(userId, items) method. It uses the User data object.
-The Act of Payment A separate PaymentProcessor class with a processPayment(orderId, cardDetails) method.
+A User ... A User data class (or entity) that just holds data: id, name, email.
+The Act of Logging In ...  A separate AuthService class with a login(username, password) method. It uses the User data object.
+The Act of Placing an Order.. A separate OrderService class with a placeOrder(userId, items) method. It uses the User data object.
+The Act of Payment ... A separate PaymentProcessor class with a processPayment(orderId, cardDetails) method.
 
 
 Analogy

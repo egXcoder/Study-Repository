@@ -1,6 +1,6 @@
 # Liskov Substitution Principle (LSP)
 
-this is inheritance rule.. whenever you use inheritance. all subclasses must follow the expectations set by the parent. then any subclass can replace his parent without breaking the code.. 
+this is inheritance rule.. whenever you use inheritance. all subclasses must follow the expectations set by the parent. then any subclass can replace his parent without breaking the code.. subclasses can replace their parent without breaking code
 
 
 ---
@@ -20,8 +20,8 @@ I don’t care if it’s Stripe, PayPal, or whatever — as long as it charge().
 ---
 
 ## 🎯 Why LSP is Useful in Laravel Projects
-- ✅ Ensures services or channels can be **swapped without bugs**  
-- ✅ Makes subclasses usage reliable so that swapping between them shouldnt cause bugs  
+- ✅ Makes code reliable and not confusing   
 - ✅ Prevents nasty runtime errors where you think a subclass “fits” but it doesn’t  
+- ✅ Ensures services or channels can be **swapped without bugs**  
 - ✅ Makes **dependency injection safe**  
 - ✅ Improves **testability** — you can mock or swap implementations freely  

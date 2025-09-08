@@ -2,6 +2,8 @@
 
 // 👉 Bad Example (violating SRP):
 // This controller has too many responsibilities: validation, persistence, email sending, logging.
+// laravel controllers has only one responsibility is to receive request and return response but handling the request should be
+// responsibility of other classes
 class UserController extends Controller
 {
     public function store(Request $request)
