@@ -2,7 +2,9 @@
 
 HTTPS = HTTP over TLS/SSL.
 
-TLS is the security protocol that gives you:
+TLS is the security protocol, its main idea is 
+1- share symmetric key between client and server without man in middle can see this symmetric key
+2- confidence client is talking to server and there is no one in the middle acting as the server
 
 ## TLS 1.3 (Key Exchange)
 Client:
@@ -43,9 +45,7 @@ Now all key exchange is (Elliptic Curve) Diffie–Hellman (DH/ECDH).
 👉 This gives forward secrecy: even if the server’s private key is stolen tomorrow, past traffic can’t be decrypted.
 
 
-### Problem And Solution:
-
-Problem:
+### Client Should Be Confident of the server:
 because someone in middle can act as the server and trick the client, there become a need to assure server responding is the correct server.
 
 what we can do
@@ -53,8 +53,7 @@ what we can do
 - server can sign the data being sent to client with private key (CertificateVerify) and send the public key as well
 - browser can use the public key to double check CertificateVerify to make sure all good
 
-### Problem And Solution:
-even with the top implemented, a man in the middle can have his own combination of private key and public key and act as if he is the server
+still even with the top implemented, a man in the middle can have his own combination of private key and public key and act as if he is the server
 
 what we can do
 - we need a certificate authority which will say example.com have this public key
