@@ -35,7 +35,6 @@ please notice:
 
 
 ## Q: it seems tls1.3 is generating private key and public key every session?
-
 TLS 1.3 removed RSA key exchange completely.
 Now all key exchange is (Elliptic Curve) Diffie–Hellman (DH/ECDH).
 - Both browser and server generate fresh, random private values every handshake (ephemeral keys).
@@ -45,7 +44,7 @@ Now all key exchange is (Elliptic Curve) Diffie–Hellman (DH/ECDH).
 👉 This gives forward secrecy: even if the server’s private key is stolen tomorrow, past traffic can’t be decrypted.
 
 
-### Client Should Be Confident of the server:
+### TLS 1.3 (Client Should Be Confident of the server):
 because someone in middle can act as the server and trick the client, there become a need to assure server responding is the correct server.
 
 what we can do
@@ -58,6 +57,7 @@ still even with the top implemented, a man in the middle can have his own combin
 what we can do
 - we need a certificate authority which will say example.com have this public key
 - the certificate authority will make sure you are the domain owner when you try to issue a certificate from them
+- certificate authority will tell you give me your public key, your meta data if any and what is your domain? can you verify it from dns records?
 
 
 ### Certificate
