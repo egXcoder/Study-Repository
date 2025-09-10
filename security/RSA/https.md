@@ -4,7 +4,7 @@ HTTPS = HTTP over TLS/SSL.
 
 TLS is the security protocol, its main idea is 
 1- share symmetric key between client and server without man in middle can see this symmetric key
-2- confidence client is talking to server and there is no one in the middle acting as the server
+2- client should be confident he is talking to server and there is no one in the middle acting as the server
 
 ## TLS 1.3 (Key Exchange)
 Client:
