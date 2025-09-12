@@ -19,16 +19,9 @@ If you have a big interface and end up with implementations that don’t use som
 
 - small and focused is more effective
 
-- Slows down evolution
-If you add a method to a fat interface, suddenly all implementations break until they add that method.
-With small contracts, you only affect the classes that actually care.
+- reduce surprises (if class says it follow this contract, it has to respect all parent rules)
 
-- Hurts readability
-A fat interface with 10–20 methods is harder to understand than 3–4 focused ones.
-Small, cohesive contracts make relationships clearer.
-
-- Confuse Code
-If an interface has methods that don’t apply to every implementation, classes will end up throwing exceptions, leaving methods empty, or adding dummy logic. Example: SmsNotification shouldn’t have to implement sendEmail().
+- on dependencies, instead of a class depend on another class, it can only depend on the contract that it truely need which make the code loosely coupled (so classes and methods should depend on the things it truely need)
 
 
 ---

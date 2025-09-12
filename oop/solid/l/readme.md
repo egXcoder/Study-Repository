@@ -20,8 +20,4 @@ I don’t care if it’s Stripe, PayPal, or whatever — as long as it charge().
 ---
 
 ## 🎯 Why LSP is Useful in Laravel Projects
-- ✅ Makes code reliable and not confusing   
-- ✅ Prevents nasty runtime errors where you think a subclass “fits” but it doesn’t  
-- ✅ Ensures services or channels can be **swapped without bugs**  
-- ✅ Makes **dependency injection safe**  
-- ✅ Improves **testability** — you can mock or swap implementations freely  
+- reduce surprises (if class says its inherited from parent, it has to respect all parent rules)

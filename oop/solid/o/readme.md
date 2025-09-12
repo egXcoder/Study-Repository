@@ -28,9 +28,9 @@ You modify a closed class for reasons that are not about adding new behaviour:
 
 ## 🚀 Why is it Useful?
 
-- **Stability** → Once a class works and is tested, you don’t risk introducing bugs by modifying it every time a new requirement comes up.  
-- **Extensibility** → You can add new features by adding new classes or extending behavior, not by hacking existing ones.  
-- **Scalability** → Keeps the codebase cleaner as requirements grow, instead of one God-class with endless `if/else`.
+- Once a class works and is tested, you don’t risk introducing bugs by modifying it every time a new requirement comes up.  (stability)
+- You can add new features by adding new classes or extending behavior, not by hacking existing ones.  (extensibility)
+- Keeps the codebase cleaner as requirements grow, instead of one God-class with endless `if/else`. (maintainability)
 
 ---
 
