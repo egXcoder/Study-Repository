@@ -1,43 +1,10 @@
 <?php
 
-//in abstract factory, you will have a factory which returns factories
-//not necarrily his name will be factory or the returned name is called factory, however you can quickly see it
-
-interface Connection {
-    public function connect();
-}
-
-interface QueryBuilder {
-    public function buildSelect(string $table): string;
-}
+//factory here will be a class with many methods creating related objects 
+// we can use FactoryMethod DP to write a class to return one of these factories 
 
 
-// MySQL products
-class MySQLConnection implements Connection {
-    public function connect() {
-        echo "Connecting to MySQL...\n";
-    }
-}
-
-class MySQLQueryBuilder implements QueryBuilder {
-    public function buildSelect(string $table): string {
-        return "SELECT * FROM `$table`";
-    }
-}
-
-// PostgreSQL products
-class PostgresConnection implements Connection {
-    public function connect() {
-        echo "Connecting to PostgreSQL...\n";
-    }
-}
-
-class PostgresQueryBuilder implements QueryBuilder {
-    public function buildSelect(string $table): string {
-        return "SELECT * FROM \"$table\"";
-    }
-}
-
+//not necarrily class name will be factory its more of role rather than name, such as in laravel MysqlFactory is called MysqlDrive
 
 interface DBFactory {
     public function createConnection(): Connection;
@@ -65,7 +32,6 @@ class PostgresFactory implements DBFactory {
     }
 }
 
-
 class DBFactoryProvider {
     public static function getFactory(string $db): DBFactory {
         return match ($db) {
@@ -75,6 +41,9 @@ class DBFactoryProvider {
         };
     }
 }
+
+
+
 
 // client
 $factory = DBFactoryProvider::getFactory("mysql");

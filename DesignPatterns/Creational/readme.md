@@ -8,7 +8,7 @@ They deal with object creation mechanisms — i.e., how objects are instantiated
 - they will help you to move construction logic to separate place
 
 
-- Factory .. decide which class to instantiate from multiple available classes in run time
+- Factory Method .. decide which class to instantiate from multiple available classes in run time
 - Abstract Factory .. decide which factory to instantiate from multiple available factories
 - Builder ... construction of a complex object
 - Prototype ... cloning an existing instance
