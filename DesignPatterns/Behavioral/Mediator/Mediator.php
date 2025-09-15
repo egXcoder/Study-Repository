@@ -2,11 +2,11 @@
 
 
 //Mediator is the central hub which knows all colleagues
-//Colleague individual participants and not talk to each other directly
+//Colleague is the individuals that need to communicate with each other but not directly
 
 
 // Imagine a chatroom where multiple participants can send messages.
-// Without a mediator: Each uparticpant would need to know about every other particpant → messy.
+// Without a mediator: Each particpant would need to know about every other particpant → messy.
 // With a mediator: particpants send messages to the chatroom (mediator), which forwards them appropriately.
 
 
