@@ -10,3 +10,4 @@ define the ways in which objects collaborate and delegate responsibilities
 - Command Pattern: turns a request into an object.
 - Iterator: provides a standard way to traverse a collection of objects without exposing its internal structure.
 - Mediator: make colleagues not send messages to each other directly and instead rely on mediator
+- Memento: save and restore its state

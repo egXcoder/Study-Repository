@@ -1,17 +1,9 @@
 <?php
 
-
 // Command Pattern is useful
 //  - Undo/redo systems
 //  - queue commands and process later (laravel commands and invoker is queue:work)
 //  - log actions happened (like in banking systems, every action has to be logged)
-
-// Imagine you’re building a file manager in PHP.
-// You want to support commands like:
-// Create a file
-// Rename a file
-// Delete a file
-// Undo last operation
 
 
 //The Receiver is the object that actually does the work.
@@ -22,6 +14,15 @@
 //The Invoker is responsible for executing commands.
 // It doesn’t know what the command does internally, only that it has an execute() (and maybe undo()) method.
 //The invoker can also store history (to allow undo/redo).
+
+
+// Imagine you’re building a file manager in PHP.
+// You want to support commands like:
+// Create a file
+// Rename a file
+// Delete a file
+// Undo last operation
+
 
 
 //Receiver
