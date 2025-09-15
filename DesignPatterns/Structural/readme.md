@@ -2,7 +2,7 @@
 
 They deal with how to assemble objects and classes into larger structures
 
-## Why do we need creational patterns?
+## Why do we need structural patterns?
 
 
 
