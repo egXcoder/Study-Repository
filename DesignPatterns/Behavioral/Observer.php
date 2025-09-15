@@ -24,6 +24,12 @@ class Order {
         $this->observers[] = $observer;
     }
 
+    private function notifyObservers(): void {
+        foreach ($this->observers as $observer) {
+            $observer->update($this);
+        }
+    }
+    
     public function setStatus(string $status): void {
         $this->status = $status;
         $this->notifyObservers();
@@ -33,11 +39,6 @@ class Order {
         return $this->status;
     }
 
-    private function notifyObservers(): void {
-        foreach ($this->observers as $observer) {
-            $observer->update($this);
-        }
-    }
 }
 
 //Observers
@@ -63,7 +64,6 @@ class AnalyticsLogger implements OrderObserver {
     }
 }
 
-
 //client code
 $order = new Order();
 
@@ -77,6 +77,78 @@ $order->setStatus("PLACED");
 $order->setStatus("SHIPPED");
 
 
+
+//please notice in the top example, Order is violating SRP as its doing multiple things, managing observers and logic of order as well
+//so its better to separate concerns 
+
+class OrderEventDispatcher {
+    private array $observers = [];
+
+    public function attach(OrderObserver $observer): void {
+        $this->observers[] = $observer;
+    }
+
+    public function detach(OrderObserver $observer): void {
+        $this->observers = array_filter(
+            $this->observers,
+            fn($obs) => $obs !== $observer
+        );
+    }
+
+    public function notifyObservers(Order $order): void {
+        foreach ($this->observers as $observer) {
+            $observer->update($order);
+        }
+    }
+}
+
+// --- Order (domain model only) ---
+class Order {
+    private string $status;
+    private OrderEventDispatcher $dispatcher;
+
+    public function __construct(OrderEventDispatcher $dispatcher) {
+        $this->subject = $dispatcher;
+    }
+
+    public function setStatus(string $status): void {
+        $this->status = $status;
+        $this->dispatcher->notifyObservers($this);
+    }
+
+    public function getStatus(): string {
+        return $this->status;
+    }
+}
+
+// --- Usage ---
+$dispatcher = new OrderEventDispatcher();
+$dispatcher->attach(new EmailNotifier());
+$dispatcher->attach(new InventoryUpdater());
+$dispatcher->attach(new AnalyticsLogger());
+
+$order = new Order($dispatcher);
+$order->setStatus("Processing");
+$order->setStatus("Shipped");
+
+
+
+//Q: If Order class directly depends on 10 different objects/services, is that a code smell?
+// Yes, usually that is a smell — specifically a God object or too many responsibilities.
+// Why?
+// High coupling → Order becomes fragile because a change in any of the 10 services might force a change in Order.
+// Hard to test → you’d need 10 mocks/stubs just to test Order.
+// Violates SRP → the class likely has more than one reason to change.
+// Poor cohesion → the class is doing “too much”.
+
+// What’s the healthy range?
+// A class having 2–4 collaborators is common and fine.
+// If you reach 7+ dependencies, that’s usually a red flag 🚩 unless it’s just a DTO or orchestrator.
+
+
+// What to do instead
+// Introduce a Facade/Service: Group related services under one higher-level abstraction.
+// Use Events / Dispatcher
 
 // in laravel
 // subject is event
