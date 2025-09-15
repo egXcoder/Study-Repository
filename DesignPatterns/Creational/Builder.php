@@ -3,6 +3,13 @@
 //Builder .. build complex object
 //Directory .. use the builder to build pre-defined templates of the complex object
 
+
+//Q: is Builder class has to have a build method which takes all steps and build the complex object, or the builder itself can be the complex object?
+// in classical builder pattern: there has to be a build method which take the step to instantiate the complex object, some people take the shortcut 
+// to have the builder being the complex object itself but this isn't a typical builder pattern and also this shortcut mixes logic with instantiation
+// while in a typical builder, goal is to differentiate instantiation from the logic
+
+
 interface QueryBuilder {
     public function select($table, $columns);
     public function where($column, $value);
