@@ -6,18 +6,13 @@
 
 
 // Imagine a chatroom where multiple participants can send messages.
-// Without a mediator: Each particpant would need to know about every other particpant → messy.
-// With a mediator: particpants send messages to the chatroom (mediator), which forwards them appropriately.
+// Without a mediator: Each participant would need to know about every other participant → messy.
+// With a mediator: participants send messages to the chatroom (mediator), which forwards them appropriately.
 
-
-//if we have a chat room contains 3 particpants, and particpant 1 want to send message
-//so instead of $particpant1->sendMessage($message,particpant2) and $particpant1->sendMessage($message,particpant3)
-//we would $particpant1->sendInChatRoom($message)
-//there is a need of ChatRoom mediator which holds reference to all 3 particpants and makes one object to talk with the other objects
 
 
 // Colleague
-class ChatPartricipant {
+class ChatParticipant {
     protected $mediator;
     protected $name;
 
@@ -31,26 +26,26 @@ class ChatPartricipant {
         $this->mediator->sendMessage($message, $this);
     }
 
-    public function receive(string $message, ChatPartricipant $sender): void {
+    public function receive(string $message, ChatParticipant $sender): void {
         echo "{$this->name} received from {$sender->name}: {$message}\n";
     }
 }
 
 // Mediator interface
 interface ChatMediator {
-    public function sendMessage(string $message, ChatPartricipant $user): void;
-    public function addParticipant(ChatPartricipant $user): void;
+    public function sendMessage(string $message, ChatParticipant $user): void;
+    public function addParticipant(ChatParticipant $user): void;
 }
 
 // Concrete Mediator
 class ChatRoom implements ChatMediator {
     private $users = [];
 
-    public function addParticipant(ChatPartricipant $user): void {
+    public function addParticipant(ChatParticipant $user): void {
         $this->users[] = $user;
     }
 
-    public function sendMessage(string $message, ChatPartricipant $sender): void {
+    public function sendMessage(string $message, ChatParticipant $sender): void {
         foreach ($this->users as $user) {
             // Don’t send the message back to the sender
             if ($user !== $sender) {
@@ -69,9 +64,9 @@ class ChatRoom implements ChatMediator {
 $chatRoom = new ChatRoom();
 
 // Create users
-$user1 = new ChatPartricipant($chatRoom, "Alice");
-$user2 = new ChatPartricipant($chatRoom, "Bob");
-$user3 = new ChatPartricipant($chatRoom, "Charlie");
+$user1 = new ChatParticipant($chatRoom, "Alice");
+$user2 = new ChatParticipant($chatRoom, "Bob");
+$user3 = new ChatParticipant($chatRoom, "Charlie");
 
 // Add users to chatroom
 $chatRoom->addParticipant($user1);
