@@ -132,3 +132,69 @@ $pipeline
 // Use callback/Closure style if:
 // - You want dynamic, lightweight chains like middleware.
 // - You are working in Laravel-style pipelines.
+
+
+
+// Q3: Should every chain of handlers share a generic “request” type (like a Context or Request class)?
+//   Or should each chain define its own abstract base class with the correct method signature (handle(MyRequest $request))?
+
+
+// Option 1: Generic Request Object
+class RequestContext {
+    public array $data = [];
+    public array $meta = [];
+}
+
+abstract class Handler {
+    protected Handler $next = null;
+
+    public function setNext(Handler $handler): Handler {
+        $this->next = $handler;
+        return $handler;
+    }
+
+    public function handle(RequestContext $request): RequestContext {
+        if ($this->next) {
+            return $this->next->handle($request);
+        }
+        return $request;
+    }
+}
+
+// Pros:
+// - Reusable — one Handler base class works for any kind of chain.
+// - Flexible — handlers can attach arbitrary metadata ($request->meta['user'] = ...).
+// - Useful when the request can vary or grow over time (e.g., pipelines, middleware).
+
+// Cons:
+// - Handlers don’t get compile-time safety.
+// - You might need to “know” what keys are inside $request->data.
+// - Could get messy without good documentation.
+
+
+// Option 2: Domain-Specific Abstract Handler
+abstract class PaymentHandler {
+    protected PaymentHandler $next = null;
+
+    public function setNext(PaymentHandler $handler): PaymentHandler {
+        $this->next = $handler;
+        return $handler;
+    }
+
+    abstract public function handle(PaymentRequest $request): PaymentResponse;
+}
+
+
+// Pros:
+// - Strong typing — compiler/IDE can check you’re passing the right objects.
+// - Handlers are self-documenting: PaymentHandler clearly belongs to payment chain.
+// - Better if you have business-specific chains (auth, billing, validation, etc.).
+
+// Cons:
+// - You’ll repeat the Handler boilerplate for each domain (AuthHandler, PaymentHandler, etc.).
+// - Less reusable — each chain is siloed.
+
+
+// My rule of thumb:
+// If I’m writing application-level logic (payments, approvals, workflow), I go with domain-specific handlers.
+// If I’m writing infrastructure-level pipelines (logging, middleware, transformations), I use a generic Context or Request object.
