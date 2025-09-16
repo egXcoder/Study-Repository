@@ -1,5 +1,7 @@
 <?php
 
+// its idea is to delegate work from Order to the OrderState, Order is called the context
+
 
 // Imagine you’re building an Order system for e-commerce.
 // An order can be in different states:
@@ -15,7 +17,6 @@
 
 
 //Applying the pattern can be overkill if a state machine has only a few states or rarely changes.
-// its idea is to delegate work from Order to the OrderState
 
 interface OrderState {
     public function pay(Order $order);
