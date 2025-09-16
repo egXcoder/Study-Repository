@@ -1,5 +1,11 @@
 <?php
 
+// Idea is Chain Of Handlers
+// - some handlers maybe for validations that they can stop chain
+// - some handlers maybe for amending the request being passed through the chain till we end with the final request after finishing the chain
+// - some handers maybe pass the request untouched, they are just for logging and auditing
+
+
 //Chain Of Responsibility also can be called
 // - Pipeline
 // - Interceptor Pattern
