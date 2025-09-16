@@ -1,10 +1,10 @@
 <?php
 
+// Decorators can add extra behaviors dynamically:
 
 // Suppose you want a flexible logging system:
 // Base logger → logs to file.
 
-// Decorators can add extra behaviors dynamically:
 // Timestamp before the message.
 // Convert message to JSON.
 // Send critical logs by email, etc.
