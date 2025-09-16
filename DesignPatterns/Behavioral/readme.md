@@ -12,3 +12,4 @@ define the ways in which objects collaborate and delegate responsibilities
 - Mediator: make colleagues not send messages to each other directly and instead rely on mediator
 - Memento: save and restore its state
 - Observer: subscription mechanism to notify multiple objects about events
+- State: letting an object change its behavior when its internal state changes

@@ -82,10 +82,14 @@ $pipeline
             return $next($request);
         },
     ])
-    ->then($finalHandler)([
-        'user' => '  JOHNDOE  ',
-        'action' => 'create'
-    ]);
+    ->then(
+        function ($request) {
+            echo "Final handler got request: " . json_encode($request) . PHP_EOL;
+            return $request;
+        }
+    );
+
+$pipeline(['user' => '  JOHNDOE  ','action' => 'create']); //execute A,B,C then final handler
 
 
 //Q1 : why are we calling array_reverse?
