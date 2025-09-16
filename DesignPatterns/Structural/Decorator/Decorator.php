@@ -2,10 +2,9 @@
 
 //idea is to add additional responsibilities dynamically
 
-// [scenario]
 //suppose you have a class of FileReader which read a file from disk
 
-// [thinking]
+// [problem]
 //What if I want to compress the content before returning? Or encrypt it? Or cache the content?
 //or compress then encrypt .. or encrypt then cache .. or compress then cache
 //there are many ways we want to do this, we cant create a class for every thing as this will cause class explosion
