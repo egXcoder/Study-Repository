@@ -29,7 +29,16 @@ class StateMachine
             throw new Exception("Event '{$action}' not allowed from state '{$this->state}'");
         }
 
+        $oldState = $this->state;
+
         $this->state = $this->transitions[$this->state][$action];
+
+        EventDispatcher::dispatch('order.state_changed', [
+            'from' => $oldState,
+            'to' => $this->state,
+            'action' => $action,
+        ]);
+        
         return $this->state;
     }
 }
@@ -79,6 +88,7 @@ class Order
 
 class OrderService{
     protected $order;
+    
     public function __construct(Order $order)
     {
         $this->order = $order;
@@ -86,61 +96,47 @@ class OrderService{
 
     public function pay()
     {
-        if(!$this->order->isOrderStateAllow('pay')){
-            return ['error'=>'Cant Pay Order with state ' . $this->order->getState()];
-        }
-
-        // business logic lives here
-
-        $this->order->applyOrderAction('pay');
-        return ['success'=>'Paid successfully'];
+        return $this->applyWithGuard('pay', function() {
+            // business logic
+        });
     }
 
     public function ship(string $carrier)
     {
-        if(!$this->order->isOrderStateAllow('ship')){
-            return ['error'=>'Cant ship Order with state ' . $this->order->getState()];
-        }
-
-        // business logic lives here
-
-        $this->order->applyOrderAction('ship');
-        return ['success'=>'Shipped successfully'];
+        return $this->applyWithGuard('ship', function() {
+            // business logic
+        });
     }
 
     public function deliver()
     {
-        if(!$this->order->isOrderStateAllow('deliver')){
-            return ['error'=>'Cant deliver Order with state ' . $this->order->getState()];
-        }
-
-        // business logic lives here
-
-        $this->order->applyOrderAction('deliver');
-        return ['success'=>'Delivered successfully'];
+        return $this->applyWithGuard('deliver', function() {
+            // business logic
+        });
     }
 
     public function refund()
     {
-        if(!$this->order->isOrderStateAllow('refund')){
-            return ['error'=>'Cant refund Order with state ' . $this->order->getState()];
-        }
-
-        // business logic lives here
-
-        $this->order->applyOrderAction('refund');
-        return ['success'=>'Refunded successfully'];
+        return $this->applyWithGuard('refund', function() {
+            // business logic
+        });
     }
 
     public function cancel()
     {
-        if(!$this->order->isOrderStateAllow('cancel')){
-            return ['error'=>'Cant cancel Order with state ' . $this->order->getState()];
-        }
- 
-        // business logic lives here
+        return $this->applyWithGuard('cancel', function() {
+            // business logic
+        });
+    }
 
-        $this->order->applyOrderAction('cancel');
-        return ['success'=>'Cancelled successfully'];
+    private function applyWithGuard(string $action, callable $logic) {
+        if (!$this->order->isOrderStateAllow($action)) {
+            return ['error' => "Cant {$action} Order with state " . $this->order->getState()];
+        }
+
+        $logic();
+        
+        $this->order->applyOrderAction($action);
+        return ['success' => ucfirst($action) . " successfully"];
     }
 }
