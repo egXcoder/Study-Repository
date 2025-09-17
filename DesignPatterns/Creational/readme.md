@@ -7,9 +7,9 @@ They deal with object creation mechanisms — i.e., how objects are instantiated
 - Sometimes object creation involves logic, not just new.
 - they will help you to move construction logic to separate place
 
-
-- Factory Method .. decide which class to instantiate from multiple available classes in run time
-- Abstract Factory .. decide which factory to instantiate from multiple available factories
-- Builder ... construction of a complex object
-- Prototype ... cloning an existing instance
-- singleton ... Ensures a class has only one instance and provides global access to it.
+- Simple Factory: one centralized factory with static method decides which class to instantiate.
+- Factory Method: creation logic is delegated to factories (each factory knows how to build its own payment).
+- Abstract Factory: decide which factory to instantiate from multiple available factories
+- Builder: construction of a complex object
+- Prototype: cloning an existing instance
+- singleton: Ensures a class has only one instance and provides global access to it.
