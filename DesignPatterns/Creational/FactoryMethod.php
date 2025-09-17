@@ -41,5 +41,7 @@ class PayPalPayment implements PaymentGateway {
 //in laravel
 Queue::connection('redis'); 
 
-// Behind the scenes, Laravel has an abstract Connector factory.
-// Each driver (RedisConnector, DatabaseConnector, SqsConnector) overrides the factory method to create its own Queue implementation.
+// Queue is the QueueManager and when you call connection on it, it will call resolve() which calls getConnector()
+// getConnector() is going to choose RedisConnector using simple factory, but not with switch its like more of config
+// RedisConnector (is a factory) and it knows how to instantiate RedisQueue which is the final product
+//every connector is subclasses, and each subclass is responsible to create one product (which fits perfectly factory method)
