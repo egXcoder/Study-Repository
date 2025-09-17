@@ -13,3 +13,4 @@ define the ways in which objects collaborate and delegate responsibilities
 - Memento: save and restore its state
 - Observer: subscription mechanism to notify multiple objects about events
 - State: letting an object change its behavior when its internal state changes
+- Strategy: define a family of algorithms, put each of them into a separate class, and make their objects interchangeable.

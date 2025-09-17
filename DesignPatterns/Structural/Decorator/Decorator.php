@@ -5,9 +5,8 @@
 //suppose you have a class of FileReader which read a file from disk
 
 // [problem]
-//What if I want to compress? Or encrypt? Or cache the content?
-//or compress then encrypt .. or encrypt then cache .. or compress then cache
-//there are many ways we want to do this, we cant create a class for every thing as this will cause class explosion
+//What if I want to compress? Or encrypt? Or cache the content? or compress then encrypt .. or encrypt then cache .. or compress then cache
+//if we create a class for every way,it will cause class explosion
 
 // [answer]
 //Decorator Pattern is perfect in this use case
