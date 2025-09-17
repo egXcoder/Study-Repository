@@ -7,7 +7,7 @@ They deal with object creation mechanisms — i.e., how objects are instantiated
 - Sometimes object creation involves logic, not just new.
 - they will help you to move construction logic to separate place
 
-- Simple Factory: one centralized factory with static method decides which class to instantiate.
+- Simple Factory: one factory responsible to create a product from available products
 - Factory Method: many factories, and each subclass (factory) is responsibile to create one type of product
 - Abstract Factory: many factories, and each subclass (factory) is responsibile to create family of similar products
 - Builder: construction of a complex object
