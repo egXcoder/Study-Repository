@@ -1,109 +1,85 @@
 <?php
 
-//factory here will be a class with many methods creating related objects 
-// we can use FactoryMethod DP to write a class to return one of these factories 
+// It’s like Factory Method on steroids.
+// While Factory Method creates one product at a time,
+// Abstract Factory creates a family of related products that should work together.
 
 
-//not necarrily class name will be factory its more of role rather than name, such as in laravel MysqlFactory is called MysqlDrive
-
-interface DBFactory {
-    public function createConnection(): Connection;
-    public function createQueryBuilder(): QueryBuilder;
+interface PaymentProviderFactory {
+    public function createPayment(): PaymentGateway;
+    public function createInvoice(): InvoiceGenerator;
+    public function createRefund(): RefundProcessor;
 }
 
 
-class MySQLFactory implements DBFactory {
-    public function createConnection(): Connection {
-        return new MySQLConnection();
+class StripeFactory implements PaymentProviderFactory {
+    public function createPayment(): PaymentGateway {
+        return new StripePayment();
     }
-
-    public function createQueryBuilder(): QueryBuilder {
-        return new MySQLQueryBuilder();
+    public function createInvoice(): InvoiceGenerator {
+        return new StripeInvoice();
     }
-}
-
-class PostgresFactory implements DBFactory {
-    public function createConnection(): Connection {
-        return new PostgresConnection();
-    }
-
-    public function createQueryBuilder(): QueryBuilder {
-        return new PostgresQueryBuilder();
+    public function createRefund(): RefundProcessor {
+        return new StripeRefund();
     }
 }
 
-class DBFactoryProvider {
-    public static function getFactory(string $db): DBFactory {
-        return match ($db) {
-            "mysql" => new MySQLFactory(),
-            "postgres" => new PostgresFactory(),
-            default => throw new Exception("Unknown DB type"),
-        };
+class PayPalFactory implements PaymentProviderFactory {
+    public function createPayment(): PaymentGateway {
+        return new PayPalPayment();
+    }
+    public function createInvoice(): InvoiceGenerator {
+        return new PayPalInvoice();
+    }
+    public function createRefund(): RefundProcessor {
+        return new PayPalRefund();
     }
 }
 
 
+// Stripe family
+class StripePayment implements PaymentGateway {
+    public function pay(float $amount): void {
+        echo "💳 Stripe processed payment of \${$amount}\n";
+    }
+}
+
+class StripeInvoice implements InvoiceGenerator {
+    public function generate(string $orderId): void {
+        echo "🧾 Stripe invoice generated for order {$orderId}\n";
+    }
+}
+
+class StripeRefund implements RefundProcessor {
+    public function refund(float $amount): void {
+        echo "↩️ Stripe refunded \${$amount}\n";
+    }
+}
 
 
-// client
-$factory = DBFactoryProvider::getFactory("mysql");
-$connection = $factory->createConnection();
-$connection->connect();
+// PayPal family
+class PayPalPayment implements PaymentGateway {
+    public function pay(float $amount): void {
+        echo "🅿️ PayPal processed payment of \${$amount}\n";
+    }
+}
 
-$queryBuilder = $factory->createQueryBuilder();
-echo $queryBuilder->buildSelect("users") . "\n";
+class PayPalInvoice implements InvoiceGenerator {
+    public function generate(string $orderId): void {
+        echo "🧾 PayPal invoice generated for order {$orderId}\n";
+    }
+}
 
+class PayPalRefund implements RefundProcessor {
+    public function refund(float $amount): void {
+        echo "↩️ PayPal refunded \${$amount}\n";
+    }
+}
 
 
 //in laravel
-//DB is the database manager
-DB::connection('mysql')->select(...);
+DB::connection('mysql');
 
-
-namespace Illuminate\Database;
-class DatabaseManager implements ConnectionResolverInterface{
- /**
-     * Get a database connection instance.
-     *
-     * @param  string|null  $name
-     * @return \Illuminate\Database\Connection
-     */
-    public function connection($name = null)
-    {
-        // ...
-    }
-}
-
-namespace Illuminate\Database;
-class MySqlConnection extends Connection
-{
-    /**
-     * Get the default query grammar instance.
-     *
-     * @return \Illuminate\Database\Query\Grammars\MySqlGrammar
-     */
-    protected function getDefaultQueryGrammar()
-    {
-        // ...
-    }
-
-    /*
-     * Get a schema builder instance for the connection.
-     *
-     * @return \Illuminate\Database\Schema\MySqlBuilder
-     */
-    public function getSchemaBuilder()
-    {
-        // ...
-    }
-
-    /**
-     * Get the default post processor instance.
-     *
-     * @return \Illuminate\Database\Query\Processors\MySqlProcessor
-     */
-    protected function getDefaultPostProcessor()
-    {
-        // ...
-    }
-}
+// the Database Manager acts like an abstract factory:
+// MySqlConnection produces not just the connection, but a family of related objects (query grammars, schema grammars, processors) that all belong to the "MySQL ecosystem".
+// If you switch to PostgresConnection, you get a whole consistent family of Postgres-specific objects.

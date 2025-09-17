@@ -9,7 +9,7 @@ They deal with object creation mechanisms — i.e., how objects are instantiated
 
 - Simple Factory: one centralized factory with static method decides which class to instantiate.
 - Factory Method: many factories, and each subclass (factory) is responsibile to create one type of product
-- Abstract Factory: decide which factory to instantiate from multiple available factories
+- Abstract Factory: many factories, and each subclass (factory) is responsibile to create family of similar products
 - Builder: construction of a complex object
 - Prototype: cloning an existing instance
 - singleton: Ensures a class has only one instance and provides global access to it.

@@ -42,3 +42,10 @@ $payment->pay(100);
 
 $payment = PaymentFactory::create('stripe');
 $payment->pay(200);
+
+
+
+//in laravel  
+$cache = Cache::store('redis'); // returns Redis cache driver
+
+// The Cache manager internally works like a simple factory that returns the correct driver based on a string key.

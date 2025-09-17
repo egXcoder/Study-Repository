@@ -36,3 +36,10 @@ class PayPalPayment implements PaymentGateway {
         echo "🅿️ Paid \${$amount} with PayPal.\n";
     }
 }
+
+
+//in laravel
+Queue::connection('redis'); 
+
+// Behind the scenes, Laravel has an abstract Connector factory.
+// Each driver (RedisConnector, DatabaseConnector, SqsConnector) overrides the factory method to create its own Queue implementation.
