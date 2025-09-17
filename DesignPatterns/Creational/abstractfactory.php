@@ -80,6 +80,8 @@ class PayPalRefund implements RefundProcessor {
 //in laravel
 DB::connection('mysql');
 
-// the Database Manager acts like an abstract factory:
-// MySqlConnection produces not just the connection, but a family of related objects (query grammars, schema grammars, processors) that all belong to the "MySQL ecosystem".
-// If you switch to PostgresConnection, you get a whole consistent family of Postgres-specific objects.
+// DB is the DatabaseManager and when you call connection on it, it will call ConnectionFactory -> make()
+// ConnectionFactory is considered Parameterized Abstract Factory, as instead of having multiple factories for each family as the classical abstract factory
+// ConnectionFactory able to build MySqlConnector and MySqlConnection using two different methods with parameters
+// MySqlConnection itself knows how to build MySqlQueryBuilder , MySqlGrammer and MySqlProcessor and others
+// MySqlConnection can be thought as subfactory or lazy initialization
