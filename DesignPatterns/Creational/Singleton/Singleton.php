@@ -52,3 +52,6 @@ $conn2 = $db2->getConnection();
 // Check if both are same
 var_dump($db1 === $db2); // true
 var_dump($conn1 === $conn2); // true
+
+
+
