@@ -44,3 +44,34 @@ xRDP = the RDP server that Hyper-V Enhanced Session uses
 - `apt autoclean` .. removes only obsolete .deb files, Safer but frees less space.
 
 
+# incrase disk space
+`lsblk` .. the disk is 100 GB but the root partition (sda2) is still 50 GB.
+
+sda     8:0   0   100G  0 disk
+└─sda2  8:2   0    50G  0 part / 
+
+`parted /dev/sda` then after going there run `resizepart 2 100%` .. this will increase block size to take the remaining space
+
+`resize2fs /dev/sda1` .. this will grow file system for the partition to take block size
+
+Q: what if we didnt grow file system?
+ - well block will be the space, but you cant put data into them as they are not used with file system
+
+Q: what is difference between block and file system
+ - you can think of it block is the box that you can put data into it, but you have to file system to match
+
+Q: so what is the process to shrink partition?
+ - its the opposite now, you have to shrink filesystem first, then shrink block
+
+Q: what if i tried to shrink block directly?
+ - this can cause irrecoverable corruption and permanent data loss as you will have file system thinking its still big while block is already shrinked, so file system will try to read and write on places that doesnt exist
+
+Q: okay, but shouldnt linux stop that?
+ - linux doesnt stop you, you have to know what you are doing
+
+Q: if i shrink file system, would that may cause data loss?
+ - well, it might yes..
+
+Q: command to shrink?
+ `resize2fs /dev/sda2 50G`
+ `parted /dev/sda` then `resizepart 2 50GB`
