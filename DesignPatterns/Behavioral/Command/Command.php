@@ -1,19 +1,35 @@
 <?php
 
-// Command Pattern is useful
-//  - Undo/redo systems
-//  - queue commands and process later (laravel commands and invoker is queue:work)
-//  - log actions happened (like in banking systems, every action has to be logged)
+//Idea: The Command is about encapsulating a request (an action you want to perform) as an object.
 
 
-//The Receiver is the object that actually does the work.
-//It has the real business logic.
-//The receiver doesn’t know anything about the Command or Invoker.
-//You can have multiple receivers in the Command pattern.
+// Why would you do that, isnt it easier to run the method without having to wrap it into object
+// what is the benefit you would get from wrapping a logic inside a method into an object?
 
-//The Invoker is responsible for executing commands.
+// Benefits
+// - Uniform handling of actions, Since every command has the same interface, you can treat them the same way (store, queue, log, undo, retry…).
+// - Undo / Redo functionality
+// - CLI wrapper (laravel commands and php artisan )
+// - Queueing & Scheduling (laravel jobs and invoker is queue:work or schedule:run)
+// - Macro commands (composition) Multiple commands can be bundled together to form a workflow.
+// - Testing: Since commands are isolated and small, you can unit-test them independently of the system.
+
+
+// ✅ In short:
+// Think of Command when your action is something you might want to queue, undo, log, or standardize across different callers.
+
+
+//Receiver: is the object that actually does the work. 
+// - It has the real business logic. 
+// - You can have multiple receivers in the Command pattern.
+
+//Command: is the request as an object
+
+//Invoker: is responsible for executing commands. 
 // It doesn’t know what the command does internally, only that it has an execute() (and maybe undo()) method.
 //The invoker can also store history (to allow undo/redo).
+
+//Macro Command: is a command but within its execute method, it execute multiple commands 
 
 
 // Imagine you’re building a file manager in PHP.
