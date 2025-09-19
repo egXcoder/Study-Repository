@@ -11,15 +11,24 @@ A web server its responsibility is to listens for requests from browsers and for
 - `a2enmod rewrite` .. enable module
 - `a2dismod rewrite` .. disable module
 
+- `ls /etc/apache2/conf-available` ... list of available configuration
+- `ls /etc/apache2/conf-enabled` .. list of enabled configuration
+- `a2enconf php8.1-fpm` .. enable config
+- `a2disconf php8.1-fpm` .. enable config
+
 
 # Apache Service
 - enable service, so that it auto start on system restart `systemctl enable apache2`
 - start service `systemctl start apache2`
 - restart service `systemctl restart apache2`
+- see service status `systemctl status apache2`
 
 # Apache MPM Workers (Multi-Processing Modules Workers)
 
 know current worker using `apachectl -V` ... it will show you the mpm worker that is running
+
+
+
 
 
 # Apache PHP
@@ -53,3 +62,13 @@ notices:
 
 - in same way, we can add another older version, example php5.6 
 `apt install libapache2-mod-php5.6 && a2dismod php7.4 && a2enmod php5.6 && systemctl restart apache2`
+
+
+## PHP-FPM (FastCGI Process Manager)
+- install by `apt install php8.1-fpm`
+- enable it `systemctl enable php8.1-fpm`, or enable and start now `systemctl enable php8.1-fpm --now`
+- start it `systemctl start php8.2-fpm`
+- enable required modules `a2enmod proxy_fcgi setenvif mpm_event rewrite`
+- enable required configuration `a2enconf php8.1-fpm`
+
+- to change php-fpm version `apt install php7.4-fpm && a2dismod php8.1-fpm && a2disconf php8.1-fpm && a2enmod php7.4-fpm && a2enmod php7.4-fpm`
