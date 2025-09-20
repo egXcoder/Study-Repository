@@ -1,7 +1,10 @@
 <?php
 
 
-// idea: defines the skeleton (template) of an algorithm in a base class but lets subclasses override certain steps of the algorithm without changing its overall structure.
+// idea: defines the skeleton (template) of an algorithm in a base class and let subclasses override certain steps of the algorithm without changing its overall structure.
+
+// template method hooks is like afterFechingData, 
+// methods can be overrided in subclasses to do extra within the algorithm or it can be empty as it doesnt affect the core algorithm
 
 // Imagine you have to generate reports, but the output format differs (PDF, CSV, etc.).
 // The overall algorithm for generating a report is always the same:

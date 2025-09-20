@@ -28,9 +28,21 @@ A web server its responsibility is to listens for requests from browsers and for
 - see service status `systemctl status apache2`
 
 # Apache MPM Workers (Multi-Processing Modules Workers)
+Apache has different MPMs that define how it handles concurrency:
+- prefork → processes only, no threads (old, safe for non-thread-safe PHP).
+- worker → multiple processes, each with multiple threads.
+- event → like worker, but with smarter handling of idle keep-alive connections.
+
+Q:i think for event, its safer for fpm connection to be tcp rather than socket, but worker can be socket as apache will have multiple processes already? yes, you are correct
+    -- Event MPM → TCP is often safer/more scalable at very high concurrency (less risk of contention, easier to tune backlog).
+    -- Worker MPM → Unix socket works well (process-per-request model maps nicely, lower overhead).
+    -- Prefork MPM → Unix socket is fine.
+
+Q: so why event is more populate, i think worker is better?
+at first glance worker MPM looks simpler and “better,” but event MPM became more popular and is now the default on most distros (Ubuntu, Debian, etc).
+
 
 know current worker using `apachectl -V` ... it will show you the mpm worker that is running
-
 
 
 

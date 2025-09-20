@@ -1,7 +1,17 @@
 <?php
 
 
-//idea: define a family of algorithms, put each of them into a separate class, and make their objects interchangeable.
+//idea: when you have multiple ways to do the same thing, define each way in a class
+
+// you would use strategy for:
+// - when you have multiple ways to something
+// - you want to switch between these algorithms dynamically in run time
+// - alternatively, you can have big class like SortingAlgorithms and within you can declare methods, each method
+//  define one sorting algorithm, but you end up with big object that doing multiple things (Violating SRP)
+//  also change frequently if to add/edit sorting algorithm (violating OCP)
+//  you can do it though for small project but while your project growing up
+//  you will start feel the rigidity and you will refactor it to strategy pattern 
+
 
 //- strategy: is the algorithm
 //- context: is the class which need the strategy to work
