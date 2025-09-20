@@ -20,7 +20,11 @@ A web server its responsibility is to listens for requests from browsers and for
 # Apache Service
 - enable service, so that it auto start on system restart `systemctl enable apache2`
 - start service `systemctl start apache2`
-- restart service `systemctl restart apache2`
+- restart service `systemctl restart apache2` .. stop service completely and kill all processes, threads and build them again
+- reload service `systemctl reload apache2` .. dont stop service, just reload its configurations.. 
+    -- Current connections remain open and continue to work.
+    -- New connections will use the updated configuration. 
+    -- It does not re-load or re-apply loaded modules.
 - see service status `systemctl status apache2`
 
 # Apache MPM Workers (Multi-Processing Modules Workers)
@@ -72,3 +76,25 @@ notices:
 - enable required configuration `a2enconf php8.1-fpm`
 
 - to change php-fpm version `apt install php7.4-fpm && a2dismod php8.1-fpm && a2disconf php8.1-fpm && a2enmod php7.4-fpm && a2enmod php7.4-fpm`
+
+
+## Apache Directives
+- `<IfModule proxy_fcgi_module> .... </IfModule>` .. check if module is enabled then do what is inside
+- `<IfModule !proxy_fcgi_module> .... </IfModule>` .. check if module is not enabled then do what is inside
+- `<FilesMatch ".+\.ph(ar|p|tml)$"> ... </FilesMatch>` .. check if file Matches {file}.php, {file}.phtml, {file}.phar
+- `Require all denied` .. reply back with 403 Forbidden
+- `SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1`
+    -- "SetEnvIfNoCase": creates or modifies environment variables based on incoming HTTP headers. NoCase means it ignores header case (Authorization, authorization, AUTHORIZATION → all matched).
+    -- "^Authorization$" : Regex pattern: matches the HTTP header named Authorization
+    -- "(.+)": Captures the value of the header (whatever comes after Authorization:). Example: Authorization: Bearer abc123 → captured string = Bearer abc123.
+    -- "HTTP_AUTHORIZATION=$1" : Stores the captured value in an environment variable called HTTP_AUTHORIZATION.
+    -- so that $_SERVER['HTTP_AUTHORIZATION']
+    -- Why? Apache, by default, strips or consumes the Authorization header during its own authentication phase (because it thinks it should handle Basic/Digest auth). Unless you explicitly tell Apache to forward it, PHP-FPM never sees it.
+
+- `SetHandler "proxy:unix:/run/php/php8.1-fpm.sock|fcgi://localhost"`
+    -- "SetHandler": Overrides how Apache should handle matching files/requests.
+    -- "proxy:": Means “use Apache’s proxy system.” Specifically proxy_fcgi_module (FastCGI proxy).
+    -- "unix:/run/php/php8.1-fpm.sock": Path to the PHP-FPM Unix domain socket. PHP-FPM listens here instead of a TCP port (like 127.0.0.1:9000). Unix sockets are faster and more secure (only local processes can use them).
+SetHandler "proxy:unix:/run/php/php8.1-fpm.sock|fcgi://localhost"
+    -- "|": The | separates the socket path from the backend “URL.”
+    -- "fcgi://localhost": fcgi://localhost is just a label for Apache’s proxy system — it doesn’t actually use TCP here since we already gave it a Unix socket. Required syntax so Apache knows it’s talking to a FastCGI server.

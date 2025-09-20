@@ -55,7 +55,7 @@ sda     8:0   0   100G  0 disk
 `resize2fs /dev/sda1` .. this will grow file system for the partition to take block size
 
 Q: what if we didnt grow file system?
- - well block will be the space, but you cant put data into them as they are not used with file system
+ - in this situation block will be bigger than file system, and you cant put data into the extra space unless file system grows
 
 Q: what is difference between block and file system
  - you can think of it block is the box that you can put data into it, but you have to file system to match
@@ -75,3 +75,28 @@ Q: if i shrink file system, would that may cause data loss?
 Q: command to shrink?
  `resize2fs /dev/sda2 50G`
  `parted /dev/sda` then `resizepart 2 50GB`
+
+
+# Socket
+- A special file (not a regular text file) created by the kernel.
+- When Apache connects to /run/php/php8.1-fpm.sock, the kernel opens a socket connection to PHP-FPM.
+- That socket is bi-directional → data flows both ways (requests & responses).
+- `ulimit -n`To know how many sockets can be opened in same time, its typically means how many file descriptors a process can have
+- connecting by a socket, The kernel provides in-memory buffers for this socket. so that client and server can talk through memory
+- Why sockets need a "file": 
+    -- In Unix, “everything is a file” — sockets, pipes, devices, etc
+    -- Access control → chmod on the socket file restricts who can connect.
+    -- Namespace → Multiple services can each have their own sockets (/var/run/mysql.sock, /run/php/php8.1-fpm.sock, etc.).
+    -- Lifecycle → The socket file disappears if the process is stopped.
+    -- If sockets are also "files," the same API works. No need for a special API just for sockets.
+
+
+Let’s say 3 users hit your site at the same time:
+Apache accepts 3 requests.
+For each, Apache opens a new connection to /run/php/php8.1-fpm.sock.
+The kernel creates 3 separate connection streams (not all mixed into one).
+kernel creates 3 file descriptor in Apache’s process like FD 42, like FD 51, like FD 70
+PHP-FPM listens on the socket and accepts all 3.
+PHP-FPM’s pool of workers takes them concurrently (one worker per request).
+So even though it looks like “just a single file,” it can handle many simultaneous streams.
+
