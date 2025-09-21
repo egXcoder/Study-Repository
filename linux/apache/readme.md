@@ -16,6 +16,11 @@ A web server its responsibility is to listens for requests from browsers and for
 - `a2enconf php8.1-fpm` .. enable config
 - `a2disconf php8.1-fpm` .. enable config
 
+- `ls /etc/apache2/sites-available` ... list of available sites
+- `ls /etc/apache2/sites-enabled` .. list of enabled sites
+- `a2ensite your-site-ssl.conf` .. enable site
+- `a2dissite your-site-ssl.conf` .. enable site
+
 
 # Apache Service
 - enable service, so that it auto start on system restart `systemctl enable apache2`
@@ -168,6 +173,57 @@ If you are running PHP with **PHP-FPM** (the modern and most common setup with A
 
 
 
+# Apache HTTPS
+- `a2enmod ssl` enable ssl module
+- `mkdir -p /etc/apache2/ssl`
+- `openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/apache2/ssl/apache-selfsigned.key -out /etc/apache2/ssl/apache-selfsigned.crt` .. generate self signed certificate
+- `nano /etc/apache2/sites-available/your-site-ssl.conf` .. configure apache for https
+"<VirtualHost *:443>
+    ServerName example.com
+    DocumentRoot /var/www/html
+
+    SSLEngine on
+    SSLCertificateFile /etc/apache2/ssl/apache-selfsigned.crt
+    SSLCertificateKeyFile /etc/apache2/ssl/apache-selfsigned.key
+
+    <Directory /var/www/html>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>"
+
+- `a2ensite your-site-ssl.conf` .. enable apache for https
+
+
+Q: if i don't put fqdn in self signed certificate is that an issue, or if i added another domain other than the one will be using?
+
+With SSL certificates, the hostname matters a lot.
+- If you don’t put an FQDN (use only localhost or leave it blank):
+    - The certificate won’t match your actual domain.
+    - Browsers will show a warning/error like “Certificate not valid for this site”.
+    - You can still click Proceed (in dev/test), but it’s insecure for production.
+
+- If you add another domain (say cert says mytest.com, but you use myreal.com):
+    - Same issue: hostname mismatch → browser warning.
+    - The browser only trusts a certificate if the domain in the address bar matches one of the names inside the certificate.
+
+Q: can certificate have multiple domains?
+
+yes, Certificates have a Common Name (CN) and/or Subject Alternative Names (SANs).
+If your cert has: CN = example.com SAN = www.example.com, api.example.com, myapp.org
+As long as they’re listed in the SAN field, the certificate will be valid for all of them.
+
+Commercial CAs (like Let’s Encrypt, DigiCert, etc.) will only issue certs for domains you can prove you own (via DNS or HTTP challenge). So you can’t just add google.com to your SANs unless you control it
+
+
+# Apache HTTP2
+`a2enmod http2` .. enable http2 module
+then within virtualhost directive add `Protocols h2 http/1.1`
+h2 .. http2 over tls
+h2c .. http2 without tls
+Browsers do not support h2c for security reasons.
+
 ## Apache Directives
 - `<IfModule proxy_fcgi_module> .... </IfModule>` .. check if module is enabled then do what is inside
 - `<IfModule !proxy_fcgi_module> .... </IfModule>` .. check if module is not enabled then do what is inside
@@ -188,3 +244,17 @@ If you are running PHP with **PHP-FPM** (the modern and most common setup with A
 SetHandler "proxy:unix:/run/php/php8.1-fpm.sock|fcgi://localhost"
     -- "|": The | separates the socket path from the backend “URL.”
     -- "fcgi://localhost": fcgi://localhost is just a label for Apache’s proxy system — it doesn’t actually use TCP here since we already gave it a Unix socket. Required syntax so Apache knows it’s talking to a FastCGI server.
+
+- `<VirtualHost *:443>` .. tells Apache: “Listen on all network interfaces (*) on port 443
+- `<VirtualHost 127.0.0.1:443>` .. tells apache: listen on loopback network interface
+- `ServerName example.com` .. This is the primary domain for this virtual host. When a browser requests https://example.com, Apache matches it to this block. if no host matches, then apache will fallback to the default host even if it doesnt match
+- `DocumentRoot /var/www/html` .. If someone visits https://example.com/index.html, Apache will look for /var/www/html/index.html
+- `Protocols h2 h2c http/1.1` .. use these protocols with ordered prioritiy
+- `<Directory /var/www/html> ... </Directory>` .. A directory-specific configuration.
+- `Options Indexes FollowSymLinks` .. 
+    -- Indexes → if no index.html is found, Apache may show a file listing.
+    -- FollowSymLinks → allows symbolic links to be followed.
+- `Options -Indexes +FollowSymLinks`: stop file listing, please notice your site will still serve index.html or index.php if present
+- `AllowOverride All`: Lets .htaccess files inside /var/www/html override Apache settings.
+- `AllowOverride None`: stop .htaccess overriding, if it exist in directoy
+- `Require all granted` .. Allows anyone (all clients) to access the files.
