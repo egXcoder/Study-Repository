@@ -157,6 +157,16 @@ notices:
 
 - to change php-fpm version `apt install php7.4-fpm && a2dismod php8.1-fpm && a2disconf php8.1-fpm && a2enmod php7.4-fpm && a2enmod php7.4-fpm`
 
+🔹 **Q: In FPM, is every request a new process?**
+yes, FPM keeps a pool of long-lived processes ready and each request go to a process. it does not fork a new process per request though (that would be too expensive).  
+
+**Q: Do I ever need to worry if PHP version is thread-safe (TS) or non-thread-safe (NTS)?**
+
+not really, it will be always NTS. unless its windows and using the winnt apache mpm then you may need the TS
+
+If you are running PHP with **PHP-FPM** (the modern and most common setup with Apache `event/worker` MPM or Nginx), you dont need the thread-safe version. PHP-FPM uses multiple processes, not threads, so NTS is the standard and faster choice.  
+
+
 
 ## Apache Directives
 - `<IfModule proxy_fcgi_module> .... </IfModule>` .. check if module is enabled then do what is inside
