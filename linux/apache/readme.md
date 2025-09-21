@@ -28,23 +28,91 @@ A web server its responsibility is to listens for requests from browsers and for
 - see service status `systemctl status apache2`
 
 # Apache MPM Workers (Multi-Processing Modules Workers)
+
+know current worker using `apachectl -V` ... it will show you the mpm worker that is running
+
 Apache has different MPMs that define how it handles concurrency:
 - prefork → processes only, no threads (old, safe for non-thread-safe PHP).
 - worker → multiple processes, each with multiple threads.
 - event → like worker, but with smarter handling of idle keep-alive connections.
 
-Q:i think for event, its safer for fpm connection to be tcp rather than socket, but worker can be socket as apache will have multiple processes already? yes, you are correct
-    -- Event MPM → TCP is often safer/more scalable at very high concurrency (less risk of contention, easier to tune backlog).
-    -- Worker MPM → Unix socket works well (process-per-request model maps nicely, lower overhead).
-    -- Prefork MPM → Unix socket is fine.
+## Event MPM
 
-Q: so why event is more populate, i think worker is better?
-at first glance worker MPM looks simpler and “better,” but event MPM became more popular and is now the default on most distros (Ubuntu, Debian, etc).
+### 1. Startup
+When Apache starts with **event MPM**, it:
+
+- Spawns several processes (`ServerLimit`).
+- In each process, it creates:
+  - **1 listener thread** → waits for new connections
+  - **N worker threads** (`ThreadsPerChild`) → process requests
+
+Additional directives:
+
+- `AsyncRequestWorkerFactor` → multiplier factor to determine how many idle connections each process can keep track of.
+- `MaxRequestWorkers` → defines the total number of **active requests** across all processes.
+
+**Example configuration:**
+
+- ServerLimit = 4
+- ThreadsPerChild = 25
+- AsyncRequestWorkerFactor = 2
+- MaxRequestWorkers = 100
 
 
-know current worker using `apachectl -V` ... it will show you the mpm worker that is running
+**Result:**
+
+- **1 parent process** (Apache itself)
+- **4 processes × (1 listener + 25 workers) = 105 total threads**
+- Each process can track `2 × 25 = 50` idle connections (keep-alive)
+- Total active request limit = **100** (`MaxRequestWorkers`), typically it would match `4 × 25 = 100` by default, you can assign lower if you want to reduce concurrency
+
+---
+
+### 2. Accepting Connections
+- A client connects (for example, a browser opens a TCP connection).
+- The **listener thread** in one process accepts it.
+- The connection is registered in an **event loop** (`epoll` on Linux, `kqueue` on BSD, `select/poll` as fallback).
+👉 At this stage, the connection exists but **no worker thread is tied up yet**.
+
+---
+
+### 3. Handling Requests
+- If the client sends an HTTP request, the event loop detects *data ready*.
+- A **worker thread** is assigned to handle the request:
+  - Parses headers
+  - Passes request to modules (for example, `mod_proxy_fcgi` for PHP-FPM)
+  - Generates the response
+  - Sends the response back
+
+After that:
+
+- If the connection is **closed** → the worker thread is freed.
+- If it’s **keep-alive** → the connection goes back into the event loop (idle), and the worker thread is released.
+
+---
+
+### 4. Keep-Alive Magic (Why Event > Worker)
+- **Worker MPM:** A worker thread stays stuck as long as the connection is open (even if idle).
+- **Event MPM:** The worker thread is released after finishing the request. The **event loop** continues watching the idle connection.
+  - If the client sends another request, a worker thread is reassigned.
 
 
+Q: is event loop and queue is in parent process or in the child process or both?
+
+In Apache Event MPM, the event loop and the connection queue live in the child processes
+
+Parent process
+- Starts up and spawns the child processes.
+- Does not handle requests or connections directly.
+- Its job is mainly: monitoring children, restarting them if they die, reloading config, etc.
+
+Child processes
+- Each child process has:
+    - One listener thread → accepts new connections from the socket (port 80/443).
+    - One event loop (inside that listener thread) → tracks all active/idle connections for that child.
+    - Worker threads → process active requests when the event loop says “data is ready.”
+
+there isn’t one big global event loop in the parent — instead, each child has its own mini event loop + pool of worker threads.
 
 
 # Apache PHP
