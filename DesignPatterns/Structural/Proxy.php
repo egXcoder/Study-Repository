@@ -1,6 +1,14 @@
 <?php
 
 
+//Idea: Wrap another object to control access to it
+// - Protection Proxy: Restrict access based on roles, permissions etc..
+// - Virtual Proxy: Lazy Initialization when creating object is expensive (memory, cpu, network) you dont want to create it till its really needed)
+// - Remote Proxy: When object exists in another process, server, machine and you need a local stand-in to forward request
+// - Caching Proxy: cache real object instead of recomputing
+// - Smart Proxy: Logging, monitoring
+
+
 // Imagine a system that displays product images in an admin dashboard:
 // Images are large and expensive to load from disk or remote storage.
 // You don’t want to load them until they are actually displayed.

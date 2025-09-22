@@ -13,7 +13,7 @@
 
 // When State pattern is worth it
 //  -- If the number of states grows (10+).
-//  -- If each state has very different, complex behavior.
+//  -- If states are 3 -> 10 and each state has very different, complex behavior.
 //  -- If you need pluggable behaviors (e.g., 3rd-party packages can add new states).
 //  -- If your rules change a lot and you want to isolate them cleanly.
 //  -- Otherwise, State pattern can feel like overengineering.

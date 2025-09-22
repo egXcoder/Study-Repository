@@ -1,6 +1,7 @@
 <?php
 
-//below is another implemenation of chain of responsibility using higher order function
+//below is another implemenation of chain of responsibility using higher order function pipelines
+//these pipelines handlers can be proxy or decorators, doesnt matter always we can call them handlers
 
 
 class Pipeline

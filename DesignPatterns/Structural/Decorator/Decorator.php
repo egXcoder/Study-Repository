@@ -1,6 +1,6 @@
 <?php
 
-//idea is to add additional responsibilities dynamically
+//idea: Wrap another object to add dynamic behavior
 
 //suppose you have a class of FileReader which read a file from disk
 
