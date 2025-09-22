@@ -1,22 +1,9 @@
 <?php
 
-// its idea is to delegate work from Order to the OrderState, Order is called the context
+// its idea is to encapsulate state-based behavior and delegate behavior to its current state
 
 
-// Imagine you’re building an Order system for e-commerce.
-// An order can be in different states:
-// New (just created)
-// Paid
-// Shipped
-// Completed
-
-// Each state dictates what actions are allowed.
-// For example:
-// You can pay a New order, but not a Shipped one.
-// You can ship a Paid order, but not a New one.
-
-
-//Applying the pattern can be overkill if a state machine has only a few states or rarely changes.
+//notice: applying the pattern can be overkill if a state machine has only a few states or rarely changes.
 
 interface OrderState {
     public function pay(Order $order);
@@ -115,3 +102,4 @@ class Order {
 
 // Q: but isnt these state classes violate lsp?
 // This is actually a known tradeoff with State patterns. state patterns violate liskov substituion principle
+// and since its known design pattern, so its expected for state class to acts differently which is totally fine

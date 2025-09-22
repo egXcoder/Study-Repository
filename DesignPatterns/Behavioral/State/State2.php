@@ -1,142 +1,225 @@
 <?php
 
-//Finite State Machine: it is interested more in transitions and declare it
+// laravel example
+//
+// - abstract State class which will implement all the available actions and all actions return with error by default
+// - define a class for each state and override the actions that can be done
+// - OrderStateManager will take the order and try to perform action on it 
 
-class StateMachine
+abstract class AbstractSalesOrderState
 {
-    private string $state;
-    private array $transitions;
+    protected string $stateName;
+    protected array $availableActions = []; //can be used for ui buttons
+    protected bool $canEdit = false;
+    protected string $statusColor = 'gray';
 
-    public function __construct(string $initialState, array $transitions)
-    {
-        $this->state = $initialState;
-        $this->transitions = $transitions;
+    public function confirm(SalesOrder $order): array{
+        return $this->createErrorResponse('confirm', $order);
     }
 
-    public function getState(): string
-    {
-        return $this->state;
+    public function process(SalesOrder $order): array{
+        return $this->createErrorResponse('process', $order);
     }
 
-    public function can(string $action): bool
-    {
-        return isset($this->transitions[$this->state][$action]);
+    public function ship(SalesOrder $order): array{
+        return $this->createErrorResponse('ship', $order);
     }
 
-    public function apply(string $action): ?string
-    {
-        if (!$this->can($action)) {
-            throw new Exception("Event '{$action}' not allowed from state '{$this->state}'");
-        }
-
-        $oldState = $this->state;
-
-        $this->state = $this->transitions[$this->state][$action];
-
-        EventDispatcher::dispatch('order.state_changed', [
-            'from' => $oldState,
-            'to' => $this->state,
-            'action' => $action,
-        ]);
-        
-        return $this->state;
+    public function deliver(SalesOrder $order): array{
+        return $this->createErrorResponse('deliver', $order);
     }
-}
 
+    public function cancel(SalesOrder $order): array{
+        return $this->createErrorResponse('cancel', $order);
+    }
 
-class Order
-{
-    private int $id;
-    private StateMachine $fsm;
+    public function getStateName(): string{
+        return $this->stateName;
+    }
 
-    public function __construct(int $id)
+    public function canExecuteAction($action): bool{
+        return isset($this->availableActions[$action]);
+    }
+
+    public function canEdit(): bool{
+        return $this->canEdit;
+    }
+
+    public function getStatusColor(): string{
+        return $this->statusColor;
+    }
+
+    protected function createErrorResponse(string $action, SalesOrder $order): array
     {
-        $this->id = $id;
-
-        $transitions = [
-            'new' => [
-                'pay' => 'paid', //action => new state
-                'cancel' => 'cancelled',
-            ],
-            'paid' => [
-                'ship' => 'shipped',
-                'refund' => 'refunded',
-            ],
-            'shipped' => [
-                'deliver' => 'completed',
-            ],
-            'cancelled' => [],
-            'refunded' => [],
-            'completed' => [],
+        return [
+            'ok' => false,
+            'message' => "Cannot {$action} order #{$order->order_number} in {$this->stateName} status."
         ];
-
-        $this->fsm = new StateMachine('new', $transitions);
     }
 
-    public function getState(){
-        return $this->fsm->getState();
-    }
+    protected function createSuccessResponse(string $action, SalesOrder $order, string $newStatus): array
+    {
+        $order->status = $newStatus;
+        $order->save();
 
-    public function isOrderStateAllow($action){
-        return $this->fsm->can($action);
-    }
-
-    public function applyOrderAction($action){
-        return $this->fsm->apply($action);
+        return [
+            'ok' => true,
+            'message' => "Order #{$order->order_number} has been {$action}d successfully."
+        ];
     }
 }
 
-class OrderService{
-    protected $order;
-    
-    public function __construct(Order $order)
-    {
-        $this->order = $order;
+
+class DraftState extends AbstractSalesOrderState
+{
+    protected string $stateName = 'Draft';
+    protected array $availableActions = ['confirm', 'cancel'];
+    protected bool $canEdit = true;
+    protected string $statusColor = 'gray';
+
+    public function confirm(SalesOrder $order): array{
+        return $this->createSuccessResponse('confirm', $order, 'confirmed');
     }
 
-    public function pay()
-    {
-        return $this->applyWithGuard('pay', function() {
-            // business logic
-        });
+    public function cancel(SalesOrder $order): array{
+        return $this->createSuccessResponse('cancel', $order, 'cancelled');
+    }
+}
+
+// app/States/ConfirmedState.php
+class ConfirmedState extends AbstractSalesOrderState
+{
+    protected string $stateName = 'Confirmed';
+    protected array $availableActions = ['process', 'cancel'];
+    protected bool $canEdit = false;
+    protected string $statusColor = 'blue';
+
+    public function process(SalesOrder $order): array{
+        return $this->createSuccessResponse('process', $order, 'processing');
     }
 
-    public function ship(string $carrier)
+    public function cancel(SalesOrder $order): array{
+        return $this->createSuccessResponse('cancel', $order, 'cancelled');
+    }
+}
+
+// app/States/ProcessingState.php
+class ProcessingState extends AbstractSalesOrderState
+{
+    protected string $stateName = 'Processing';
+    protected array $availableActions = ['ship'];
+    protected bool $canEdit = false;
+    protected string $statusColor = 'yellow';
+
+    public function ship(SalesOrder $order): array{
+        return $this->createSuccessResponse('ship', $order, 'shipped');
+    }
+}
+
+class ShippedState extends AbstractSalesOrderState
+{
+    protected string $stateName = 'Shipped';
+    protected array $availableActions = ['deliver'];
+    protected bool $canEdit = false;
+    protected string $statusColor = 'purple';
+
+    public function deliver(SalesOrder $order): array{
+        return $this->createSuccessResponse('deliver', $order, 'delivered');
+    }
+}
+
+// app/States/DeliveredState.php
+class DeliveredState extends AbstractSalesOrderState
+{
+    protected string $stateName = 'Delivered';
+    protected array $availableActions = [];
+    protected bool $canEdit = false;
+    protected string $statusColor = 'green';
+}
+
+// app/States/CancelledState.php
+class CancelledState extends AbstractSalesOrderState
+{
+    protected string $stateName = 'Cancelled';
+    protected array $availableActions = [];
+    protected bool $canEdit = false;
+    protected string $statusColor = 'red';
+}
+
+class SalesOrderStateFactory
+{
+    private static array $states = [
+        'draft' => DraftState::class,
+        'confirmed' => ConfirmedState::class,
+        'processing' => ProcessingState::class,
+        'shipped' => ShippedState::class,
+        'delivered' => DeliveredState::class,
+        'cancelled' => CancelledState::class,
+    ];
+
+    public static function create(string $status): AbstractSalesOrderState
     {
-        return $this->applyWithGuard('ship', function() {
-            // business logic
-        });
+        $stateClass = self::$states[$status] ?? DraftState::class;
+        return new $stateClass();
+    }
+}
+
+//this class is used by controller to change order from a state to another
+// by calling for example $salesOrderStateManager->confirm($order) .. delegate the work to OrderState class and see what will happen
+class SalesOrderStateManager
+{
+    public function __construct(
+        private SalesOrderStateFactory $stateFactory,
+    ) {}
+
+    public function confirm(SalesOrder $order): array
+    {
+        return $this->executeAction($order, 'confirm');
     }
 
-    public function deliver()
+    public function process(SalesOrder $order): array
     {
-        return $this->applyWithGuard('deliver', function() {
-            // business logic
-        });
+        return $this->executeAction($order, 'process');
     }
 
-    public function refund()
+    public function ship(SalesOrder $order): array
     {
-        return $this->applyWithGuard('refund', function() {
-            // business logic
-        });
+        return $this->executeAction($order, 'ship');
     }
 
-    public function cancel()
+    public function deliver(SalesOrder $order): array
     {
-        return $this->applyWithGuard('cancel', function() {
-            // business logic
-        });
+        return $this->executeAction($order, 'deliver');
     }
 
-    private function applyWithGuard(string $action, callable $logic) {
-        if (!$this->order->isOrderStateAllow($action)) {
-            return ['error' => "Cant {$action} Order with state " . $this->order->getState()];
-        }
+    public function cancel(SalesOrder $order): array
+    {
+        return $this->executeAction($order, 'cancel');
+    }
 
-        $logic();
-        
-        $this->order->applyOrderAction($action);
-        return ['success' => ucfirst($action) . " successfully"];
+    public function getStateName(SalesOrder $order): string
+    {
+        return $this->getState($order)->getStateName();
+    }
+
+
+    public function canEdit(SalesOrder $order): bool
+    {
+        return $this->getState($order)->canEdit();
+    }
+
+    public function getStatusColor(SalesOrder $order): string
+    {
+        return $this->getState($order)->getStatusColor();
+    }
+
+    private function executeAction(SalesOrder $order, string $action): array
+    {
+        return $this->getState($order)->$action($order);
+    }
+
+    public function getState(SalesOrder $order): AbstractSalesOrderState
+    {
+        return $this->stateFactory->create($order->status);
     }
 }
