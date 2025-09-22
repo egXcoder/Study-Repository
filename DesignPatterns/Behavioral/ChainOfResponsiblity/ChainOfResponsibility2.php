@@ -203,3 +203,14 @@ abstract class PaymentHandler {
 // My rule of thumb:
 // If I’m writing application-level logic (payments, approvals, workflow), I go with domain-specific handlers.
 // If I’m writing infrastructure-level pipelines (logging, middleware, transformations), I use a generic Context or Request object.
+
+
+//Q: does laravel have pipeline class that can be used out of the box?
+//yes, laravel have Pipeline class and laravel itself use it heavily internally. you can use it to chain your handlers
+//  Pipeline::send($request)
+    // ->through([
+    //     First::class,
+    //     Second::class,
+    //     Third::class,
+    // ])
+    // ->thenReturn();
