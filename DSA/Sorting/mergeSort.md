@@ -23,7 +23,7 @@ class MergeSort{
             return;
         }
 
-        int mid = (left + right) / 2;
+        int mid = left - (left-right)/2; //instead of (left+right)/2 as its safer for big left and right
 
         //sort left
         this.recursiveMerge(arr,left,mid);
