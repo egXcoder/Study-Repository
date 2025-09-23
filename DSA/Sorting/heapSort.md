@@ -55,7 +55,7 @@ for(int i=n/2-1;i>=0;i--){
 }
 
 //reaching here, then arr is re-represented as maxHeap like 5,4,3,2,1
-//so now extract the parent one which is the maximum value and heapify again 
+//so now extract the parent at index 0 and heapify again 
 //Complexity:
 //O(n log n)
 for(int i=n-1;i>0;i--){
