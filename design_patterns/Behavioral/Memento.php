@@ -35,10 +35,6 @@
 // A customer adds/removes items from a shopping cart.
 // You want the ability to undo the last change (e.g., remove last added item, restore last removed item).
 
-// Originator = ShoppingCart (the object whose state changes).
-// Memento = snapshot of the cart items.
-// Caretaker = CartHistory that keeps cart versions.
-
 
 // Originator: Shopping Cart
 class ShoppingCart {
