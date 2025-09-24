@@ -3,7 +3,32 @@
 // you would use memnto when you want to store state at a point and restore it back if required
 // - undo/redo functionality, or even restore to a specific state straight away
 // - snapshots in business overflow
-// - Stateful objects in simulations or games
+
+
+
+//Originator: object you want to take snapshots of
+//Memento: Snapshot of the necessary data from Originator
+//Caretaker: store history of snapshots
+
+// Q: cant i clone the whole object and store it?
+// 
+// not, If you just clone the object:
+// - If the object is large, cloning can be heavy and wasteful (deep copy of everything).
+// - If you later change the object’s internal structure, all stored clones may break or be inconsistent.
+// - The Originator (the real object) loses control of what gets saved and restored.
+// - You’re breaking encapsulation: the caretaker would now need to know the whole internal structure of the object to copy/restore it.
+// 
+//With Memento pattern:
+// - The Originator decides what to expose as the "state snapshot".
+// - Maybe only a few fields matter (not everything inside the object).
+// - The Memento object can be lightweight (only storing necessary state).
+
+
+// Q: i remember this undo/redo functionality was mentioned before in command pattern?
+//yes, you can undo/redo by either 
+// - take original state of object and work throw queue of do commands till we reach final destination [command pattern]
+// - iterate through stored snapshots with [memnto pattern]
+
 
 
 // Scenario:
