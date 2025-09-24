@@ -1,8 +1,10 @@
 <?php
 
 
-//Mediator is the central hub which knows all colleagues
-//Colleague is the individuals that need to communicate with each other but not directly
+//idea: handles communication between objects, instead of them talking to each other directly
+
+//Mediator: is the central hub which knows all colleagues
+//Colleague: is the individuals that need to communicate with each other but not directly
 
 
 // Imagine a chatroom where multiple participants can send messages.
@@ -10,69 +12,50 @@
 // With a mediator: participants send messages to the chatroom (mediator), which forwards them appropriately.
 
 
+// Colleague ... DTO (no behavior, just data)
+class User {
+    public function __construct(
+        public string $name
+    ) {}
+}
 
-// Colleague
-class ChatParticipant {
-    protected $mediator;
-    protected $name;
+// Mediator
+class ChatRoom {
+    private string $name;
+    private array $users = [];
 
-    public function __construct(ChatMediator $mediator, string $name) {
-        $this->mediator = $mediator;
+    public function __construct(string $name) {
         $this->name = $name;
     }
 
-    public function sendInChatRoom(string $message): void {
-        echo "{$this->name} sends: {$message}\n";
-        $this->mediator->sendMessage($message, $this);
-    }
-
-    public function receive(string $message, ChatParticipant $sender): void {
-        echo "{$this->name} received from {$sender->name}: {$message}\n";
-    }
-}
-
-// Mediator interface
-interface ChatMediator {
-    public function sendMessage(string $message, ChatParticipant $user): void;
-    public function addParticipant(ChatParticipant $user): void;
-}
-
-// Concrete Mediator
-class ChatRoom implements ChatMediator {
-    private $users = [];
-
-    public function addParticipant(ChatParticipant $user): void {
+    public function addUser(User $user): void {
         $this->users[] = $user;
     }
 
-    public function sendMessage(string $message, ChatParticipant $sender): void {
+    public function sendMessage(User $sender, string $message): void {
+        echo "[{$sender->name}] sends: $message\n";
         foreach ($this->users as $user) {
-            // Don’t send the message back to the sender
             if ($user !== $sender) {
-                $user->receive($message, $sender);
+                $this->deliverMessage($user, $sender, $message);
             }
         }
     }
+
+    private function deliverMessage(User $receiver, User $sender, string $message): void {
+        echo "[{$receiver->name}] receives from {$sender->name}: $message\n";
+    }
 }
 
+// Client code
+$room = new ChatRoom("Sports");
 
+$alice = new User("Alice");
+$bob   = new User("Bob");
+$carol = new User("Carol");
 
+$room->addUser($alice);
+$room->addUser($bob);
+$room->addUser($carol);
 
-//client code
-
-// Create mediator
-$chatRoom = new ChatRoom();
-
-// Create users
-$user1 = new ChatParticipant($chatRoom, "Alice");
-$user2 = new ChatParticipant($chatRoom, "Bob");
-$user3 = new ChatParticipant($chatRoom, "Charlie");
-
-// Add users to chatroom
-$chatRoom->addParticipant($user1);
-$chatRoom->addParticipant($user2);
-$chatRoom->addParticipant($user3);
-
-// Communication via mediator
-$user1->sendInChatRoom("Hi everyone!");
-$user2->sendInChatRoom("Hello Alice!");
+$room->sendMessage($alice, "Hi everyone!");
+$room->sendMessage($bob, "Hey Alice!");
