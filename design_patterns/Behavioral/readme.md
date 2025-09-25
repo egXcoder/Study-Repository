@@ -15,4 +15,4 @@ define the ways in which objects collaborate and delegate responsibilities
 - State: encapsulate state-based behavior and delegate behavior to its current state
 - Strategy: define a family of algorithms, put each of them into a separate class, and make their objects interchangeable.
 - Template Method: defines the skeleton (template) of an algorithm in a base class but lets subclasses override certain steps of the algorithm without changing its overall structure.
-- Visitor: separate algorithms from the objects on which they operate.
+- Visitor: each visitor is guest expert who knows how have knowledge to do different operations for different classes
