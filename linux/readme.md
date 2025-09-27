@@ -20,6 +20,21 @@ linux main components:
 - Xorg (X server) → the steering system (knows how to “draw” on the screen and take input from keyboard/mouse)
 - Desktop Environment (GNOME, XFCE, KDE, etc.) → the body & dashboard (menus, windows, panels, file manager, apps)
 
+# Display Manager
+When you start your computer:
+1- The Display Manager is the first thing that appears.
+2- It shows the login window where you enter your username and password.
+3- After logging in, it starts your desktop environment (like GNOME, KDE, XFCE, etc.)
+
+- GDM3 (GNOME Display Manager) .. It is the login screen software used in GNOME-based Linux distributions like Ubuntu, Debian, Pop!_OS, and others.
+
+- LightDM ... login screen that loads XFCE / Older Ubuntu / Linux Mint
+
+- SDDM ... login screen that loads KDE Plasma
+
+Component	Purpose
+GDM3	The login screen / session manager that loads GNOME
+GNOME	Full Desktop Environment (your graphical workspace)
 
 
 
@@ -100,3 +115,17 @@ PHP-FPM listens on the socket and accepts all 3.
 PHP-FPM’s pool of workers takes them concurrently (one worker per request).
 So even though it looks like “just a single file,” it can handle many simultaneous streams.
 
+
+
+# tar
+tar -xvzf file.tgz
+tar -xvf file.tar
+
+-x	Extract
+-v	Verbose
+-z	Gzip Compression	Indicates the archive is .gz / .tgz compressed
+-f	File	Specifies the file name that follows
+
+
+# Directories
+- /opt is meant for optional or third-party applications that are not installed via package manager (APT, DNF, etc.) .. so when you install package manually, best practice is to move it opt directory
