@@ -4,7 +4,7 @@ jmeter requires java run time
 
 # Install
 
-- Install Java (JMeter requires Java 8 or later):
+Install Java (JMeter requires Java 8 or later):
 `sudo apt update`
 `sudo apt install default-jre`
 
