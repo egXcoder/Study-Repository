@@ -2,6 +2,8 @@
 
 - any number XOR with itself cancels out 5^6^5 = 6 .. you can refer back to problem 1
 
+- valid triangle a,b,c is which a+b>c && a+c>b && b+c>a
+
 
 
 
