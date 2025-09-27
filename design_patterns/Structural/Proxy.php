@@ -9,6 +9,9 @@
 // - Smart Proxy: Logging, monitoring
 
 
+//Subject: the original object
+//Proxy: is the wrapper to control access, etc...
+
 // Imagine a system that displays product images in an admin dashboard:
 // Images are large and expensive to load from disk or remote storage.
 // You don’t want to load them until they are actually displayed.

@@ -1,6 +1,9 @@
 <?php
 
-//idea: Wrap another object to add dynamic behavior
+//idea: add dynamic behavior by Wrap object with a wrapper
+
+//Component: the original object to be extended
+//Decorator: wrapper
 
 //suppose you have a class of FileReader which read a file from disk
 

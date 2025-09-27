@@ -2,9 +2,10 @@
 
 //Also Called .. Pub/Sub, Observer, Event Listeners
 
+
 // two classes
-// Subject (Publisher).. object being observed
-// Observers (Subscribers).. Objects to be notified when the subject changes
+// Subject/Publisher.. object being observed
+// Observer/Subscribers.. Objects to be notified when the subject changes
 
 
 // 👉 Suppose we have an Order.

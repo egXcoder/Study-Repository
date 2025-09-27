@@ -1,6 +1,9 @@
 <?php
 
 
+//Facade: Provides a simplified interface to a complex subsystem
+//SubSystem: The complex internal classes that the Facade delegates to
+
 // Imagine an e-commerce system.
 // To send an order confirmation email, you need to:
 // Get the user from the database.

@@ -1,6 +1,11 @@
 <?php
 
 
+//Adapter: Converts Adaptee to Target by implementing Target and wrapping Adaptee
+//Adaptee: The existing/legacy/incompatible class you want to reuse
+//Target: The interface expected by the client
+
+
 // Suppose your application expects to send notifications through a NotifierInterface
 // but you want to reuse a legacy email sender class that has a different method signature.
 
