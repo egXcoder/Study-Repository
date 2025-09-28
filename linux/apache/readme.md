@@ -1,21 +1,26 @@
 # Apache
 A web server its responsibility is to listens for requests from browsers and forward these requests to handler like mod_php internally or php-fpm externally and respond to requests
 
-- apache consist of multiple modules, you can enable and disable between them
+- apache consist of multiple modules/config/sites, you can enable and disable between them
 
 # apache core commands
 - `apt install apache2` .. install on linux
+- `apache2ctl -V` .. show apache version with its mpm (prefork or worker or event)
+- `apache2ctl -M` .. list of enabled modules loaded successfully into memory
+
+## modules
 - `ls /etc/apache2/mods-available` ... list of available modules
 - `ls /etc/apache2/mods-enabled` .. list of enabled modules (Loaded Modules)
-- `apache2ctl -M` .. list of enabled modules loaded successfully into memory
 - `a2enmod rewrite` .. enable module
 - `a2dismod rewrite` .. disable module
 
+## config
 - `ls /etc/apache2/conf-available` ... list of available configuration
 - `ls /etc/apache2/conf-enabled` .. list of enabled configuration
 - `a2enconf php8.1-fpm` .. enable config
 - `a2disconf php8.1-fpm` .. enable config
 
+## sites
 - `ls /etc/apache2/sites-available` ... list of available sites
 - `ls /etc/apache2/sites-enabled` .. list of enabled sites
 - `a2ensite your-site-ssl.conf` .. enable site
@@ -23,18 +28,20 @@ A web server its responsibility is to listens for requests from browsers and for
 
 
 # Apache Service
-- enable service, so that it auto start on system restart `systemctl enable apache2`
-- start service `systemctl start apache2`
-- restart service `systemctl restart apache2` .. stop service completely and kill all processes, threads and build them again
-- reload service `systemctl reload apache2` .. dont stop service, just reload its configurations.. 
+- `systemctl enable apache2` enable service, so that it auto start on system restart 
+- `systemctl enable apache2 --now` enable service and start it as well 
+- `systemctl start apache2` start service 
+- `systemctl restart apache2` restart service .. stop service completely and kill all processes, threads and build them again
+- `systemctl reload apache2` reload service .. dont stop service, just reload its configurations.. 
     -- Current connections remain open and continue to work.
     -- New connections will use the updated configuration. 
     -- It does not re-load or re-apply loaded modules.
-- see service status `systemctl status apache2`
+- `systemctl status apache2` see service status 
+
 
 # Apache MPM Workers (Multi-Processing Modules Workers)
 
-know current worker using `apachectl -V` ... it will show you the mpm worker that is running
+`apachectl -V` know current mpm
 
 Apache has different MPMs that define how it handles concurrency:
 - prefork → processes only, no threads (old, safe for non-thread-safe PHP).
@@ -43,134 +50,127 @@ Apache has different MPMs that define how it handles concurrency:
 
 ## Event MPM
 
-### 1. Startup
-When Apache starts with **event MPM**, it:
+### Architecture
+- Even though you connect to Apache via one port (like 80 or 443), that doesn’t mean its the parent process which listens.
+- Actually, the parent process never directly accepts or processes client traffic. It only creates the listening socket, forks children, and supervises.
+- Parent forks N child processes
+- All child processes inherit the same listening socket from the parent and waiting to accept connections in parallel
+- All listening processes are technically "notified" for a new connection but only one of them can accept
 
-- Spawns several processes (`ServerLimit`).
-- In each process, it creates:
-  - **1 listener thread** → waits for new connections
-  - **N worker threads** (`ThreadsPerChild`) → process requests
-
-Additional directives:
-
-- `AsyncRequestWorkerFactor` → multiplier factor to determine how many idle connections each process can keep track of.
-- `MaxRequestWorkers` → defines the total number of **active requests** across all processes.
-
-**Example configuration:**
-
+### Configuration
 - ServerLimit = 4
 - ThreadsPerChild = 25
 - AsyncRequestWorkerFactor = 2
 - MaxRequestWorkers = 100
 
 
-**Result:**
+Result:
+- 4 Processes
+- 25 thread per process
+- `2 × 25 = 50` Each process can track idle connections (keep-alive)
+- 100 max concurrent active requests Apache can handle overall
 
-- **1 parent process** (Apache itself)
-- **4 processes × (1 listener + 25 workers) = 105 total threads**
-- Each process can track `2 × 25 = 50` idle connections (keep-alive)
-- Total active request limit = **100** (`MaxRequestWorkers`), typically it would match `4 × 25 = 100` by default, you can assign lower if you want to reduce concurrency
 
----
+Notice: every process in the 4 process, has by default one thread (listener thread) which listen for new connections, so actually each process has 26 thread
 
-### 2. Accepting Connections
+
+
+### Connecting
 - A client connects (for example, a browser opens a TCP connection).
-- The **listener thread** in one process accepts it.
-- The connection is registered in an **event loop** (`epoll` on Linux, `kqueue` on BSD, `select/poll` as fallback).
-👉 At this stage, the connection exists but **no worker thread is tied up yet**.
+- The listener thread in one process accepts it.
+- The connection is registered in the process event loop (`epoll` on Linux, `kqueue` on BSD, `select/poll` as fallback)
+👉 At this stage, the connection exists but no worker thread is tied up yet.
 
----
 
-### 3. Handling Requests
-- If the client sends an HTTP request, the event loop detects *data ready*.
-- A **worker thread** is assigned to handle the request:
+### Handling Requests
+- If the client sends an HTTP request, the event loop detects data ready.
+- A worker thread is assigned to handle the request:
   - Parses headers
   - Passes request to modules (for example, `mod_proxy_fcgi` for PHP-FPM)
   - Generates the response
   - Sends the response back
 
 After that:
-
-- If the connection is **closed** → the worker thread is freed.
-- If it’s **keep-alive** → the connection goes back into the event loop (idle), and the worker thread is released.
+- If the connection is closed → the worker thread is freed.
+- If it’s keep-alive → the connection goes back into the event loop (idle), and the worker thread is released.
 
 ---
 
-### 4. Keep-Alive Magic (Why Event > Worker)
-- **Worker MPM:** A worker thread stays stuck as long as the connection is open (even if idle).
-- **Event MPM:** The worker thread is released after finishing the request. The **event loop** continues watching the idle connection.
+### Keep-Alive Magic (Why Event > Worker)
+- Worker MPM: A worker thread stays stuck as long as the connection is open (even if idle).
+- Event MPM: The worker thread is released after finishing the request. The event loop continues watching the idle connection.
   - If the client sends another request, a worker thread is reassigned.
-
-
-Q: is event loop and queue is in parent process or in the child process or both?
-
-In Apache Event MPM, the event loop and the connection queue live in the child processes
-
-Parent process
-- Starts up and spawns the child processes.
-- Does not handle requests or connections directly.
-- Its job is mainly: monitoring children, restarting them if they die, reloading config, etc.
-
-Child processes
-- Each child process has:
-    - One listener thread → accepts new connections from the socket (port 80/443).
-    - One event loop (inside that listener thread) → tracks all active/idle connections for that child.
-    - Worker threads → process active requests when the event loop says “data is ready.”
-
-there isn’t one big global event loop in the parent — instead, each child has its own mini event loop + pool of worker threads.
 
 
 # Apache PHP
 by default apache doesnt auto install php, you have to install it.. so you have two ways to handle requests ..
- - using mod_php which is php internally into apache
- - using php-fpm (FastCGI Process Manager) 
+ - mod_php which is php internally into apache
+ - php-fpm (FastCGI Process Manager) ... It’s a separate service that runs PHP as an independent backend processor instead of embedding PHP directly into the web server. it works as one request / one process
 
 notices:
 - mod_php is simpler, but PHP-FPM is usually preferred today (better performance, works with Nginx, more flexible).
-- mod_php, Apache can only use one PHP version at a time. PHP-FPM allows multiple versions.
-- mod_php does not work with the event or worker MPM. You need Apache’s prefork MPM.
+- mod_php works only with prefork. it doesnt work with worker or event
+- php-fpm is 
+
+Q: why mod_php works only with prefork?
+because mod_php is non thread safe, as prefork doesnt require threads, so it works great with mod_php. but worker and event require threading so it need a version of php which is thread safe
+
+Q: so why didnt apache create a module like mod_php_ts to work with worker and event instead of proxy to php-fpm?
+Because making PHP truly thread-safe would require rewriting large parts of PHP itself and its extensions. It’s not just an Apache problem — it’s a deep architectural limitation of PHP and its ecosystem.
+
+1. PHP Was Designed for Single-Threaded Execution
+2. A Thread-Safe Build of PHP Used to Exist… and Failed
+- Windows PHP binaries still have php-ts and php-nts builds.
+- But even php-ts isn’t truly thread-safe, because most extensions are not.
+- Worse, thread-safe builds are slower due to locking overhead.
+So even when thread-safety was attempted, performance dropped and compatibility broke.
+3. PHP-FPM Was a Cleaner, More Scalable Solution
+✅ Keep PHP single-threaded
+✅ Let Apache, Nginx, or Caddy handle concurrency
+✅ Use FastCGI to connect them
 
 
 ## mod_php
-- install by `apt install libapache2-mod-php` this will automatically install apache mod-php + php itself (recent version)
-- enabled by `a2enmod php*` the * matches the installed version, e.g., php8.1
-
-- notice: you have to change worker to be prefork as mod_php require mpm-worker prefork always `sudo a2dismod mpm_event && sudo a2enmod mpm_prefork && sudo systemctl restart apache2`
+- `apt install libapache2-mod-php` install mod-php and php itself (recent version)
+- `a2enmod php*` enabled the * matches the installed version, e.g., php8.1
+- `a2dismod mpm_event && a2enmod mpm_prefork && sudo systemctl restart apache2` you have to change worker to be prefork
 
 ### change mod_php version 
 - running this won't work because php7.4 is not there on official repo, so it cant find it and will revert back to the recent one which is php8.1 `apt install libapache2-mod-php7.4`
 
-- you have to Add the PHP PPA (Ondřej Surý’s repo) which contains multiple PHP versions (7.4, 8.0, 8.1, 8.2, …).
-`add-apt-repository ppa:ondrej/php` then `apt update`
+- `add-apt-repository ppa:ondrej/php && apt update` you have to Add the PHP PPA (Ondřej Surý’s repo) which contains multiple PHP versions (7.4, 8.0, 8.1, 8.2, …).
 
-- now you can `apt install libapache2-mod-php7.4`
+- `apt install libapache2-mod-php7.4` install
 
-- make sure php7.4 module is added to apache available modules `ls /etc/apache2/mods-available/`
+- `ls /etc/apache2/mods-available/` make sure php7.4 module is added to apache available modules 
 
-- now enable it `a2enmod php7.4 && systemctl restart apache2` 
+- `a2enmod php7.4 && systemctl restart apache2` now enable it 
 
 - in same way, we can add another older version, example php5.6 
 `apt install libapache2-mod-php5.6 && a2dismod php7.4 && a2enmod php5.6 && systemctl restart apache2`
 
 
 ## PHP-FPM (FastCGI Process Manager)
-- install by `apt install php8.1-fpm`
-- enable it `systemctl enable php8.1-fpm`, or enable and start now `systemctl enable php8.1-fpm --now`
-- start it `systemctl start php8.2-fpm`
-- enable required modules `a2enmod proxy_fcgi setenvif mpm_event rewrite`
-- enable required configuration `a2enconf php8.1-fpm`
-
+- `apt install php8.1-fpm` install by 
+- `systemctl enable php8.1-fpm --now` enable it and start now
+- `a2enmod proxy_fcgi setenvif mpm_event rewrite` enable required modules 
+- `a2enconf php8.1-fpm` enable required configuration 
 - to change php-fpm version `apt install php7.4-fpm && a2dismod php8.1-fpm && a2disconf php8.1-fpm && a2enmod php7.4-fpm && a2enmod php7.4-fpm`
 
-🔹 **Q: In FPM, is every request a new process?**
+Q: In FPM, is every request a new process?
 yes, FPM keeps a pool of long-lived processes ready and each request go to a process. it does not fork a new process per request though (that would be too expensive).  
 
-**Q: Do I ever need to worry if PHP version is thread-safe (TS) or non-thread-safe (NTS)?**
+Q: Do I ever need to worry if PHP version is thread-safe (TS) or non-thread-safe (NTS)?
 
 not really, it will be always NTS. unless its windows and using the winnt apache mpm then you may need the TS
 
-If you are running PHP with **PHP-FPM** (the modern and most common setup with Apache `event/worker` MPM or Nginx), you dont need the thread-safe version. PHP-FPM uses multiple processes, not threads, so NTS is the standard and faster choice.  
+If you are running PHP with PHP-FPM (the modern and most common setup with Apache `event/worker` MPM or Nginx), you dont need the thread-safe version. PHP-FPM uses multiple processes, not threads, so NTS is the standard and faster choice.  
 
+Q: we have prefork is one request one process, and we have php-fpm is one request one process. so why would we make apache to be event and threading and all of that while at the end you will rely on fpm which is one request one process?
+
+- Event is better than prefork in handling idle connections. in event, apache Keep-Alive idle connections in event loop queue, while in prefork idle connections stays as separate processes
+- Event is better than prefork in allowing multiplexing hence http2. Event can allow multiplexing since connection live in one process, so every request is a thread within this process so multiplexing is possible. while in prefork every request is a new separate process so multiplexing is not possible
+- Apache itself benefits massively from being Event/Threaded — because not all requests are PHP.
 
 
 # Apache HTTPS
@@ -221,8 +221,12 @@ Commercial CAs (like Let’s Encrypt, DigiCert, etc.) will only issue certs for 
 `a2enmod http2` .. enable http2 module
 then within virtualhost directive add `Protocols h2 http/1.1`
 h2 .. http2 over tls
-h2c .. http2 without tls
-Browsers do not support h2c for security reasons.
+h2c .. http2 without tls ... Browsers do not support h2c for security reasons.
+
+Q: why http2 only allowed for event and worker but not prefork?
+Event can allow multiplexing since connection live in one process, so every request is a thread within this process so threads can work on requests in parallel and response can include multiple requests so multiplexing is possible. while in prefork every request is a new separate process so multiplexing is not possible
+
+
 
 ## Apache Directives
 - `<IfModule proxy_fcgi_module> .... </IfModule>` .. check if module is enabled then do what is inside
@@ -258,3 +262,4 @@ SetHandler "proxy:unix:/run/php/php8.1-fpm.sock|fcgi://localhost"
 - `AllowOverride All`: Lets .htaccess files inside /var/www/html override Apache settings.
 - `AllowOverride None`: stop .htaccess overriding, if it exist in directoy
 - `Require all granted` .. Allows anyone (all clients) to access the files.
+- `Require all denied` .. reply back with 403 Forbidden
