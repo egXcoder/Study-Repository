@@ -224,7 +224,14 @@ h2 .. http2 over tls
 h2c .. http2 without tls ... Browsers do not support h2c for security reasons.
 
 Q: why http2 only allowed for event and worker but not prefork?
-Event can allow multiplexing since connection live in one process, so every request is a thread within this process so threads can work on requests in parallel and response can include multiple requests so multiplexing is possible. while in prefork every request is a new separate process so multiplexing is not possible
+- Event can allow multiplexing since tcp connection live in one process and you can do threading.. so you can extract the streams for the connection and each stream goes to a thread in parallel
+
+- Prefork cant do multiplexing since tcp connection live in one process but you can't do threading. so even if you extracted the streams you have to process them sequentially anyway, so prefork can't do multiplexing by design.
+
+to understand the model:
+- Event when you start http2 connection, tcp connection will live in a queue in a child process and a thread inside the child process can be assigned when request raised
+
+- Prefork (theoritically) when you start http2 connection, tcp connection will live in a separate process and process keep idle till request is sent then the process will start working and response, then another request so process work again etc...
 
 
 
