@@ -270,3 +270,12 @@ SetHandler "proxy:unix:/run/php/php8.1-fpm.sock|fcgi://localhost"
 - `AllowOverride None`: stop .htaccess overriding, if it exist in directoy
 - `Require all granted` .. Allows anyone (all clients) to access the files.
 - `Require all denied` .. reply back with 403 Forbidden
+
+
+
+## Why is it called apache2 instead of just apache?
+
+- The original web server was called Apache 1.x.
+- When Apache 2.0 was released, it introduced major architectural changes (new MPMs like Worker and Event, better threading, new APIs).
+- To distinguish it from the older Apache 1.x, many systems began referring to it as Apache2.
+- So "Apache2" == "Apache version 2", not a different product.
