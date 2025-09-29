@@ -1,35 +1,49 @@
 <?php
 
-//Idea: The Command is about encapsulating a request (an action you want to perform) as an object.
+//Idea: turns a request (action/operation) into a separate object
 
-
-// Why would you do that, isnt it easier to run the method without having to wrap it into object
-// what is the benefit you would get from wrapping a logic inside a method into an object?
+// Why would you do that?
 
 // Benefits
-// - Uniform handling of actions, Since every command has the same interface, you can treat them the same way (store, queue, log, undo, retry…).
-// - Undo / Redo functionality
-// - CLI wrapper (laravel commands and php artisan )
 // - Queueing & Scheduling (laravel jobs and invoker is queue:work or schedule:run)
-// - Macro commands (composition) Multiple commands can be bundled together to form a workflow.
-// - Testing: Since commands are isolated and small, you can unit-test them independently of the system.
+// - Undo / Redo functionality
+
+// Objects
+// - Command: is the request as an object
+// - Receiver: object which do the actual work
+// - Invoker: is responsible for executing commands. 
+// - Macro Command: is a command but within its execute method, it execute multiple commands
 
 
-// ✅ In short:
-// Think of Command when your action is something you might want to queue, undo, log, or standardize across different callers.
+//Typically Command is just a request and it delegate the actual work to receiver
+// the useful of command is just that we can queue, we can schedule, we can undo/redo ..
+// but command shouldnt need to worry about actual implemenations (it violates SRP)
+class PlaceOrderCommand implements ShouldQueue {
+    public function __construct(public int $orderId) {}
+
+    public function handle(OrderService $service) {
+        $service->placeOrder($this->orderId);
+    }
+}
+
+// in small projects, we can put the implemenation inside command (Fat Command) . its not adviced to do that though
+// as its violates SRP, also code now is not reusable if i want to place order from another place rather than queue
+// notice: Command is the Receiver in same time, so no explicit receiver here..
+class PlaceOrderJob implements ShouldQueue {
+    public function __construct(public int $orderId) {}
+
+    public function handle() {
+        Order::create(['id' => $this->orderId]);
+        Mail::to('customer@example.com')->send(new OrderPlacedMail($this->orderId));
+        // etc...
+    }
+}
 
 
-//Receiver: is the object that actually does the work. 
-// - It has the real business logic. 
-// - You can have multiple receivers in the Command pattern.
+//Q: Is a CLI Wrapper (like a Laravel Artisan Command) considered Command Pattern?
+// Short answer: No, a CLI command is not the classic Command Pattern — it’s more like a Facade or Adapter or controller to trigger application logic.
 
-//Command: is the request as an object
 
-//Invoker: is responsible for executing commands. 
-// It doesn’t know what the command does internally, only that it has an execute() (and maybe undo()) method.
-//The invoker can also store history (to allow undo/redo).
-
-//Macro Command: is a command but within its execute method, it execute multiple commands 
 
 
 // Imagine you’re building a file manager in PHP.
@@ -144,18 +158,25 @@ class CommandManager {
     }
 }
 
-//client code
-$fs = new FileSystemReceiver();
+
+class MacroCommand implements Command {
+    public function __construct(private array $commands) {}
+    
+    public function execute() {
+        foreach ($this->commands as $command) $command->execute();
+    }
+    public function undo() {
+        foreach (array_reverse($this->commands) as $command) $command->undo();
+    }
+}
+
+
+// ✅ Usage Example
+$macro = new MacroCommand([
+    new CreateFileCommand(new FileSystemReceiver(), "tmp/test.txt"),
+    new RenameFileCommand(new FileSystemReceiver(), "tmp/test.txt", "tmp/renamed.txt"),
+]);
+
 $manager = new CommandManager();
-
-$create = new CreateFileCommand($fs, "test.txt");
-$rename = new RenameFileCommand($fs, "test.txt", "renamed.txt");
-$delete = new DeleteFileCommand($fs, "renamed.txt");
-
-$manager->executeCommand($create);   // 📄 File created: test.txt
-$manager->executeCommand($rename);   // ✏️ File renamed: test.txt → renamed.txt
-$manager->executeCommand($delete);   // 🗑️ File deleted: renamed.txt
-
-$manager->undoLast();                // ⚠️ Cannot undo delete
-$manager->undoLast();                // ✏️ File renamed: renamed.txt → test.txt
-$manager->undoLast();                // 🗑️ File deleted: test.txt (undo of create)
+$manager->executeCommand($macro);
+$manager->undoLast();
