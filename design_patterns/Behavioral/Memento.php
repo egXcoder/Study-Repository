@@ -6,17 +6,16 @@
 
 
 
-//Originator: object you want to take snapshots of
 //Memento: Snapshot of the necessary data from Originator
 //Caretaker: store history of snapshots
+//Originator: object you want to take snapshots of
 
-// Q: cant i clone the whole object and store it?
+// Q: can't i clone the whole object and store it?
 // 
 // not, If you just clone the object:
 // - If the object is large, cloning can be heavy and wasteful (deep copy of everything).
 // - If you later change the object’s internal structure, all stored clones may break or be inconsistent.
 // - The Originator (the real object) loses control of what gets saved and restored.
-// - You’re breaking encapsulation: the caretaker would now need to know the whole internal structure of the object to copy/restore it.
 // 
 //With Memento pattern:
 // - The Originator decides what to expose as the "state snapshot".
@@ -25,8 +24,8 @@
 
 
 // Q: i remember this undo/redo functionality was mentioned before in command pattern?
-//yes, you can undo/redo by either 
-// - take original state of object and work throw queue of do commands till we reach final destination [command pattern]
+//yes, you can undo/redo by 
+// - take original object and work through queue of do commands till we reach final destination [command pattern]
 // - iterate through stored snapshots with [memnto pattern]
 
 
@@ -110,8 +109,6 @@ $history = new CartHistory();
 
 // Add first item
 $cart->addItem("Laptop");
-$history->push($cart->save());
-
 $cart->addItem("Phone");
 $history->push($cart->save());
 
@@ -125,3 +122,28 @@ echo "Cart after undo: " . implode(", ", $cart->getItems()) . "\n";
 // Undo again
 $cart->restore($history->pop());
 echo "Cart after second undo: " . implode(", ", $cart->getItems()) . "\n";
+
+
+
+// Q: i feel this memnto idea is same as serialization, originator can serialize itself as snapshot and unserialize it to restore itself, memnto is not class rather its serialized text?
+// yes, you are correct. they are very similar but different
+
+// Serialization is the process of converting an object’s state into a format that can be stored or transmitted. 
+
+// The output could be:
+// - Text (JSON, XML, YAML)
+// - Binary (bytes in Java, C#, etc.)
+
+// Purpose:
+// - Save an object to a file, database, or send it over a network.
+// - Later, you can deserialize it back to reconstruct the object.
+// -------
+
+// Memento is a design pattern that captures and externalizes an object’s internal state without exposing its implementation details
+
+// The output could be:
+// - Memento object which store any representation of the state
+
+// Purpose:
+// - Save an object to a memento object
+// - Later, you can restore the object from the memento object

@@ -9,8 +9,9 @@
 // - Undo / Redo functionality
 
 // Objects
-// - Command: is the request as an object
-// - Receiver: object which do the actual work
+// - Command: is the request as an object (OrderPlaced)
+// - Receiver: object which do the actual work (OrderService)
+// - Target: is the object which the command will operate on (Order)
 // - Invoker: is responsible for executing commands. 
 // - Macro Command: is a command but within its execute method, it execute multiple commands
 
@@ -161,7 +162,7 @@ class CommandManager {
 
 class MacroCommand implements Command {
     public function __construct(private array $commands) {}
-    
+
     public function execute() {
         foreach ($this->commands as $command) $command->execute();
     }
