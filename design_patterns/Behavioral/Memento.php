@@ -1,6 +1,6 @@
 <?php
 
-// you would use memnto when you want to store state at a point and restore it back if required
+// you would use memento when you want to store state at a point and restore it back if required
 // - undo/redo functionality, or even restore to a specific state straight away
 // - snapshots in business overflow
 
@@ -26,7 +26,7 @@
 // Q: i remember this undo/redo functionality was mentioned before in command pattern?
 //yes, you can undo/redo by 
 // - take original object and work through queue of do commands till we reach final destination [command pattern]
-// - iterate through stored snapshots with [memnto pattern]
+// - iterate through stored snapshots with [memento pattern]
 
 
 
@@ -89,7 +89,7 @@ class CartHistory {
     }
 }
 
-//Q: why do i have to save in history manually, wont it once i create a cartmemnto it would add it to history automatically?
+//Q: why do i have to save in history manually, wont it once i create a cartmemento it would add it to history automatically?
 // The Memento pattern has a separation of roles on purpose:
 // - Originator (Cart): only responsible for creating/restoring snapshots of its state.
 // Caretaker (History): decides when to save.
@@ -125,7 +125,7 @@ echo "Cart after second undo: " . implode(", ", $cart->getItems()) . "\n";
 
 
 
-// Q: i feel this memnto idea is same as serialization, originator can serialize itself as snapshot and unserialize it to restore itself, memnto is not class rather its serialized text?
+// Q: i feel this memento idea is same as serialization, originator can serialize itself as snapshot and unserialize it to restore itself, memento is not class rather its serialized text?
 // yes, you are correct. they are very similar but different
 
 // Serialization is the process of converting an object’s state into a format that can be stored or transmitted. 
