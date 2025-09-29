@@ -1,104 +1,136 @@
 <?php
 
 
-
 //Element: is the object which is going to be visited
-//Visitor: is guest expert who have knowledge how to do different operations for each class of family
+//Visitor: is guest expert who have knowledge how to do a specific operation for all elements family
 
-//without visitor
-interface Shape {
-    public function draw();
+// - Each element doesn’t know what operations visitors will perform.
+// - Adding a new operation → adding a new visitor without touching document classes. (respect OCP)
+// - Adding a new document type → implement DocumentElement and update visitors. (bad)
+
+//Visitor shines when you have Stable Object Structure (Elements) and often want to add new operations on them, Visitor is ideal.
+
+// Q: i can put the operation directly into the classes instead of visitor?
+// If operations are few → maybe just add methods to the element (simpler). but when operations are many and frequently added then visitor
+
+// Q:i may create a visitor and implmenet two methods while others throw exception which violates LSP?
+//Visitor works best when each visitor implement all element types, or you provide default behaviors in a base visitor class.
+
+
+interface DocumentElement {
+    public function accept(DocumentVisitor $visitor);
 }
 
-class Circle implements Shape {
-    public function draw() {
-        echo "Drawing Circle\n";
+
+class Invoice implements DocumentElement {
+    public $id;
+    public $amount;
+
+    public function __construct($id, $amount) {
+        $this->id = $id;
+        $this->amount = $amount;
+    }
+
+    public function accept(DocumentVisitor $visitor) {
+        $visitor->visitInvoice($this);
     }
 }
 
-class Rectangle implements Shape {
-    public function draw() {
-        echo "Drawing Rectangle\n";
-    }
-}
+class SalesOrder implements DocumentElement {
+    public $id;
+    public $customer;
 
-//problem here: 
-// - if we wan to add a new method which is different from shape to another such as AreaCalculator
-// you have to amend all shape classes which is too much work and violating (OCP)
-// - keep adding operations which is different from shape to another, you will end up with big classes and much effort implementation them all even if you dont need them
-
-
-// visitor typically solve the problem of keep adding operation to a set of shapes, so if you are not going to keep adding operations frequently
-// then no need for visitor
-
-
-// with visitor
-
-//shapes are elements
-interface Shape {
-    public function accept(ShapeVisitor $visitor);
-}
-
-class Circle implements Shape {
-    public $radius;
-
-    public function __construct($radius) {
-        $this->radius = $radius;
+    public function __construct($id, $customer) {
+        $this->id = $id;
+        $this->customer = $customer;
     }
 
-    public function accept(ShapeVisitor $visitor) {
-        $visitor->visitCircle($this);
-    }
-}
-
-class Rectangle implements Shape {
-    public $width;
-    public $height;
-
-    public function __construct($w, $h) {
-        $this->width = $w;
-        $this->height = $h;
-    }
-
-    public function accept(ShapeVisitor $visitor) {
-        $visitor->visitRectangle($this);
+    public function accept(DocumentVisitor $visitor) {
+        $visitor->visitSalesOrder($this);
     }
 }
 
 
-interface ShapeVisitor {
-    public function visitCircle(Circle $circle);
-    public function visitRectangle(Rectangle $rectangle);
-}
+class DeliveryNote implements DocumentElement {
+    public $id;
+    public $items;
 
-class ShapeDrawer implements ShapeVisitor {
-    public function visitCircle(Circle $circle) {
-        echo "Draw Circle";
+    public function __construct($id, $items) {
+        $this->id = $id;
+        $this->items = $items;
     }
 
-    public function visitRectangle(Rectangle $rectangle) {
-        echo "Draw Rectangle";
+    public function accept(DocumentVisitor $visitor) {
+        $visitor->visitDeliveryNote($this);
     }
 }
 
-//now if we will add a new operation, we add a new class like AreaCalculator which respects OCP and more flexible
+
+interface DocumentVisitor {
+    public function visitInvoice(Invoice $invoice);
+    public function visitSalesOrder(SalesOrder $salesOrder);
+    public function visitDeliveryNote(DeliveryNote $deliveryNote);
+}
+
+
+class Exporter implements DocumentVisitor {
+    public function visitInvoice(Invoice $invoice) {
+        echo "Exporting Invoice #{$invoice->id} with amount {$invoice->amount} to XML\n";
+    }
+
+    public function visitSalesOrder(SalesOrder $order) {
+        echo "Exporting Sales Order #{$order->id} for customer {$order->customer} to XML\n";
+    }
+
+    public function visitDeliveryNote(DeliveryNote $note) {
+        echo "Exporting Delivery Note #{$note->id} with items: " . implode(", ", $note->items) . " to XML\n";
+    }
+}
+
+
+class Auditor implements DocumentVisitor {
+    public function visitInvoice(Invoice $invoice) {
+        echo "Auditing Invoice #{$invoice->id}: Amount {$invoice->amount}\n";
+    }
+
+    public function visitSalesOrder(SalesOrder $order) {
+        echo "Auditing Sales Order #{$order->id}: Customer {$order->customer}\n";
+    }
+
+    public function visitDeliveryNote(DeliveryNote $note) {
+        echo "Auditing Delivery Note #{$note->id}: Items " . implode(", ", $note->items) . "\n";
+    }
+}
+
+
+//client code
+$documents = [
+    new Invoice(1, 100),
+    new SalesOrder(10, "Alice"),
+    new DeliveryNote(100, ["Item1", "Item2"])
+];
+
+$exporter = new Exporter();
+$auditor = new Auditor();
+
+foreach ($documents as $doc) {
+    $doc->accept($exporter);
+    $doc->accept($auditor);
+}
 
 
 
-// Q: when would i use visitor pattern?
-// - when you have family of classes, and you will frequently add operations (which is different from class to another)
-// notice: if the added operations is common between family, then you would just use inheritance
 
+//Q: i don't know what are the operations that are available for elements because visitors are scattered all over?
+// you can do a factory for available visitors so that you know what are the available visitors instead of having them scattered
 
-// Q: how can i imagine visitor?
-// you have a construction site, working site, finished site (element) .. and you have visitor (engineer) .. each visitor knows what he will do
-// - there is a visitor (architect) who will draw the architect for construction site, monitor progress of working site, receive finished job from finished site
-// - there is a visitor (worker) who will get sand and iron into construction site, monitor suppliers for working site, take his money on finished job site
-// sites just need to accept them, once accepted the visitor will do his job
-
-
-//Q: visitor pattern look similar to command pattern?
-// - yes and no..
-// - command is to encapsulate request focuses on when/how to execute it (queue it,undo it, log it,etc..)
-// - visitor is to encapsulate set of operations that apply to different classes (each visitor knows how to visit construction site and how to visit working site and how to visit finished site,etc..)
-// - Visitor is like a guest expert who comes and applies knowledge (e.g., “I know how to calculate area for Circle and Rectangle”) to different hosts.
+class DocumentVisitorFactory {
+    public static function getVisitor($operation){
+        switch ($operation) {
+            case "export":
+                return new Exporter;
+            case "audit":
+                return new Auditor;
+        }
+    }
+}
