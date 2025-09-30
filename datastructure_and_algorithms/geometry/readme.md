@@ -10,7 +10,7 @@
 - Perimeter : sum of 3 sides
 
 
-## useful
+## Useful laws
 - valid triangle a,b,c is which a+b>c && a+c>b && b+c>a
 
 - Area = .5 * a * H = .5 * a * b * sin(x) where x is the angle between a and b
