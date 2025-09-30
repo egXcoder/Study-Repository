@@ -7,7 +7,6 @@
 
 Dynamic Programming (DP) is a technique used to optimize recursion problems by remembering and reusing the results.
 
-
 - Built on top of recursion
     - as recursion is used to solve complex problems by breaking them into smaller subproblems
     - but using recursion sometimes is redundant calculation because same subproblem may be recalculated
@@ -18,7 +17,8 @@ Dynamic Programming (DP) is a technique used to optimize recursion problems by r
     - for time complexity.. recursion will be like O(2^n) while after memoization memo[m][n] .. then its O(m*n)
 
 
-- analyze way
+- Practical Steps
+    - is BFS can solve it quicker then go for it without analyzing for dyanmic programming
     - is solveable with normal recursion? where recursion function have parameters and return result, so its not void
     - check time complexity: see for every node, how many nodes can be traversed. for example if node can traverse to 3 nodes then it is O(3^n)
     - see, what are the parameters to the recursion which are the states memo[i][j][k]
@@ -27,7 +27,6 @@ Dynamic Programming (DP) is a technique used to optimize recursion problems by r
 
 
 notice: it can be approached from bottom up as well, using tabulation technique to build dp[state1][state2] and build dp[] till you reach your desired goal, but i like to think recursion as it is more obviouse
-
 
 - Ex: Fibonacci Numbers 1,2,3,5,8,13,21,...
 
