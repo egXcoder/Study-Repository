@@ -126,6 +126,27 @@ tar -xvf file.tar
 -z	Gzip Compression	Indicates the archive is .gz / .tgz compressed
 -f	File	Specifies the file name that follows
 
+# systemctl
+- systemctl is the manager for services (daemons) on Linux using systemd
+    - `systemctl start nginx`
+    - `systemctl stop nginx`
+    - `systemctl reload nginx` .. reload service config
+    - `systemctl enable nginx` .. activate service then it auto start when linux restart
+    - `systemctl disable nginx` .. deactivate service
+    - `systemctl enable nginx --now` .. activate service and start it
+    - `systemctl status nginx` .. show servie status and logs
+    - `systemctl list-units --type=service` .. list all services
+
+
+- Difference Between systemctl and systemd
+    - systemctl
+        - A command-line tool used to interact with systemd
+        - It’s the user interface to control and query systemd services and states.
+        
+    - systemd
+        - The init system and service manager for Linux
+        - It's the background process (daemon) that bootstraps the system, starts services, handles logging, networking, timers, etc.
+
 
 # Directories
 - /opt is meant for optional or third-party applications that are not installed via package manager (APT, DNF, etc.) .. so when you install package manually, best practice is to move it opt directory
