@@ -9,7 +9,7 @@
 
 
 
-Problems:
-1- Given an integer array, every element appears twice except for one. Find that single one.
+- Problems:
+1. Given an integer array, every element appears twice except for one. Find that single one.
 Input: nums = [2,2,1]
 Output: 1

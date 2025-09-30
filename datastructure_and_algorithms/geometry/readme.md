@@ -1,13 +1,13 @@
 # Triangles
 
 ## Terminology:
-Acute Angle :  angle < 90
-Right Angle :  angle = 90
-Obtuse Angle:  angle > 90
-Straight Angle:angle   = 180
+- Acute Angle :  angle < 90
+- Right Angle :  angle = 90
+- Obtuse Angle:  angle > 90
+- Straight Angle:angle   = 180
 
-Side: one of triangle 3 lengths
-Perimeter : sum of 3 sides
+- Side: one of triangle 3 lengths
+- Perimeter : sum of 3 sides
 
 
 ## useful
