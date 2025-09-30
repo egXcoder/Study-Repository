@@ -2,7 +2,7 @@
 
 - any number XOR with itself cancels out 5^6^5 = 6 .. you can refer back to problem 1
 
-
+- you can know if number is even by bitwise operation num & 1
 
 
 

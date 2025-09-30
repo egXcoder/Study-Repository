@@ -242,12 +242,30 @@ But Redis does have built-in mechanisms to shrink (rewrite) it automatically, if
         SET user:1 "Johnny"
         ```
 
+## Redis transaction
 
-## Redis as pub/sub?? TODO::
+- Yes — Redis supports transactions using MULTI, EXEC with atomic execution.
+- However, it's NOT like SQL — there's no rollback on failure.
+- All commands inside MULTI ... EXEC run sequentially and atomically — no other client can run commands in between.
+
+```nginx
+MULTI
+INCR account:balance
+INCR account:transactions
+EXEC #Execute all queued commands atomically
+```
+
+- It clears all queued commands and exits the transaction mode.
+
+```nginx
+MULTI
+INCR account:balance
+INCR account:transactions
+DISCARD # Cancel Transaction
+```
+
+
 ## is redis support transaction?? TODO::
 
 Q: Can redis have two blocks where one is used for caching only and i dont want to bother to persist it and one is for session data where i need persistence?
 - You have to create two redis instance. each with its own configuration. each listen to a different port 
-
-    
-    
