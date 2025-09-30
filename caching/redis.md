@@ -244,6 +244,7 @@ But Redis does have built-in mechanisms to shrink (rewrite) it automatically, if
 
 
 ## Redis as pub/sub?? TODO::
+## is redis support transaction?? TODO::
 
 Q: Can redis have two blocks where one is used for caching only and i dont want to bother to persist it and one is for session data where i need persistence?
 - You have to create two redis instance. each with its own configuration. each listen to a different port 
