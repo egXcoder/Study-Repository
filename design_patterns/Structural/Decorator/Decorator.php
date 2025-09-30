@@ -2,8 +2,20 @@
 
 //idea: add dynamic behavior by Wrap object with a wrapper
 
-//Component: the original object to be extended
-//Decorator: wrapper
+//- Decorator: wrapper
+//- Component: the original object to be extended
+
+
+// decorator is useful when:
+// - You need many combinations of features, and inheritance would cause a class explosion.
+// Example: Notification system -> by (Email + SMS + Push Notification + Slack Message)
+// Example: File save → Local Save + Cloud Sync + History Backup + Encryption.
+// Example: Coffee → {With Milk, With Sugar, With Whipped Cream, With Milk+Sugar, ...}
+
+// - if the original object (component) you didnt write and you cant amend it
+// instead you would decorate it and rely on your decorator to be able to amend the behavior
+
+
 
 //suppose you have a class of FileReader which read a file from disk
 
