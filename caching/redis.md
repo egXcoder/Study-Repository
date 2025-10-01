@@ -337,7 +337,7 @@ Redis provides a built-in Publish/Subscribe (Pub/Sub) messaging system that lets
             But if Server 1 publishes to Redis channel "chat:room1" and Servers 2 & 3 subscribe, all WebSocket servers redispatch the message to their connected clients. (so its mainly redis used from the websocket server)
 
     
-        
+TODO:: redis stream for message queue
         
 
 ## Questions
