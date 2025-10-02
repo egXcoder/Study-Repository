@@ -147,6 +147,20 @@ tar -xvf file.tar
         - The init system and service manager for Linux
         - It's the background process (daemon) that bootstraps the system, starts services, handles logging, networking, timers, etc.
 
+# Processes
+
+- `ps aux | grep apache2` know who is the user running a process
+
+
+# Users
+
+- `sudo groupadd webdev` add a group
+- `sudo usermod -aG webdev ahmed` .. add user to group .. -a append G group
+- `sudo usermod -aG webdev www-data` .. add user to group .. -a append G group
+- `sudo chown -R ahmed:webdev /var/www/html/news_fetcher` .. change owner to be ahmed and group to be webdev. then ahmed and apache both can reach the project files
+- `sudo -u www-data touch /var/www/html/news_fetcher/storage/testfile` .. do something on behalf of other user
+
+
 
 # Directories
 - /opt is meant for optional or third-party applications that are not installed via package manager (APT, DNF, etc.) .. so when you install package manually, best practice is to move it opt directory
