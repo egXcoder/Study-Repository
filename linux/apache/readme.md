@@ -258,6 +258,7 @@ SetHandler "proxy:unix:/run/php/php8.1-fpm.sock|fcgi://localhost"
 
 - `<VirtualHost *:443>` .. tells Apache: “Listen on all network interfaces (*) on port 443
 - `<VirtualHost 127.0.0.1:443>` .. tells apache: listen on loopback network interface
+- `Redirect permanent / https://your-domain.com/` .. redirect always to this
 - `ServerName example.com` .. This is the primary domain for this virtual host. When a browser requests https://example.com, Apache matches it to this block. if no host matches, then apache will fallback to the default host even if it doesnt match
 - `DocumentRoot /var/www/html` .. If someone visits https://example.com/index.html, Apache will look for /var/www/html/index.html
 - `Protocols h2 h2c http/1.1` .. use these protocols with ordered prioritiy
@@ -270,6 +271,30 @@ SetHandler "proxy:unix:/run/php/php8.1-fpm.sock|fcgi://localhost"
 - `AllowOverride None`: stop .htaccess overriding, if it exist in directoy
 - `Require all granted` .. Allows anyone (all clients) to access the files.
 - `Require all denied` .. reply back with 403 Forbidden
+
+
+## Redirect
+
+in command `Redirect permanent / https://your-domain.com/` if set in virtual host. its going to make virtual host to redirect to another location
+
+- Redirect permanent: 
+    - return with status code 301
+    - Permanent redirect (cached by browsers & search engines)
+    - When you know the redirect will never change
+
+- Redirect temp:
+    - return 302
+    - Temporary redirect (won’t be cached)
+    - When redirect might change later, or during testing
+
+- Redirect gone
+    - return 410
+    - Resource permanently removed
+    - For dead pages with no replacement
+
+- Redirect (without type)
+    - same as temp.
+
 
 
 
