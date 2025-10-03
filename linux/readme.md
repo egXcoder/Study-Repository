@@ -157,7 +157,8 @@ tar -xvf file.tar
 - `sudo groupadd webdev` add a group
 - `sudo usermod -aG webdev ahmed` .. add user to group .. -a append G group
 - `sudo usermod -aG webdev www-data` .. add user to group .. -a append G group
-- `sudo chown -R ahmed:webdev /var/www/html/news_fetcher` .. change owner to be ahmed and group to be webdev. then ahmed and apache both can reach the project files
+- `sudo chown -R ahmed:webdev /var/www/html/news_fetcher` .. change owner to be ahmed and group to be webdev. then ahmed and www-data both can reach the project files
+- `sudo chmod -R 2775 /var/www/html/news_fetcher` .. set gid bit to directories, then any new file/directory created within directory would inherit group from directory .. gid bit = 2
 - `sudo -u www-data touch /var/www/html/news_fetcher/storage/testfile` .. do something on behalf of other user
 
 
