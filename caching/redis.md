@@ -337,8 +337,50 @@ Redis provides a built-in Publish/Subscribe (Pub/Sub) messaging system that lets
             But if Server 1 publishes to Redis channel "chat:room1" and Servers 2 & 3 subscribe, all WebSocket servers redispatch the message to their connected clients. (so its mainly redis used from the websocket server)
 
     
-TODO:: redis stream for message queue
-        
+
+## Redis Databases
+
+In Redis, "databases" are not like traditional SQL databases. They’re more like logical namespaces or partitions within a single Redis instance.
+
+- A Redis instance can contain multiple numbered databases, e.g., DB 0, DB 1, DB 2, … (default is usually 0).
+- They don’t have names, only integer indexes.
+- They share the same memory and configuration, but data stored in one DB is isolated from others.
+- select a database by `SELECT 0   # or 1, 2, etc.`
+
+Q: Are Redis Databases Commonly Used?
+
+Not really in production. While Redis supports multiple databases, most users stick to a single database (DB 0) and instead separate data by key prefixes, like:
+
+
+✅ Best Practice
+Use a single Redis database and separate data using key prefixes.
+
+
+
+## Redis Clusters
+
+A Redis Cluster is a group of Redis servers (called nodes) that:
+
+ - Sharding (Data Distribution) : Automatically splits keys across multiple nodes, so you’re not limited by the memory of a single machine.
+
+ - High Availability: Each node has a replica (slave) — if a node fails, another takes over.
+
+ - Horizontal Scalability: You can add or remove nodes without downtime.
+
+ - No Single Point of Failure: Unlike standalone Redis, a cluster survives node failures.
+
+Sharding: 
+
+- Redis Cluster divides the key space into 16,384 hash slots.
+- Each master node is responsible for a range of hash slots.
+- When you set or get a key, Redis hashes the key and forwards it to the correct node.
+
+Key: "user:123" -> Hash -> Slot 8123 -> Node 2
+Key: "order:567" -> Hash -> Slot 12000 -> Node 4
+
+
+TODO:: this redis cluster will need practice at some point after we practice redis itself in a project
+
 
 ## Questions
 
@@ -347,4 +389,4 @@ Q: Can redis have two blocks where one is used for caching only and i dont want 
 
 
 
-TODO:: redis databases
+TODO:: redis stream for message queue
