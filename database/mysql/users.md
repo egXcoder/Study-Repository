@@ -1,14 +1,5 @@
-# mysql
+# Users
 
-
-- `apt install mysql-server` .. install
-- `sudo mysql_secure_installation` configure mysql by setting passwords etc..
-- `mysql -u root -p` by default root is allowed to login via auth_socket.. means you have to login in linux as root
-- `sudo mysql -u root -p` or login as root by sudo
-- if you want users to login to mysql with passwords. you may need to enable 
-
-
-## users
 - `SELECT User, Host, Plugin FROM mysql.user;` ... show list users with their auth plugins
 
     Auth Plugins:
@@ -44,8 +35,6 @@
 
             `CREATE USER 'sha2'@'localhost' IDENTIFIED WITH caching_sha2_password BY 'Testpass1#'; FLUSH PRIVILEGES;`
 
-    
-
 
     
 
@@ -53,17 +42,3 @@
     - `GRANT ALL PRIVILEGES ON *.* TO 'username'@'localhost';`
     - `GRANT SELECT, INSERT, UPDATE, DELETE ON mydb.* TO 'username'@'localhost';`
     - `FLUSH PRIVILEGES;` .. take the effect now by reload users and their permissions into memory
-
-
-
-
-## phpmyadmin
-- `apt install phpmyadmin` .. install phpmyadmin
-
-- create phpmyadmin user and give him all privilleagues
-```sql
-CREATE USER 'phpmyadmin'@'localhost' IDENTIFIED BY 'StrongPassword123!';
-GRANT ALL PRIVILEGES ON *.* TO 'phpmyadmin'@'localhost';
-FLUSH PRIVILEGES;
-EXIT;
-```
