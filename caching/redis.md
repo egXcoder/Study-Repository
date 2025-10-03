@@ -344,3 +344,7 @@ TODO:: redis stream for message queue
 
 Q: Can redis have two blocks where one is used for caching only and i dont want to bother to persist it and one is for session data where i need persistence?
 - You have to create two redis instance. each with its own configuration. each listen to a different port 
+
+
+
+TODO:: redis databases
