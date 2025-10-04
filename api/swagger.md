@@ -30,81 +30,86 @@ Swagger generates all of this automatically, usually from your backend code or a
 ## generating the open api files
 
 - there are multiple tools that can scan your code and auto generate the open api file for you
-    - both of below can scan annotations on controllers and generate open api file that you can preview and share
+    - L5-Swagger 
     - zircote/swagger-php
-    - L5-Swagger
 
+- on every controll method, we can put the documenation of this api .. get, post, patch, etc..
 
-Example:
+```php
+/**
+ * @OA\Get(
+ *     path="/api/users",
+ *     tags={"Users"},
+ *     summary="Get a list of users",
+ *     @OA\Response(
+ *         response=200,
+ *         description="Successful response",
+ *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/User"))
+ *     ),
+ *     @OA\Response(response=401, description="Unauthorized", @OA\JsonContent(ref="#/components/schemas/Error"))
+ * )
+ */
+```
+
+- you can define empty php file for global swagger annotation, you can put it in /app/Swagger/SwaggerAnnotations.php
 
 ```php
 
-<?php
-
-namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
-
 /**
- * @OA\Tag(
- *     name="Users",
- *     description="Operations related to users"
+ * @OA\Info(
+ *     title="My API",
+ *     version="1.0.0",
+ *     description="This is the API documentation for My API.",
+ *     @OA\Contact(
+ *         email="support@example.com"
+ *     ),
+ *     @OA\License(
+ *         name="MIT",
+ *         url="https://opensource.org/licenses/MIT"
+ *     )
  * )
  */
-class UserController extends Controller
-{
-    /**
-     * @OA\Get(
-     *     path="/api/users",
-     *     tags={"Users"},
-     *     summary="Get a list of users",
-     *     @OA\Response(
-     *         response=200,
-     *         description="Successful response",
-     *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/User"))
-     *     ),
-     *     @OA\Response(response=401, description="Unauthorized", @OA\JsonContent(ref="#/components/schemas/Error"))
-     * )
-     */
-    public function index(Request $request)
-    {
-        // Fetch users
-    }
 
-    /**
-     * @OA\Post(
-     *     path="/api/users",
-     *     tags={"Users"},
-     *     summary="Create a new user",
-     *     @OA\RequestBody(@OA\JsonContent(ref="#/components/schemas/UserCreate")),
-     *     @OA\Response(response=201, description="Created", @OA\JsonContent(ref="#/components/schemas/User")),
-     *     @OA\Response(response=400, description="Invalid input", @OA\JsonContent(ref="#/components/schemas/Error"))
-     * )
-     */
-    public function store(Request $request)
-    {
-        // Create user
-    }
+/**
+ * @OA\Schema(
+ *     schema="Article",
+ *     type="object",
+ *     title="Article",
+ *     required={"id", "title"},
+ *     @OA\Property(property="id", type="integer", example=1),
+ *     @OA\Property(property="title", type="string", example="News Title"),
+ *     @OA\Property(property="description", type="string", example="Content of the news article"),
+ *     @OA\Property(property="content", type="string", example="Full Content of the news article"),
+ * )
+ */
 
-    /**
-     * @OA\Get(
-     *     path="/api/users/{id}",
-     *     tags={"Users"},
-     *     summary="Get user by ID",
-     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="User details", @OA\JsonContent(ref="#/components/schemas/User")),
-     *     @OA\Response(response=404, description="User not found", @OA\JsonContent(ref="#/components/schemas/Error"))
-     * )
-     */
-    public function show($id)
-    {
-        // Fetch single user
-    }
-}
 
+/**
+ * @OA\SecurityScheme(
+ *     securityScheme="bearerAuth", 
+ *     type="http",
+ *     scheme="basic"
+ *     in="cookie",
+ *     name="laravel_session"
+ * )
+ */
 
 ```
 
+## Swagger Security Scheme
+- securityScheme
+    - name it whatever you want but has to match when you mention it on the api
 
+- type can be 
+    - http  .. Basic or Bearer (JWT) auth
+    - apikey .. Custom header, query, or cookie
+    - oauth2 .. OAuth2 flows
 
+- scheme="basic"
+    - basic: Authorization: Basic dXNlcjpwYXNz
+    - bearer: Authorization: Bearer dXNlcjpwYXNz
+    - digest: Authorization: Digest username="admin",...
 
+- in="header" | "query" | "cookie"
+
+- name: is the name of key like name of auth key in cookie which is laravel_session
