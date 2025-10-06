@@ -59,39 +59,6 @@ xRDP = the RDP server that Hyper-V Enhanced Session uses
 - `apt autoclean` .. removes only obsolete .deb files, Safer but frees less space.
 
 
-# incrase disk space
-`lsblk` .. the disk is 100 GB but the root partition (sda2) is still 50 GB.
-
-sda     8:0   0   100G  0 disk
-└─sda2  8:2   0    50G  0 part / 
-
-`parted /dev/sda` then after going there run `resizepart 2 100%` .. this will increase block size to take the remaining space
-
-`resize2fs /dev/sda1` .. this will grow file system for the partition to take block size
-
-Q: what if we didnt grow file system?
- - in this situation block will be bigger than file system, and you cant put data into the extra space unless file system grows
-
-Q: what is difference between block and file system
- - you can think of it block is the box that you can put data into it, but you have to file system to match
-
-Q: so what is the process to shrink partition?
- - its the opposite now, you have to shrink filesystem first, then shrink block
-
-Q: what if i tried to shrink block directly?
- - this can cause irrecoverable corruption and permanent data loss as you will have file system thinking its still big while block is already shrinked, so file system will try to read and write on places that doesnt exist
-
-Q: okay, but shouldnt linux stop that?
- - linux doesnt stop you, you have to know what you are doing
-
-Q: if i shrink file system, would that may cause data loss?
- - well, it might yes..
-
-Q: command to shrink?
- `resize2fs /dev/sda2 50G`
- `parted /dev/sda` then `resizepart 2 50GB`
-
-
 # Socket
 - A special file (not a regular text file) created by the kernel.
 - When Apache connects to /run/php/php8.1-fpm.sock, the kernel opens a socket connection to PHP-FPM.
@@ -157,8 +124,9 @@ tar -xvf file.tar
 - `sudo groupadd webdev` add a group
 - `sudo usermod -aG webdev ahmed` .. add user to group .. -a append G group
 - `sudo usermod -aG webdev www-data` .. add user to group .. -a append G group
-- `sudo chown -R ahmed:webdev /var/www/html/news_fetcher` .. change owner to be ahmed and group to be webdev. then ahmed and www-data both can reach the project files
-- `sudo chmod -R 2775 /var/www/html/news_fetcher` .. set gid bit to directories, then any new file/directory created within directory would inherit group from directory .. gid bit = 2
+- `sudo chown -R :webdev /var/www/html/laravel_project` .. change group owner to be webdev
+- `sudo chmod -R 2775 /var/www/html/laravel_project` .. set gid bit to directories, then any new file/directory created within directory would inherit group from directory .. gid bit = 2
+- `sudo chown -R ahmed:webdev /var/www/html/news_fetcher` .. change owner + group
 - `sudo -u www-data touch /var/www/html/news_fetcher/storage/testfile` .. do something on behalf of other user
 
 
