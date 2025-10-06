@@ -152,8 +152,8 @@ nginx        latest    1234abcd       3 days ago      187MB
     - run container in detached mode .. like run it in background
     - super practical for server containers like apache, nginx, redis etc...
 
-- `docker run -d --name mynginx --restart unless-stopped nginx` 
-    - run a container with name and auto restart if crashed unless its manually stopped
+- `docker run -d --name mynginx -e MYSQL_ROOT_PASSWORD=my-secret-pw nginx` 
+    - run a container with name and environment variable
 
 - `docker run -d -p 8080:80 httpd`
     - run apache container in detached mode
