@@ -268,6 +268,7 @@ run multi-container Docker applications using a single configuration file, typic
 Instead of running multiple docker run commands manually, you can declare your entire application stack—containers, networks, volumes, ports, and environment variables—in one file and start everything with a single command.
 
 - `docker-compose up` .. Build, (re)create, and start all services. Runs in foreground.
+- `docker-compose up --build` .. ReBuild Image..then up containers
 - `docker-compose down` .. Stop and remove containers, networks, and optionally volumes/images.
 - `docker-compose stop` .. Stop running containers but keep them.
 - `docker-compose start` .. Start existing stopped containers.
