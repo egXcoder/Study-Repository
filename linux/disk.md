@@ -6,7 +6,7 @@
 
 `print free` .. show partitions + free space
 
-`mkpart mydata ext4 32.2GB 100%%` .. make partition with name = mydata and fs = ext4 from 32.2GB and take rest 100% space
+`mkpart mydata ext4 32.2GB 100%` .. make partition with name = mydata and fs = ext4 from 32.2GB and take rest 100% space
 
 `rm 2` .. remove partition 2
 
