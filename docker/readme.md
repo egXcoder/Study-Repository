@@ -214,3 +214,104 @@ Cons:
 - Can break your container unexpectedly
 - New latest may introduce incompatible changes, new bugs, or updated dependencies
 - Hard to reproduce exact environment later
+
+
+
+## Dockerfile
+
+- A Dockerfile is used to set instructions of how to build image.
+- every image has only one CMD which will run when container runs..
+- its better to split your application to containers that work together than to gather everything in one container
+    - then you can upgrade or downgrade a specific component
+    - if one container fails you can replace it
+    - if all of services is in one image, it will be difficult to debug if something goes wrong or upgrade/downgrade if something goes wrong
+
+
+```dockerfile
+
+# 1. Base image
+FROM ubuntu:22.04
+
+# 2. Maintainer/author
+LABEL maintainer="ahmed@example.com"
+
+# Switch to root explicitly (optional if the base image is already root)
+USER root
+
+# 3. Environment variables
+ENV APP_HOME=/app
+
+# 4. Working directory .. directory you will be on while running commands
+WORKDIR $APP_HOME
+
+# 5. Copy files from host to container .. host current directory to specific location in docker
+COPY ./ /var/www/html
+
+# 6. Install dependencies
+RUN apt-get update && apt-get install -y python3 python3-pip
+
+# 7. Install Python packages
+RUN pip3 install -r requirements.txt
+
+# 8. Expose port (optional, for network access)
+EXPOSE 5000
+
+# 9. Command to run when container starts
+CMD ["python3", "app.py"]
+
+```
+
+## Docker compose
+
+run multi-container Docker applications using a single configuration file, typically called docker-compose.yml.
+
+Instead of running multiple docker run commands manually, you can declare your entire application stack—containers, networks, volumes, ports, and environment variables—in one file and start everything with a single command.
+
+- `docker-compose up` .. Build, (re)create, and start all services. Runs in foreground.
+- `docker-compose down` .. Stop and remove containers, networks, and optionally volumes/images.
+- `docker-compose stop` .. Stop running containers but keep them.
+- `docker-compose start` .. Start existing stopped containers.
+- `docker-compose restart` .. restart containers
+
+
+```yaml
+
+version: '3.9'  # Compose file version
+
+services:
+  web:
+    build: ./app      # Build from Dockerfile in ./app
+    ports:
+      - "5000:5000"   # Map host port 5000 to container port 5000
+    environment:
+      - APP_ENV=development
+    volumes:
+      - ./app:/app    # Mount local folder for live code updates
+    networks:
+      - net
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: mydb
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - net
+
+volumes:
+  db_data:
+    driver: local             # default, could use custom drivers
+    driver_opts:
+      o: bind                 # options for driver
+      device: /path/on/host   # bind mount location
+
+networks:
+  net:
+    driver: bridge
+
+```
