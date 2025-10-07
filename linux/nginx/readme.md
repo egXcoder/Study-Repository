@@ -365,7 +365,7 @@ large_client_header_buffers 4 8k;
 
 
 
-### What to use apache or nginx?
+### When To Use apache or nginx?
 
 ✅ Use NGINX if:
 - You’re serving static files, APIs, or reverse proxying to app servers (Node, PHP-FPM, etc.)
