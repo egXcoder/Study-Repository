@@ -184,6 +184,12 @@ nginx        latest    1234abcd       3 days ago      187MB
 - Periodically run
 
 ```bash
+#see what is taking space with docker
+docker system df
+
+# Remove everything not used
+docker system prune -a
+
 # Remove stopped containers
 docker container prune
 
@@ -193,8 +199,6 @@ docker image prune
 # Remove unused volumes
 docker volume prune
 
-# Remove everything not used
-docker system prune -a
 ```
 
 - Avoid latest → every pull may download new layers unnecessarily.
