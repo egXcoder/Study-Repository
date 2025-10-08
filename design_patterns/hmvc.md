@@ -99,8 +99,6 @@ hmvc isn’t something you need to use for every project — it’s a tool for s
 
 You would use HMVC when your application:
 
-- Wants reusable or pluggable modules
-- Has multiple distinct features/modules.
+- want to enable and disable modules per clients
+- you can split your application per module each has its own routes + screens + permissions + config
 - Needs clean separation of controllers, models, and views per modules
-- Might need optional modules or client-specific overrides.
-- Is expected to scale (multi-developer or multi-client).
