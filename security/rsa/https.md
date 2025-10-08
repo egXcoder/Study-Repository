@@ -28,7 +28,7 @@ To Add Entropy for uniqueness
 - on both end, tls specification provide HKDF (hash key deriving function) which takes (shared_key,client random,server random) and return the secret key which they are going to use for going forward encryption
 
 
-please notice:
+please Tip:
 - (p and g) are prime numbers hardcoded in tls specifications. so client and server agree them from the start
 - (1 RTT round trip time) is enough to have client and server can agree on the shared key 
 
