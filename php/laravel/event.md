@@ -3,13 +3,15 @@
 
 An Event in Laravel is a way for your app to say: “Hey, something just happened! Whoever cares, please react.”
 
+## Usage
 
-## When not to use it
+### When to use it
 - Use Laravel Events whenever you want to decouple side effects from core business logic
+- side effect it taking time, so it will be better to do it in background like sending email
 
 
-## When not to use it
-- The logic is part of the core process, not a side effect. e.g., validating payment amount, updating stock quantity — these are domain logic, not side effects.
+### When not to use it
+- The logic is part of the core process. e.g., validating payment amount, updating stock quantity — these are domain logic, not side effects.
 - If you fire an event only to call a single listener forever → just call that logic directly.
 - You need strict ordering or return values. Events don’t return values (they’re “fire-and-forget”).
 
