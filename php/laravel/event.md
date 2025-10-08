@@ -7,7 +7,7 @@ An Event in Laravel is a way for your app to say: “Hey, something just happene
 
 ### When to use it
 - Use Laravel Events whenever you want to decouple side effects from core business logic
-- side effect it taking time, so it will be better to do it in background like sending email
+- side effect it taking time, so it will be better to do it in background like sending email by queueing it
 
 
 ### When not to use it
