@@ -15,7 +15,7 @@ Purpose	Examples
 - Functions	mkcd() { mkdir $1 && cd $1; }
 - Startup Commands	fortune or clear when opening terminal
 
-notice:
+Tip:
 `source ~/.bashrc` you can reload your .bashrc without closing the terminal and open again 
 
 

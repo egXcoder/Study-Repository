@@ -67,7 +67,7 @@ SOLID shines not in small codebases, but in growing systems:
 ## 💡 Practical Trick
 
 Start with simple classes.  
-When you notice:  
+When you Tip:  
 - One class changes too often for different reasons, or  
 - You can’t unit test it without booting the whole system,  
 

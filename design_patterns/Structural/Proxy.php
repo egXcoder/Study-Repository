@@ -73,7 +73,7 @@ $image1->display(); // already loaded, just displays
 $image2->display(); // loads then displays
 
 
-// Notice: if you have multiple proxies,and it make sense to chain them then you can use chain of responsbility design patterns
+// Tip: if you have multiple proxies,and it make sense to chain them then you can use chain of responsbility design patterns
 // and you can use laravel pipelines to assist you with that
 //  Pipeline::send($request)
     // ->through([

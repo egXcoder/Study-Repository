@@ -61,7 +61,7 @@ Nginx has a concept similar to Apache’s a2ensite, but it’s not a built-in co
     - `nginx -t` .. test
     - `systemctl restart nginx` .. restart
 
-notice: ln -s .. paths should be explicit.. they cant be relative
+Tip: ln -s .. paths should be explicit.. they cant be relative
 
 #### Sites Examples:
 
@@ -154,7 +154,7 @@ server {
 
 ```
 
-notice: 
+Tip: 
     - i am forcing connection = 'upgrade' but its not doing anything unless uprade header = 'websocket'..
 
 
@@ -200,7 +200,7 @@ ways to distribute requests:
 - (ip_hash;) IP hash
 
 
-notice:
+Tip:
 - If you use NGINX Plus (Commercial), you get true active health checks:
     - It periodically sends custom HTTP requests (e.g. /health) to backends.
     - Marks nodes “up” or “down” based on responses.
@@ -248,7 +248,7 @@ http {
 ```
 
 
-notice: 
+Tip: 
 - configurations written in sites-enabled .. dont have to be surrounded http context, since its already surrounded in main config
 
 

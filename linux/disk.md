@@ -10,7 +10,7 @@
 
 `rm 2` .. remove partition 2
 
-Notice:
+Tip:
 - partitions and parted is different from file system.. parted is used to manage partition sizes.. but not really file system
     - making a new partition ext4 .. is just some hint added to partition meta dat that partition is intended to be ext4
     - print command will show you file system hinted in partition meta data

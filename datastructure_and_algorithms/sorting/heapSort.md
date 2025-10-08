@@ -28,7 +28,7 @@ Complexity:
     - Iterative heapify: O(1) auxiliary space.
     - Recursive heapify: O(log n) auxiliary space. like my example below
 
-Notice:
+Tip:
 - memory complexity measures maximum simultaneous extra memory, not the total number of allocations over time.
 - Even if the loop runs n times, at any moment you are holding just 1 temp, not n temps.
 Therefore, the extra memory is still O(1) (constant).

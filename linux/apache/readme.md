@@ -71,7 +71,7 @@ Result:
 - 100 max concurrent active requests Apache can handle overall
 
 
-Notice: every process in the 4 process, has by default one thread (listener thread) which listen for new connections, so actually each process has 26 thread
+Tip: every process in the 4 process, has by default one thread (listener thread) which listen for new connections, so actually each process has 26 thread
 
 
 

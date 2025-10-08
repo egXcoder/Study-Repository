@@ -25,7 +25,7 @@ Cohesion → how focused a class is internally.
 Coupling → how much modules rely on each other externally.
 👉 Good design aims for high cohesion (each class does one thing well) and low coupling (class don’t heavily depend on each other, they depend to contract/interface not concrete implementation or pass value as paramter instead of passing whole class).
 
-notice: high cohesion doesnt automatically lead to loose couple, they are two different dimensions and you should fight for both separately
+Tip: high cohesion doesnt automatically lead to loose couple, they are two different dimensions and you should fight for both separately
 
 
 ## Interfaces

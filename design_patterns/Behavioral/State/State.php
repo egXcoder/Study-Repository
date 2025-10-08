@@ -3,7 +3,7 @@
 // its idea is to encapsulate state-based behavior and delegate behavior to its current state
 
 
-//notice: applying the pattern can be overkill if a state machine has only a few states or rarely changes.
+//Tip: applying the pattern can be overkill if a state machine has only a few states or rarely changes.
 
 interface OrderState {
     public function pay(Order $order);

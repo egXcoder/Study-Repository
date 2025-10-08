@@ -29,7 +29,7 @@ class PlaceOrderCommand implements ShouldQueue {
 
 // in small projects, we can put the implemenation inside command (Fat Command) . its not adviced to do that though
 // as its violates SRP, also code now is not reusable if i want to place order from another place rather than queue
-// notice: Command is the Receiver in same time, so no explicit receiver here..
+// Tip: Command is the Receiver in same time, so no explicit receiver here..
 class PlaceOrderJob implements ShouldQueue {
     public function __construct(public int $orderId) {}
 

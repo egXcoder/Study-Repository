@@ -26,7 +26,7 @@ Dynamic Programming (DP) is a technique used to optimize recursion problems by r
     - check time complexity after memoization if memo[i][j][k] then it is O(m*n*k)
 
 
-notice: it can be approached from bottom up as well, using tabulation technique to build dp[state1][state2] and build dp[] till you reach your desired goal, but i like to think recursion as it is more obviouse
+Tip: it can be approached from bottom up as well, using tabulation technique to build dp[state1][state2] and build dp[] till you reach your desired goal, but i like to think recursion as it is more obviouse
 
 - Ex: Fibonacci Numbers 1,2,3,5,8,13,21,...
 
