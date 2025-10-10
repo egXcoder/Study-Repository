@@ -259,7 +259,7 @@ This means Laravel will use the default Redis connection (from config/database.p
 
 
 
-### Laravel Horizon
+## Laravel Horizon
 
 horizon has two jobs
 - Supervisor: Keeps track of your defined worker configurations (config/horizon.php). Starts and restarts workers automatically.
@@ -273,6 +273,11 @@ horizon has two jobs
 
 
 
+## Reserving Message
+
+when a message being read by queue it reserve it by filling reserved_at then no other workers can use it
+
+after worker done with the message, he can either delete it on success or release it by nulling reserved_at
 
 Q: if job is reserved and the worker crashed before releasing it, how long worker will take before retrying it?
 
@@ -290,3 +295,32 @@ retry_after is defined in your config/queue.php under redis/database
 ],
 ```
 
+Q: why for reserving, reserving is done by flagging reserved_at instead of select for update?
+
+- to be generic, because select for update is only for databases and even it differ from database to another
+
+- also select for update is blocking, which may affect performance 
+
+
+## Race Conditions
+
+if two processes are trying to get messages to process what if both of them select in same time, surely both they will get same job, so it will be handled twice?
+
+laravel handle this race condition
+
+### Get Jobs
+
+Worker A runs: `SELECT * FROM jobs WHERE reserved_at IS NULL LIMIT 1;`
+Worker B runs: `SELECT * FROM jobs WHERE reserved_at IS NULL LIMIT 1;`
+
+Both get job #1
+
+### Reserving
+
+Worker A try to reserve `UPDATE jobs SET reserved_at = NOW(), attempts = attempts + 1 WHERE id = 1 AND (reserved_at IS NULL OR reserved_at < NOW() - INTERVAL 60 SECOND)`
+
+Worker B try to reserve `UPDATE jobs SET reserved_at = NOW(), attempts = attempts + 1 WHERE id = 1 AND (reserved_at IS NULL OR reserved_at < NOW() - INTERVAL 60 SECOND)`
+
+Worker A success and will get back affected_rows=1, so it will process. worker B will get back affected_rows=0, so it will try to go and find another job
+
+Tip: Databases Update are atomic, once you try to update it locks till it finish. so these two queries are guranteed they won't race as of database locking and redis is atomic as well as its single threaded anyway
