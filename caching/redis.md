@@ -37,6 +37,15 @@ Redis has two main persistence options:
 - Sharding → Partition data across multiple Redis instances.
 - Redis Cluster → Automatic sharding and high availability.
 
+## Redis Data Structures
+
+Redis isn’t just strings. It supports multiple types:
+
+- String:  "name" => "Ahmed"
+- List: its like java deque ... "tasks" => ["task1", "task2"]
+- Hash Map: its like json but no nesting ... "user:1" => {name:"Ahmed",age:30}
+- Set: unique ... "tags" => {"php","redis","cache"}
+- Sorted Set with score for ordering ... "leaderboard" => {user1:100,user2:90}
 
 ## Install
 - `apt update && apt install redis-server` to install
@@ -72,14 +81,22 @@ Redis has two main persistence options:
     - `RPUSH tasks task1` .. add to right
     - `LPOP tasks task1` .. remove from left
     - `RPOP tasks task1` .. remove from right
-    - `GET tasks` .. will give error because GET only works with strings instead you can use lrange
     - `LRANGE tasks 0 -1`..  get all items
+    - `GET tasks` .. will give error because GET only works with strings instead you can use lrange
 
 - Sets (unique collections)
     - `SADD tags "php"` .. return 1
     - `SADD tags "redis"` .. return 1
     - `SADD tags "php"` ... return 0 as duplicate ignored
     - `SMEMBERS tags` ... get all
+    - `SREM tags "php"` .. remove from set
+
+- Sorted Sets (unique + ordered)
+    - `ZADD leaderboard 100 "Alice"` .. score = 100
+    - `ZADD leaderboard 250 "Bob"` ..
+    - `ZADD leaderboard 175 "Charlie"`
+    - `ZRANGE leaderboard 0 -1 WITHSCORES` ... get all ordered by score asc
+    - `ZREVRANGE leaderboard 0 -1 WITHSCORES` ... get all ordered by score desc
     - `SREM tags "php"` .. remove from set
 
 - Hashes (like hashmap with key value pair)
@@ -97,15 +114,7 @@ Redis has two main persistence options:
     - `FLUSHALL` .. get rid of everything in redis
 
 
-## Redis Data Structures
 
-Redis isn’t just strings. It supports multiple types:
-
-- String ... "name" => "Ahmed"
-- List Ordered collection of strings ... "tasks" => ["task1", "task2"]
-- Hash Map of fields for a key ... "user:1" => {name:"Ahmed",age:30}
-- Set Unordered unique elements ... "tags" => {"php","redis","cache"}
-- Sorted Set with score for ordering ... "leaderboard" => {user1:100,user2:90}
 
 
 ## Protecting Server Memory
