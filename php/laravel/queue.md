@@ -229,7 +229,7 @@ This means Laravel will use the default Redis connection (from config/database.p
 
 - you use the typical laravel jobs, event listeners etc... nothing changed
 
-- behind the scene, laravel add a key in redis called laravel_database_queues:default which is type list and every entry will be json encoded data
+- behind the scene, laravel add a key in redis called laravel_database_queues:default which is type list and every entry will be json encoded data and this is queue where worker will read from to process
 
 ```json
 {
@@ -251,11 +251,11 @@ This means Laravel will use the default Redis connection (from config/database.p
 
 ```
 
-- when processing it moves the processor into laravel_database_queues:default:reserved and its type of sorted set
+- if you try to add a job with delay, it will be added to a sorted set called laravel_database_queues:default:delayed .. then it can use the score feature to quickly lookup what are the jobs that are ready now and can be processed. and if it finds jobs it will move them to the default list queue
 
-- when job fails, it doesnt move to failed jobs in redis.. instead its sent to database .. its separately configured in config/queue.php on failed section and this because Laravel’s failed job mechanism is meant for persistent storage and easy inspection.
+- when processing it moves the processor into laravel_database_queues:default:reserved and its type of sorted set .. laravel uses reserved_at + timeout as the score .. then it can quickly query redis for expired or to retry jobs with O(1)
 
-- laravel doesnt provide failed jobs in redis out of the box. only databases
+- when job fails, it doesnt move to failed jobs in redis.. instead it send them to database .. its separately configured in config/queue.php on failed section and this because Laravel’s failed job mechanism is meant for persistent storage and easy inspection. and laravel doesnt provide failed jobs in redis out of the box. only databases
 
 
 
