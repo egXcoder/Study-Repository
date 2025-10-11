@@ -89,3 +89,52 @@ Since connection is held in a process and you can run threads in same time to se
 - Worker MPM: A worker thread stays stuck as long as the connection is open (even if idle).
 - Event MPM: The worker thread is released after finishing the request. The event loop continues watching the idle connection.
   - If the client sends another request, a worker thread is reassigned.
+
+
+
+
+## PHP-FPM
+
+apache or nginx receive the request, and if it find the request want to request .php then it would send the request to fpm for execution
+
+
+- PHP-FPM uses processes, not threads.
+- every php execution is a new process
+
+
+
+### Didnt you mention the problem with prefork is process based and this was the bottleneck?
+
+yes, it does have same problem as prefork in terms of memory issue
+- Each PHP-FPM execution is a full process, not a thread.
+- Each execution consumes tens of MBs (30–50 MB or more depending on extensions and scripts).
+- Under heavy PHP traffic, memory usage can grow quickly.
+- bottleneck is not eliminated, but shifted and reduced:
+
+
+but, its much better compared with what prefork was doing
+- in prefork every request was a process. even if its asking for static files but in fpm its only php execution which is a process
+- in prefork keep alive connection was holding a process. but in fpm its only php execution which is a process
+
+## Issues
+
+i can see two major issues with php-fpm that can be squeezed more if going for more performance
+
+### Duplicate Work And Memory
+every php execution has to boot up everything (classes autoload + configs + etc..) for every execution = (duplicate work) + (duplicate memory)
+
+Trials To Solve this is by 
+- Swoole
+- Road Runner
+- Laravel Octane
+
+Problem here is that all php world have been building applications + packages .. 
+assuming every execution = things will load up from scratch + execution ..
+
+now if you say i want the loadedup to maintain .. what happens if a package store something globally in static variable or in a singleton thinking its just per execution .. because now with the new model your state will be globally shared with other executions as well.. which is very different model
+
+
+### I/O work
+when php is executing and it faces expensive i/o operation like slow query or slow api call.. process will stay there with its memory usage just stuck for the i/o to finish .. on a performance wise you dont want to keep waiting for i/o to finish and do something else till this i/o finish and this is something php doesnt support out of the box
+
+nodejs nature is better here or you have to go with nodejs nature in php using some tools like reactphp
