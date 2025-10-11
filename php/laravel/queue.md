@@ -203,6 +203,42 @@ class SendOrderEmail implements ShouldQueue
 
 ```
 
+## Priority Queue
+
+Problem here.. you may have like 1000 email in the queue, while you have other background tasks which is more important.. but because its all on queue you have to wait for 1000 email to be sent for your other background task to be processed..
+
+
+Laravel doesn’t assign a priority number directly to jobs.
+
+
+Dispatching Jobs to Different Queues
+
+```php
+SendEmailJob::dispatch($user)->onQueue('high');
+
+//or inside job
+
+class SendEmailJob implements ShouldQueue
+{
+    public $queue = 'high';
+}
+```
+
+Process Queues
+
+- `php artisan queue:work --queue=high,low` .. Worker will always check high first. If high is empty, it will process low.
+
+- you can work them separately
+    - `php artisan queue:work --queue=high --sleep=0 --tries=3`
+    - `php artisan queue:work --queue=low --sleep=5 --tries=1`
+
+
+👉 So, Laravel priority queues = multiple queues + ordered workers.
+There’s no “priority=10 vs priority=5” built-in — you achieve it by structuring queues.
+
+
+Tip: --sleep .. refer to if queue worker find queue empty.. then sleep for sometime before try again.. it helps a little then you dont hammer the queue if queue is empty
+
 
 ## can i use redis for queue?
 
@@ -324,3 +360,5 @@ Worker B try to reserve `UPDATE jobs SET reserved_at = NOW(), attempts = attempt
 Worker A success and will get back affected_rows=1, so it will process. worker B will get back affected_rows=0, so it will try to go and find another job
 
 Tip: Databases Update are atomic, once you try to update it locks till it finish. so these two queries are guranteed they won't race as of database locking and redis is atomic as well as its single threaded anyway
+
+
