@@ -1,10 +1,18 @@
 <?php
 
+// Q: so what is the problem with singelton in multi-threading environment?
+// if thread A calls ::getInstance() .. this is going to create an instance in heap and will start to use it
+// if thread B calls ::getInstance() in same time.. it will create another instance and it will override the static variable 
+// with the new object, so you may have two different objects which destroy the core idea of singeleton 
+
+
 //Q: How to handle multi threading with a singleton pattern?
 // Eager Initialization (Thread-Safe by Default)
-// Lazy Initialization (with Synchronization) Only create the instance when first needed, but wrap the creation in a lock.
+// Lazy Initialization (Thread-Safe only by locking)
 
-//eager
+
+
+//eager (thread safe by default)
 class Singleton {
     private static Singleton $instance = new Singleton();
 
@@ -15,7 +23,7 @@ class Singleton {
     }
 }
 
-//Lazy
+//Lazy (thread safe by locking)
 class Singleton {
     private static Singleton $instance = null;
 
@@ -33,25 +41,6 @@ class Singleton {
         return self::$instance;
     }
 }
-
-//Lazy in java
-public class Singleton {
-    private static volatile Singleton instance;
-
-    private Singleton() {}
-
-    public static Singleton getInstance() {
-        if (instance == null) {  // first check
-            synchronized (Singleton.class) {
-                if (instance == null) {  // second check
-                    instance = new Singleton();
-                }
-            }
-        }
-        return instance;
-    }
-}
-
 
 
 //Q: is syncornize instantation solves all singelton problems?
@@ -77,31 +66,3 @@ public class Singleton {
 // if you are using event worker + PHP-FPM ... PHP-FPM is doing one process one request way, so you should be using NTS PHP Version
 
 //If you used event worker + mod_php + PHP NTS (this is a danger zone) .. you shouldnt typically do that, as this will give you alot of problems every where
-
-
-//Q: what is PHP-FPM?
-// within event worker there are processes and each process can hold many requests, but apache is sending the request to PHP-FPM
-// Since PHP-FPM uses processes, not threads, it can use Non-Thread Safe PHP (faster). 
-// PHP-FPM itself is one request 
-
-// PHP-FPM is standalone service that runs on your server, managing a pool of PHP worker processes.
-
-// Why it exists
-// Old way: mod_php — PHP runs inside Apache processes/threads.
-// Tied to Apache’s process model (prefork, worker, event).
-// Not flexible.
-
-// Modern way: PHP-FPM — a daemon that only runs PHP code.
-// Web server just acts as a proxy.
-// More scalable, flexible, secure.
-
-
-// How it works
-
-// Apache (event MPM) or Nginx receives an HTTP request.
-// If the request is for a .php file, Apache forwards it to PHP-FPM using FastCGI protocol.
-// PHP-FPM:
-// Picks an idle worker process from its pool.
-// Runs the PHP script inside that process.
-// Returns the output (HTML/JSON/etc.) back to Apache.
-// Apache sends the result to the browser.

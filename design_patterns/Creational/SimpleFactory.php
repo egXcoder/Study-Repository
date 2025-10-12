@@ -1,6 +1,6 @@
 <?php
 
-//simple factory .. one factory with switch condition
+//create one product by one factory using logic
 
 class PaymentFactory {
     public static function create(string $type): PaymentGateway {
