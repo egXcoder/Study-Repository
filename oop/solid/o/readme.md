@@ -36,5 +36,5 @@ You modify a closed class for reasons that are not about adding new behaviour:
 
 ## ✅ In Short
 
-OCP makes your codebase **future-proof**.  
-Instead of editing code, you can **plug in new behaviors like Lego blocks**.
+OCP makes your codebase future-proof.  
+Instead of editing code, you can plug in new behaviors like Lego blocks.

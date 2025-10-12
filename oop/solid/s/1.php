@@ -4,6 +4,8 @@
 // This controller has too many responsibilities: validation, persistence, email sending, logging.
 // laravel controllers has only one responsibility is to receive request and return response but handling the request should be
 // responsibility of other classes
+// 
+//Tip: its acceptable in small projects till it become complex then you have to separate concerns
 class UserController extends Controller
 {
     public function store(Request $request)
