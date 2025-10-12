@@ -2,9 +2,9 @@
 
 ## Abstraction: 
 
-its more about generalization .. moving from the specific to the general, from the concrete to the abstract. It's finding the common, essential characteristics shared by a group of things and forming a broader category.
+be generic as possible .. moving from the specific to the general, from the concrete to the abstract. It's finding the common, essential characteristics shared by a group of things and forming a broader category.
 
-- Concrete Instance: You, with your name, age, and specific skills
+- Concrete Instance: Ahmed
 - Abstraction Level 1: Web Developer (ignores your name, focuses on your profession)
 - Abstraction Level 2: Developer (ignores your web-specific skills, focuses on general coding ability)
 - Abstraction Level 3: Person (ignores your profession, focuses on human traits)
@@ -27,13 +27,13 @@ for example Notification interface, it can be EmailNotification, SMSNotification
 
 ## Inheritance: 
 
-its one way to do polymorphism through parent and child classes relationship, child has to respect same parent expectations (Liskov substition principle)
+Reuse Code by creating child classes from parent class .. child has to respect parent contract (Liskov substition principle)
 
 
 ## Encapsulation:
-bundling data and methods into class and restricting direct access to some parts of it. and only expose what make sense for the outside world ..
+Restricting direct access to properties and methods within classes. and only expose what make sense for the outside world ..
 
-example, mobile phone has cpu chips and audio chips and camera sensors all of it is defined inside mobile phone class but defined as private and the only exposed some behaviours like requestCamera or startApplication .. but how that is done internally the outside world shouldnt able to know and he shouldnt be able to touch it
+example, mobile phone has cpu/audio chips and camera sensors all of it is defined inside mobile phone class but defined as private and the only exposed some behaviours like requestCamera or startApplication .. but how that is done internally the outside world shouldnt able to know and he shouldnt be able to touch it
 
 always start declaration as private ... 
 make it protected if you think it maybe overrided .. 

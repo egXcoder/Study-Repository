@@ -19,6 +19,20 @@ Use the three objects to build a cake
 Procedural way is quicker and straight forward, but oop way is far better in the future because of code reusability, using the oop way i can build pie using pan and mixer and oven
 
 
+## APIE 
+
+its considered the foundation concepts in oop (Abstraction .. Polymorphism .. Inheritance .. Encapsulation)
+
+## SOLID 
+
+These are 5 guidelines for designing maintainable OOP systems:
+- Single Responsibility
+- Open/Closed Principle
+- Liskov Substitution
+- Interface Segregation
+- Dependency Inversion
+
+
 ## Cohesion vs Coupling
 
 Cohesion → how focused a class is internally.
