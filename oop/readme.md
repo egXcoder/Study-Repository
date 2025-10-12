@@ -23,6 +23,17 @@ Procedural way is quicker and straight forward, but oop way is far better in the
 
 its considered the foundation concepts in oop (Abstraction .. Polymorphism .. Inheritance .. Encapsulation)
 
+## Composition Over Inheritance
+
+oop encourage modularity. hence composition. unless inheritance is short then its fine but if to grow then have to refactor it to composition.
+
+## Identity And State
+
+- identity is who the object is (unique reference, doesn’t change)
+- state is what the object currently knows/contains (changes over time).
+- Behavior often depends on state
+
+
 ## SOLID 
 
 These are 5 guidelines for designing maintainable OOP systems:

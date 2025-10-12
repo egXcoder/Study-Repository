@@ -41,11 +41,7 @@ Inheritance is good thought till some point where you start to rely on it more, 
 
 building behavior by combining smaller, independent object.
 
-OOP in principle encourage modularity. where every part exists separately then you can
-- each part has its job (SRP)
-- easily maintain the class (OCP)
-- easily test the class (OCP)
-- combine these parts to do what you want will give you flexibility
+OOP in principle encourage modularity. where every part exists separately then you can break big systems into smaller, reusable, testable parts. so by nature oop encourage composition more
 
 
 ```php
