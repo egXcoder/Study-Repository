@@ -19,6 +19,13 @@ Tip:
 `source ~/.bashrc` you can reload your .bashrc without closing the terminal and open again 
 
 
+### Environment variables setting
+
+export PATH="$PATH:$HOME/.composer/vendor/bin"
+
+
+
 ## append to file
+
 
 echo 'export PATH=$PATH:/opt/jmeter/bin' >> ~/.bashrc
