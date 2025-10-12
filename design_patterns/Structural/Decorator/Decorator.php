@@ -115,6 +115,40 @@ $coffee3 = new SugarDecorator(
 );
 
 
+//Q: Decorator seems complex in its structure, should we use it?
+// well, if you can use more simpler way like composite pattern then do it, but if you really need decorator then you have to
+class CompositeCoffee implements Coffee{
+    private $coffees = [];
+    public function __construct(array $coffees)
+    {
+        $this->coffees = $coffees;
+    }
+
+    public function getCost():float{
+        $c = 0;
+        foreach($this->coffees as $coffee){
+            $c += $coffee->getCost();
+        }
+        return $c;
+    }
+
+    public function getDescription():string{
+        $d = 0;
+        foreach($this->coffees as $coffee){
+            $d .= $coffee->getDescription();
+        }
+        return $d;
+    }
+}
+
+$c = new CompositeCoffee([new SimpleCoffee,new MilkCoffee, new VaniliaCofee]);
+$c->getCost();
+
+
+
+
+
+
 
 //Q: Decorator works in layers, object inside object inside object, same as COR.. so what is the difference?
 
