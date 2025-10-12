@@ -6,24 +6,15 @@
 
 //Family Of Remotes ----------Bridge -------- Family Of Devices
 
-// remote will hold reference of device contract
+//Abstraction: the high-level interface that clients use and it will compose contract of implemenator
+//Implementor : Defines the low-level interface (platform-specific operations)
+
+
+// remote will compose reference of device contract
 // any remote will able to work on any device and thats the power of it
 // basic remote can be used for device 1, device 2, device 3 doesnt matter
 // advanced remote can be used for device 1, device 2, device 3 doesnt matter
 
-
-//Abstraction: the high-level interface that clients use (Remote)
-//Implementor : Defines the low-level interface (platform-specific operations) (Device)
-
-
-// ❓ Does the client have to use only the Abstraction? Or can it use the Implementor directly?
-
-// ✅ In a properly applied Bridge Pattern:
-// The client is supposed to interact only with the Abstraction, not the Implementor directly.
-
-// If the client talks directly to the Implementor (Device), then:
-// ❌ You defeat the purpose of the bridge
-// ❌ You tie the client to a specific implementation — which means no true independence between abstraction and implementation
 
 
 abstract class RemoteControl {

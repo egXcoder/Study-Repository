@@ -1,8 +1,8 @@
 <?php
 
 
-//Adapter: Converts Adaptee to Target by implementing Target and wrapping Adaptee
-//Adaptee: The existing/legacy/incompatible class you want to reuse
+//Adapter: Wrapper on legacy class 
+//Adaptee: legacy class you want to reuse
 //Target: The interface expected by the client
 
 
