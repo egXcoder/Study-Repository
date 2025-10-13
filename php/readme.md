@@ -1,7 +1,12 @@
 # PHP
 
-- `php -m` get php modules
-- `sudo apt install php8.1-mysql php8.1-mbstring php8.1-curl` .. install php modules
+
+## install any php extenstion
+- `apt install php8.1-curl`
+- `apt install php8.1-mysql`
+- `php -m`
+
+## enable/disable php extensions
 - `phpenmod curl` enable curl module
 - `phpdismod curl` disable curl module
 
