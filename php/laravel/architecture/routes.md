@@ -4,7 +4,7 @@
 Routing is one of the core concepts in Laravel — it’s how you tell your app what to do when someone visits a URL.
 
 
-## Returning a view:
+### Returning a view:
 
 ```php
 Route::get('/about', function () {
@@ -14,7 +14,7 @@ Route::get('/about', function () {
 
 This looks for resources/views/about.blade.php.
 
-## Using Controller
+### Using Controller
 
 ```php
 
@@ -25,7 +25,7 @@ Route::get('/contact', [ContactController::class, 'index']);
 Route::get('/contact', 'ContactController@index');
 ```
 
-## Parameters
+### Parameters
 
 ```php
 
@@ -41,7 +41,7 @@ Route::get('/users/{name?}', function ($name = 'Guest') {
 
 ```
 
-## Eloquent Auto Binding
+### Eloquent Auto Binding
 
 ```php
 
@@ -57,7 +57,7 @@ Route::get('/posts/{post:slug}', [PostController::class, 'show']);
 ```
 
 
-## Naming
+### Naming
 
 ```php
 
@@ -67,7 +67,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard
 // <a href="{{ route('dashboard') }}">Go to Dashboard</a>
 ```
 
-## Groups
+### Groups
 
 ```php
 
@@ -91,7 +91,7 @@ Route::controller(PostController::class)->prefix('posts')->group(function () {
 ```
 
 
-## Resources
+### Resources
 
 ```php
 
