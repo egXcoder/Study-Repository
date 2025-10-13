@@ -31,4 +31,32 @@ FNM = Fast Node Manager
     
     Tip: when you change nodejs version.. npm version auto switch to compatible version .. in practice → installing Node gives you npm by default as nodejs bundled with npm, so most people treat them as a pair.
 
-    
+
+
+
+## NPM Vs NPX
+
+- npm = Node Package Manager. It’s used to install and manage packages globally or locally in your project.
+
+    ```bash
+    # install a package
+    npm install lodash
+
+    # install a package globally
+    npm install -g typescript
+    ```
+
+    After installing, you can run the command from your node_modules/.bin or globally if you used -g.
+
+
+- npx = Node Package execute .. It comes bundled with npm .. run Node packages without installing them globally.
+    ```bash
+
+    # run a package without global install .. It downloads and executes the package (using cache for next time).
+    npx create-react-app myapp
+
+    # run a locally installed binary from node_modules/.bin
+    npx vite build
+
+    ```
+
