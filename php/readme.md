@@ -7,3 +7,6 @@
 ## composer
 - `composer install` .. install packages exact versions in composer.lock
 - `composer update` .. install packages and update to latest version allowed
+
+
+### Composer Require vs 
