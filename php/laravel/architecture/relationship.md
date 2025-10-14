@@ -120,3 +120,95 @@ class Course extends Model{
 //if you dont pass pivot table .. it will assume cart_course as by convention
 
 ```
+
+
+### Attach One Eloquent To the other using relationship
+
+- One To One
+```php
+class User extends Model {
+    public function profile() {
+        return $this->hasOne(Profile::class);
+    }
+}
+
+class Profile extends Model {
+    public function user() {
+        return $this->belongsTo(User::class);
+    }
+}
+
+$user = User::find(1);
+$user->profile()->create(['bio' => 'Hello']);
+$user->profile()->update(['firstname' => 'Ahmed']); 
+
+
+$profile->user()->associate($user)->save(); // you have to call save to persist association
+$profile->user()->dissociate()->save();
+```
+
+- One To Many
+```php
+
+class Post extends Model {
+    public function comments() {
+        return $this->hasMany(Comment::class);
+    }
+}
+class Comment extends Model {
+    public function post() {
+        return $this->belongsTo(Post::class);
+    }
+}
+
+
+$post = Post::find(1);
+$post->comments()->create(['body' => 'Great post!']);
+$post->comments()->createMany([
+    ['body' => 'First comment'],
+    ['body' => 'Second comment'],
+]);
+
+
+$comment->post()->associate($post)->save(); // you have to call save to persist association
+$comment->post()->disssociate()->save();
+```
+
+- Many to Many
+
+```php
+class User extends Model {
+    public function roles() {
+        return $this->belongsToMany(Role::class);
+    }
+}
+class Role extends Model {
+    public function users() {
+        return $this->belongsToMany(User::class);
+    }
+}
+
+
+$user = User::find(1);
+
+//Attaching (adding record to database to pivot table if its already there then add it again)
+$user->roles()->attach($role->id); // attach one
+$user->roles()->attach($role); // attach one
+$user->roles()->attach([1, 2, 3]); // attach multiple roles with ids 1,2,3
+$user->roles()->attach(2, ['expires_at' => now()->addDays(30)]); // attach with extra pivot data
+
+//detaching (if exists multiple times then it will remove them all)
+$user->roles()->detach($role->id); 
+$user->roles()->detach($role); 
+
+// Sync (replace existing with new):
+$user->roles()->sync([1, 3]); 
+
+// User currently has roles [1, 2, 3]
+$user->roles()->sync([2, 4]); //this will make sure database has only 2,4 and remove otherwise
+
+
+// User currently has roles [1, 2, 3]
+$user->roles()->syncWithoutDetach([2, 4]); //user now will have 1,2,3,4
+
+```
