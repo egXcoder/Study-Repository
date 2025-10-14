@@ -177,38 +177,35 @@ $comment->post()->disssociate()->save();
 - Many to Many
 
 ```php
-class User extends Model {
-    public function roles() {
-        return $this->belongsToMany(Role::class);
+class Cart extends Model {
+    public function courses() {
+        return $this->belongsToMany(Course::class);
     }
 }
-class Role extends Model {
+
+class Course extends Model {
     public function users() {
-        return $this->belongsToMany(User::class);
+        return $this->belongsToMany(Cart::class);
     }
 }
 
 
-$user = User::find(1);
+$cart = Cart::find(1);
 
 //Attaching (adding record to database to pivot table if its already there then add it again)
-$user->roles()->attach($role->id); // attach one
-$user->roles()->attach($role); // attach one
-$user->roles()->attach([1, 2, 3]); // attach multiple roles with ids 1,2,3
-$user->roles()->attach(2, ['expires_at' => now()->addDays(30)]); // attach with extra pivot data
+$cart->courses()->attach($course); // attach one
+$cart->courses()->attach($course->id); // attach one
+$cart->courses()->attach([1, 2, 3]); // attach multiple courses with ids 1,2,3
+$cart->courses()->attach(2, ['expires_at' => now()->addDays(30)]); // attach with extra pivot data
 
 //detaching (if exists multiple times then it will remove them all)
-$user->roles()->detach($role->id); 
-$user->roles()->detach($role); 
+$cart->courses()->detach($course);
+$cart->courses()->detach($course->id); 
 
-// Sync (replace existing with new):
-$user->roles()->sync([1, 3]); 
+// User currently has courses [1, 2, 3]
+$cart->courses()->sync([2, 4]); //this will make sure database has only 2,4 and remove otherwise
 
-// User currently has roles [1, 2, 3]
-$user->roles()->sync([2, 4]); //this will make sure database has only 2,4 and remove otherwise
-
-
-// User currently has roles [1, 2, 3]
-$user->roles()->syncWithoutDetach([2, 4]); //user now will have 1,2,3,4
+// User currently has courses [1, 2, 3]
+$cart->courses()->syncWithoutDetach([2, 4]); //user now will have 1,2,3,4
 
 ```
