@@ -222,3 +222,19 @@ class EventServiceProvider extends ServiceProvider
 }
 
 ```
+
+
+### Session in service providers
+
+- Service providers boot very early in the request lifecycle. before session starts
+    - so if you call session()->getId() in service provider, Laravel doesn’t have a session loaded → it will generate a fresh one.
+
+- Session is normally started by middleware
+    - Specifically, \Illuminate\Session\Middleware\StartSession.
+    - That middleware runs after all service providers have already booted.
+    - By the time your controller or view runs, the session is active and stable.
+
+- when you ask for session()->getId() early .. laravel do strange thing
+    - it create in memory a session store and give it an id and let you use session
+    - at this step, nothing is persistent no cookie, no files nothing.. just in memory
+    - when middleware run, it would take the accurate id from cookie and replace the temp id
