@@ -123,9 +123,15 @@ Q: while putting keys and values into redis, how can i gurantee i am not going t
 
 Redis stores everything in RAM, so if you’re not careful, you can crash or slow down your server by filling up memory. Luckily, Redis provides built-in mechanisms to protect against this.
 
-- within /etc/redis/redis.conf
-    - `maxmemory 1GB` Set a Maximum Memory Limit 
-    - `maxmemory-policy <policy>` What redis will do if exceeds set maximum memory limit
+Always Set TTL for Cache-like Data (This ensures old data auto-expires and prevents buildup.)
+- `SET user_cache:123 "data" EX 300` ...   # expires in 5 mins 
+
+Within /etc/redis/redis.conf
+
+```redis
+maxmemory 1GB #Set a Maximum Memory Limit 
+maxmemory-policy <policy> #What redis will do if exceeds set maximum memory limit
+```
 
 - Common policies
     - noeviction (default) .. Rejects new writes when memory is full .. good for Persistent data only
@@ -133,10 +139,6 @@ Redis stores everything in RAM, so if you’re not careful, you can crash or slo
     - volatile-lru .. Remove least-recently-used keys (keys with ttl) .. good for Cache with explicit expirations
     - allkeys-random .. Remove random keys when full .. good for Simple cache
     - volatile-ttl .. Remove keys that will expire soonest .. good for Time-based cache
-
-- Always Set TTL for Cache-like Data (This ensures old data auto-expires and prevents buildup.)
-    - `SET user_cache:123 "data" EX 300` ...   # expires in 5 mins 
-
 
 - Best Practice Setup 
     - If you're using Redis as a cache, the best configuration is:
@@ -147,7 +149,7 @@ Redis stores everything in RAM, so if you’re not careful, you can crash or slo
         - maxmemory 1gb
         - maxmemory-policy noeviction
 
-Q: in a website, where bottle necks are queries that is not repeated, like searching.. is redis can be applied to it. or for such queries redis is difficult to optimize anything?
+Q: if bottlenecks are queries that is not repeated, like searching.. is redis can be applied to it?
 - Redis is excellent for repeated or predictable lookups.
 - But for one-off, highly dynamic search queries, Redis is usually not the right tool for acceleration.
 
@@ -179,28 +181,28 @@ When Not to Use Redis for Sessions?
     - Then MySQL/Postgres sessions are perfectly fine.
 
 ## Enable Redis Presistence
-- RDB (Snapshotting), the best configuration is:
-    - configuration within redis.conf
-    ```nginx 
-    save 900 1  # If at least 1 key was modified in the last 900 seconds (15 mins) → Take an RDB snapshot
-    save 300 10  # If 10 or more keys changed within 5 minutes → Take a snapshot
-    save 60 10000  # If 10,000+ keys changed within 1 minute → Take a snapshot quickly
-    ```
-    - Why Multiple Conditions?
-        - It gives Redis flexibility:
-            - If only a few changes happened → wait longer before saving.
-            - If many changes happen fast → save sooner to avoid losing too much data.
+RDB (Snapshotting), the best configuration is:
+- configuration within redis.conf
+```nginx 
+save 900 1  # If at least 1 key was modified in the last 900 seconds (15 mins) → Take an RDB snapshot
+save 300 10  # If 10 or more keys changed within 5 minutes → Take a snapshot
+save 60 10000  # If 10,000+ keys changed within 1 minute → Take a snapshot quickly
+```
+- Why Multiple Conditions?
+    - It gives Redis flexibility:
+        - If only a few changes happened → wait longer before saving.
+        - If many changes happen fast → save sooner to avoid losing too much data.
 
-- AOF (Append-Only File):
-    - configuration within redis.conf
-    ```nginx 
-    appendonly yes        # Enables AOF persistence
-    appendfsync everysec  # Balanced performance + durability
-    ```
-    - appendfsync mode
-        - always: Write every command to disk immediately .. slowest but safest
-        - everysec: Flush to disk every second .. Recommended
-        - no : Let OS decide .. Fastest but less safe
+AOF (Append-Only File):
+- configuration within redis.conf
+```nginx 
+appendonly yes        # Enables AOF persistence
+appendfsync everysec  # Balanced performance + durability
+```
+- appendfsync mode
+    - always: Write every command to disk immediately .. slowest but safest
+    - everysec: Flush to disk every second .. Recommended
+    - no : Let OS decide .. Fastest but less safe
 
 - Best Practices
     - Cache-only (data can be lost on restart)                     .. ❌RDB   ❌AOF
@@ -253,9 +255,7 @@ But Redis does have built-in mechanisms to shrink (rewrite) it automatically, if
 
 ## Redis transaction
 
-- Yes — Redis supports transactions using MULTI, EXEC with atomic execution.
-- However, it's NOT like SQL — there's no rollback on failure.
-- All commands inside MULTI ... EXEC run sequentially and atomically — no other client can run commands in between.
+Yes — Redis supports transactions using MULTI, EXEC with atomic execution. However, it's NOT like SQL — there's no rollback on failure. All commands inside MULTI ... EXEC run sequentially and atomically — no other client can run commands in between.
 
 ```nginx
 MULTI
@@ -278,83 +278,79 @@ DISCARD # Cancel Transaction
 
 Redis provides a built-in Publish/Subscribe (Pub/Sub) messaging system that lets one or more clients publish messages to channels, while other clients subscribe to those channels to receive them in real-time.
 
-- basics
-    - Subscriber → Listens for messages from one or more channels.
-    - Publisher → Sends messages to a channel.
-    - Redis delivers the message instantly to all active subscribers.
+basics
+- Publisher → Sends messages to a channel.
+- Subscriber → Listens for messages from one or more channels.
+- if no online subscribers then message is missed. and no way to see it again
 
-- commands
-    - `subscribe news` subscribe to a channel called news (listen to channel news)
-    - `subscribe news jobs` subscribe to two channels in same time
-    - `publish news "hello"` publish a message "hello" into news channel
-    - `PUBSUB CHANNELS` show active channels which has online listeners, once listeners disconnected channels will disappear
-    - `PUBSUB NUMSUB news` how many listeners to news channels
+commands
+- `subscribe news` subscribe to a channel called news (listen to channel news)
+- `publish news "hello"` publish a message "hello" into news channel
+- `PUBSUB CHANNELS` show active channels which has online listeners, once listeners disconnected channels will disappear
+- `PUBSUB NUMSUB news` how many listeners to news channels
+- `subscribe news jobs` subscribe to two channels in same time
 
-- steps
-    - once a message is published to channel 
-    - all online subscribers will get the message instantly
-    - if no online subscribers then message is missed. and there is no way to subscriber once back online to see the missed messages
-    - the published doesnt gurantee message was received. so there is no way to replay sending
-    - publisher just send the message and receivers listening receive them (simple as that)  
-    - if you weren’t listening at the time, you miss the message. Use it when low-latency broadcast > reliability.
-    
 
-- Realworld applications
-    - all of below is when you have multiple servers, but if you have one backend server then websocket is enough
-    - Real-time notifications .. Push alerts to users (new message, system alert, stock price change)
-    - Chat applications .. One user publishes a message, all users in the room get it instantly
-    - Live dashboards / analytics: Backend publishes metrics → dashboard updates instantly
-    - not perfered for Microservices Event Broadcasting, since messages can get lost. so it perfer message queues
+Realworld applications
+- all of below is when you have multiple servers, but if you have one backend server then websocket is enough
+- Real-time notifications .. Push alerts to users (new message, system alert, stock price change)
+- Chat applications .. One user publishes a message, all users in the room get it instantly
+- Live dashboards / analytics: Backend publishes metrics → dashboard updates instantly
+- not perfered for Microservices Event Broadcasting, since messages can get lost. so it perfer message queues
 
-    Redis Pub/Sub is very simple compared to more advanced messaging systems like Kafka or RabbitMQ. But its simplicity is exactly why it's widely used in real-world applications.
+Redis Pub/Sub is very simple compared to more advanced messaging systems like Kafka or RabbitMQ. But its simplicity is exactly why it's widely used in real-world applications.
 
-    - Redis Pub/Sub excels in lightweight, real-time message broadcasting where:
-        - Speed is critical
-        - Durability is not required (if a subscriber misses a message, it's okay)
-        - System components need loose coupling
+- Redis Pub/Sub excels in lightweight, real-time message broadcasting where:
+    - Speed is critical
+    - Durability is not required (if a subscriber misses a message, it's okay)
+    - System components need loose coupling
 
-- Websockets vs Redis
-    - Websockets
-        - Server ↔ Client (frontend real-time communication)
-        - Between browser/mobile & backend
-        - Push updates to end users over the internet
-        - Connection-based
+Websockets vs Redis
+- Websockets
+    - Server ↔ Client (frontend real-time communication)
+    - Between browser/mobile & backend
+    - Push updates to end users over the internet
+    - Connection-based
 
-    - Redis:
-        - Server ↔ Server (backend coordination)
-        - Inside backend infrastructure
-        - Broadcast events between multiple servers or processes
-        - No persistence (fire-and-forget)
+- Redis:
+    - Server ↔ Server (backend coordination)
+    - Inside backend infrastructure
+    - Broadcast events between multiple servers or processes
+    - No persistence (fire-and-forget)
 
-    - When Do you Use Only Websocket?
-        - You have only 1 backend instance and you’re only doing client-to-server real-time updates (then websocket is enough)
+- When Do you Use Only Websocket?
+    - You have only 1 backend instance and you’re only doing client-to-server real-time updates (then websocket is enough)
 
-    - When Do you Use Only Redis?
-        - when processes or servers want to communicate in pub/sub way
+- When Do you Use Only Redis?
+    - when processes or servers want to communicate in pub/sub way
 
-    - When Do You Use Both Together?
-        - Example: Let’s say you run a chat app with 3 load-balanced backend servers:
+- When Do You Use Both Together?
+    - Example: Let’s say you run a chat app with 3 load-balanced backend servers:
 
-            User A is connected to Server 1 via WebSocket.
-            User B is connected to Server 2.
-            User C is connected to Server 3.
+        User A is connected to Server 1 via WebSocket.
+        User B is connected to Server 2.
+        User C is connected to Server 3.
 
-            Now A sends "Hi" to the chat room.
+        Now A sends "Hi" to the chat room.
 
-            If your server uses only WebSockets, Server 1 has no idea how to tell Server 2 and 3.
-            
-            But if Server 1 publishes to Redis channel "chat:room1" and Servers 2 & 3 subscribe, all WebSocket servers redispatch the message to their connected clients. (so its mainly redis used from the websocket server)
+        If your server uses only WebSockets, Server 1 has no idea how to tell Server 2 and 3.
+        
+        But if Server 1 publishes to Redis channel "chat:room1" and Servers 2 & 3 subscribe, all WebSocket servers redispatch the message to their connected clients. (so its mainly redis used from the websocket server)
 
-    
+
 
 ## Redis Databases
 
+A Redis instance can contain multiple numbered databases, e.g., DB 0, DB 1, DB 2, … (default is usually 0).
+
+They don’t have names, only integer indexes.
+
+They share the same memory and configuration, but data stored in one DB is isolated from others.
+
+select a database by `SELECT 0   # or 1, 2, etc.`
+
 In Redis, "databases" are not like traditional SQL databases. They’re more like logical namespaces or partitions within a single Redis instance.
 
-- A Redis instance can contain multiple numbered databases, e.g., DB 0, DB 1, DB 2, … (default is usually 0).
-- They don’t have names, only integer indexes.
-- They share the same memory and configuration, but data stored in one DB is isolated from others.
-- select a database by `SELECT 0   # or 1, 2, etc.`
 
 Q: Are Redis Databases Commonly Used?
 
@@ -363,7 +359,6 @@ Not really in production. While Redis supports multiple databases, most users st
 
 ✅ Best Practice
 Use a single Redis database and separate data using key prefixes.
-
 
 
 ## Redis Clusters
@@ -393,8 +388,9 @@ TODO:: this redis cluster will need practice at some point after we practice red
 
 ## Questions
 
-Q: Can redis have two blocks where one is used for caching only and i dont want to bother to persist it and one is for session data where i need persistence?
-- You have to create two redis instance. each with its own configuration. each listen to a different port 
+Q: Can redis have two blocks where one is used for caching only (in memory) and one is for session data (persistance)?
+
+You have to create two redis instance. each with its own configuration. each listen to a different port 
 
 
 ## Redis Stream
