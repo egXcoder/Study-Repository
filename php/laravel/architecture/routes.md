@@ -106,3 +106,36 @@ Route::resource('posts', PostController::class);
 // DELETE /posts/{post} → destroy
 
 ```
+
+
+
+### route helper function
+
+The route() helper generates a URL to a named route.
+
+`route($name, $parameters = [], $absolute = true)`
+
+- $name → the name of the route (set using ->name() or as in route group).
+- $parameters → array of values to fill in route parameters ({id}, {slug}, etc.).
+- $absolute → if true, returns a full URL (with domain). If false, returns a relative URL.
+
+```php
+// Example 1
+Route::get('/user/{id}/profile', [UserController::class, 'show'])->name('user.profile');
+
+$url = route('user.profile', ['id' => 5]); // → "http://yourapp.com/user/5/profile"
+
+//Example 2
+Route::get('/user/{user}', [UserController::class, 'show'])->name('user.show');
+Route::get('/user/{user:name}', [UserController::class, 'show'])->name('user.show');
+
+$url = route('user.show', User::find(1)); //it work for both
+
+
+// Example 3
+Route::get('/post/{post}/comment/{comment}', [CommentController::class, 'show'])->name('comment.show');
+
+$url = route('comment.show', [$post, $comment]); 
+//or
+$url = route('comment.show', ['post' => $post,'comment' => $comment]);
+```
