@@ -52,3 +52,69 @@ Q: so what if guest added lines to his cart .. then he logged in while he was ha
 - Merge guest cart into user’s existing cart (most common)
 - discard guest cart/or user cart
 - Ask the user to choose guest cart or user cart (rare, but safest)
+
+
+## Checkout
+
+### Prices to send to gateway like stripe
+
+you can add products in the gateway, each gateway product can have multiple prices. save gateway price_id against your internal products so that when doing checkout you ask gateway i want to checkout using these prices ids
+
+
+```php
+//this is using cashier package for stripe and billable trait inside user model
+public function checkout(){
+    $cart = Cart::session()->first();
+
+    $prices = $cart->courses->pluck('stripe_price_id')->toArray();
+
+    $sessionOptions = [
+        'success_url' => route('checkout-success').'?session_id={CHECKOUT_SESSION_ID}'
+        'cancel_url' =>  route('checkout-cancel'),
+
+
+        //by default, its only card as its universally used and least confusion
+        //you can allow other methods based on your audience with below parameter like wallets
+        //you need to make sure methods are active within stripe global settings
+        'payment_method_types'=>['card','bancontact','eps'],
+
+
+        'metadata'=>[
+            'cart_id'=>$cart->id
+        ]
+    ];
+
+    //meta data will be brought back when i ask for session on success or failure
+    $customerOptions = [
+        'metadata' => [
+            'user_id'=>Auth::id()
+        ]
+    ];
+
+    //this will send you to stripe
+    return Auth::user()->checkout($prices,$sessionOptions,$customerOptions);
+}
+
+public function success(){
+    $sessionId = $request->get('session_id');
+ 
+    if ($sessionId === null) {
+        return;
+    }
+ 
+    $session = Cashier::stripe()->checkout->sessions->retrieve($sessionId); //this make api call to stripe to get session
+ 
+    if ($session->payment_status !== 'paid') {
+        return;
+    }
+ 
+    $orderId = $session['metadata']['order_id'] ?? null;
+ 
+    $order = Order::findOrFail($orderId);
+ 
+    $order->update(['status' => 'completed']);
+ 
+    return view('checkout-success', ['order' => $order]);
+}
+
+```
