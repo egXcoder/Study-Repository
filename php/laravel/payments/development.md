@@ -293,3 +293,43 @@ public function checkout(){
 }
 
 ```
+
+
+
+### Payment Method (Direct Payment)
+
+- another flow of payments is that you dont send users to gateway website
+- its you provide the form on your end as this will give you extra control over ui/ux
+- you can take some html and js provided from stripe and put it in your website (review laravel cashier Payment Methods for Single Charges)
+- customer will put his card data into the form which is going to create a payment method in stripe and it will return payment method object which contains id
+- in your backend. you can use this payment method id to do interesting thing
+    - first: you can charge against this payment method id
+    ```php
+        $paymentIntent = $user->charge(100, $paymentMethodId);
+        if($paymentIntent->status == 'succeeded'){
+            //all good
+        }
+    ``` 
+
+    - second: add payment method to stripe then stripe would remember your card data
+    ```php
+        $user->updateOrCreateStripeCustomer(); //make sure user added as a customer then we can add payment methods
+        $user->updateDefaultPaymentMethod($paymentMethodId); //stripe will remember always last card info as the default
+    ```
+
+    - third: now since we have default payment method defined with customer. we can have another button called one click checkout.then user dont have to re-enter his card details again as stripe remember it
+    ```php
+    @if(Auth::user()->hasDefaultPaymentMethod())
+        <button class='btn btn-primary'>One Click Checkout</button>
+    @endif
+
+    public function oneClickButtonSubmit(){
+        if(Auth::user()->hasDefaultPaymentMethod()){
+            $defaultMethodId = Auth::user()->defaultPaymentMethod()->id
+            $paymentIntent = $user->charge(100, $paymentMethodId);
+            if($paymentIntent->status == 'succeeded'){
+                //all good
+            }
+        }
+    }
+    ```
