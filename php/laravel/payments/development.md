@@ -49,15 +49,17 @@ Q: so what if guest added lines to his cart .. then he logged in while he was ha
 
 ## Checkout
 
-### Prices to send to gateway like stripe
+### Putting Products In Gateway and use them
 
-you can add products in the gateway, each gateway product can have multiple prices. save gateway price_id against your internal products so that when doing checkout you ask gateway i want to checkout using these prices ids
+- you can add products in the gateway, each product can have multiple prices. 
+- save gateway price_id against your internal products 
+- on checkout you ask gateway i want checkout these prices ids
 
 
 ```php
 //this is using cashier package for stripe and billable trait inside user model
 public function checkout(){
-    $cart = Cart::session()->first();
+    $cart = Cart::where('session_id',session()->getId())->first();
 
     $prices = $cart->courses->pluck('stripe_price_id')->toArray();
 
@@ -77,15 +79,8 @@ public function checkout(){
         ]
     ];
 
-    //meta data will be brought back when i ask for session on success or failure
-    $customerOptions = [
-        'metadata' => [
-            'user_id'=>Auth::id()
-        ]
-    ];
-
-    //this will send you to stripe
-    return Auth::user()->checkout($prices,$sessionOptions,$customerOptions);
+    //this will send you to stripe to checkout on their website then redirect back to either success_url or cancel_url
+    return Auth::user()->checkout($prices,$sessionOptions);
 }
 
 public function success(){
@@ -97,6 +92,7 @@ public function success(){
  
     $session = Cashier::stripe()->checkout->sessions->retrieve($sessionId); //this make api call to stripe to get session
  
+    //make sure stripe session says its paid
     if ($session->payment_status !== 'paid') {
         return;
     }
@@ -110,6 +106,70 @@ public function success(){
     $cart->delete();
 
     return redirect()->route('home',['message'=>'Payment Successful']);
+}
+
+```
+
+
+### checkout for amount directly
+
+use checkoutCharge
+
+```php
+
+public function checkout(){
+    $cart = Cart::session()->first();
+
+    $session_options = [
+        'success_url' => route('checkout.success').'?session_id={CHECKOUT_SESSION_ID}',
+        'cancel_url' => route('checkout.cancel'),
+        'metadata'=>[
+            'cart_id'=>$cart->id,
+        ]
+    ];
+
+    return Auth::user()->checkoutCharge(
+        $cart->courses->sum('price'), //amount
+        'Bundle of Courses', //description of what to charge
+        1, //quantity
+        $session_options
+    );
+}
+
+```
+
+### checkout for line items which not listed as product in stripe
+
+use line_items
+
+```php
+
+public function checkout(){
+    $cart = Cart::session()->first();
+
+    $courses = $cart->courses->map(function($course){
+        return [
+            'quantity'=>1,
+            'price_data'=>[
+                'currency'=>config('cashier.currency'),
+                'product_data'=>[
+                    'name'=>$course->name
+                ],
+                'unit_amount'=> $course->price
+            ]
+        ];
+    })->toArray();
+
+    $session_options = [
+        'success_url' => route('checkout.success').'?session_id={CHECKOUT_SESSION_ID}',
+        'cancel_url' => route('checkout.cancel'),
+        'line_items'=>$courses,
+        'metadata'=>[
+            'cart_id'=>$cart->id,
+        ]
+    ];
+
+    return Auth::user()->checkout([],$session_options);
 }
 
 ```
