@@ -34,21 +34,14 @@ Cashier::formatAmount(2000)
 
 Q: if i am going to create a cart for every session.. i will end up with carts table to be untouchable, so how developers commonly address this?
 
-- Link carts to users as soon as possible
-    - then reuse user cart without creating new cards
-
-- Clean up carts automatically
-    - Run a scheduled job (cron) to remove or archive carts older than X days.
-
-- Don’t create the cart row too early
-    - delay creating a cart record until the user actually adds the first item.
-
-- Use caching for short-lived guest carts
-    - For guest users, you can rely on redis to store carts and hit the database only when user login
+- Link carts to users as soon as possible then reuse user cart without creating new cards
+- Run a scheduled job (cron) to remove or archive carts older than X days.
+- Delay creating a cart record until the user actually adds the first item.
+- For guest users, you can rely on redis to store carts and hit the database only when user login
+- On success payment, then delete cart
 
 
 Q: so what if guest added lines to his cart .. then he logged in while he was having cart already?
-
 - Merge guest cart into user’s existing cart (most common)
 - discard guest cart/or user cart
 - Ask the user to choose guest cart or user cart (rare, but safest)
