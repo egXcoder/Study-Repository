@@ -107,14 +107,95 @@ public function success(){
     if ($session->payment_status !== 'paid') {
         return;
     }
- 
-    $orderId = $session['metadata']['order_id'] ?? null;
- 
-    $order = Order::findOrFail($orderId);
- 
-    $order->update(['status' => 'completed']);
- 
-    return view('checkout-success', ['order' => $order]);
+
+    $cart = Cart::find($session->metadata->cart_id);
+
+    $order = Order::create(['user_id'=>Auth::id()]);
+
+    $order->courses()->attach($cart->courses->pluck('id'));
+
+    $cart->delete();
+
+    return redirect()->route('home',['message'=>'Payment Successful']);
+}
+
+```
+
+
+### Coupons and promotion code
+
+Coupon: 
+- a voucher (paper or digital) that gives a specific discount when presented.
+- you can say from when to when this coupon can be applied
+- is coupon for specific products or specific customers
+
+
+Promotion Code (Promo Code):
+- Always involves entering a code (letters/numbers) during checkout.
+- is only for first time order?
+- how many times it can be used before its inactive
+- does it require minimum order value
+- Example: entering WELCOME10 at checkout for 10% off.
+
+- Coupon → broader term, can be physical or digital, doesn’t always need a code.
+- Promotion Code → always a code, usually online, primarily for digital checkout systems.
+
+
+in most e-commerce it doenst matter this differentation between them, we can say coupon and we are refering to promotion codes
+
+in stripe design they differentiate between them.. 
+- first you define coupon with discount you want
+- with each coupon you can define multiple promotion codes
+
+
+
+give user ability to write the promotion code on stripe form on paying
+
+```php
+public function checkout(){
+    $cart = Cart::session()->first();
+
+    $prices = $cart->courses->pluck('stripe_price_id')->toArray();
+
+    $sessionOptions = [
+        'success_url' => route('checkout-success').'?session_id={CHECKOUT_SESSION_ID}'
+        'cancel_url' =>  route('checkout-cancel'),
+        'allow_promotion_code'=>true, //enable user to write promotion code
+    ];
+
+    //this will send you to stripe
+    return Auth::user()
+    ->allowPromotionCode() // or you can do it like this instead of above parameter. which is doing same thing
+    ->checkout($prices,$sessionOptions,$customerOptions);
+}
+
+```
+
+auto apply coupon/promotion code. and user cant amend it
+
+```php
+public function checkout(){
+    $cart = Cart::session()->first();
+
+    $prices = $cart->courses->pluck('stripe_price_id')->toArray();
+
+    $sessionOptions = [
+        'success_url' => route('checkout-success').'?session_id={CHECKOUT_SESSION_ID}'
+        'cancel_url' =>  route('checkout-cancel'),
+        'allow_promotion_code'=>true, //enable user to write promotion code
+    ];
+
+    //this will send you to stripe with coupon auto applied
+    return Auth::user()
+    ->withCoupon($stripe_coupon_id)
+    ->checkout($prices,$sessionOptions,$customerOptions);
+
+    // or
+
+    //this will send you to stripe with promotion code auto applied
+    return Auth::user()
+    ->withPromotionCode($stripe_promotion_id)
+    ->checkout($prices,$sessionOptions,$customerOptions);
 }
 
 ```
