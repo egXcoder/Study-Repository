@@ -175,6 +175,47 @@ public function checkout(){
 ```
 
 
+### guest checkout
+
+its when you allow to checkout without having users to be registered
+
+
+```php
+
+public function checkout(){
+    $cart = Cart::session()->first();
+
+    $courses = $cart->courses->map(function($course){
+        return [
+            'quantity'=>1,
+            'price_data'=>[
+                'currency'=>config('cashier.currency'),
+                'product_data'=>[
+                    'name'=>$course->name
+                ],
+                'unit_amount'=> $course->price
+            ]
+        ];
+    })->toArray();
+
+    $session_options = [
+        'success_url' => route('checkout.success').'?session_id={CHECKOUT_SESSION_ID}',
+        'cancel_url' => route('checkout.cancel'),
+        'line_items'=>$courses,
+        // 'customer_email'=> 'buyer@example.com',
+        'metadata'=>[
+            'cart_id'=>$cart->id,
+        ]
+    ];
+
+    return Checkout::guest()->create([],$session_options);
+}
+
+```
+
+Tip: for guest checkout, stripe always asks for email to be filled in the form.. you can send the email from your side using customer_email property if you have it.. 
+
+
 ### Coupons and promotion code
 
 Coupon: 
