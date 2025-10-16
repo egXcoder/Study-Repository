@@ -51,6 +51,72 @@ Q: so what if guest added lines to his cart .. then he logged in while he was ha
 this is explained on another page
 
 
+### Direct Payments
+
+
+
+
+
+
+
+
+
+Payment Intent (Most Common): every time you buy they will ask about your card details ..  This is very common for “guest checkout.” or small online shops
+
+Setup Intent: this is for large stores. stripe will hold your card details after authenticating it by SCA / 3-D Secure authentication.. then whenever
+
+“Hey Stripe, I want this customer to authorize their card so I can safely charge it later.”
+
+
+
+
+- Purpose: Charge a specific amount now (without saving the card).
+- It appears on the Stripe Dashboard as an incomplete transaction until the user provides and confirms their payment method.
+- Once confirmed, the payment completes automatically.
+
+Steps:
+- Create a PaymentIntent on Stripe (with amount, currency, etc.).
+- use the payment intent to create a payment method (once its done, payment is completed)
+
+
+
+Setup Intent:
+
+if you are buying from Large platforms (Amazon, Netflix, Uber) .. They save your card for reuse, so you don’t enter it every time.
+That requires:
+- SetupIntent → authenticate & save card details (PaymentMethod).
+- PaymentIntent → whenever they need to actually charge you (immediately, or later in background).
+
+- Purpose: Collect and save a card for future payments (without charging immediately).
+- A SetupIntent ensures that authentication (e.g. 3D Secure / SCA) is handled when the card is saved.
+- At this stage, no money moves.
+- Later, when ready, you can use the saved PaymentMethod to create a PaymentIntent and charge the user.
+
+Steps:
+- Create a SetupIntent on Stripe.
+- Collect card details (creates a PaymentMethod) and confirm it against the SetupIntent.
+- When ready to charge later, create a PaymentIntent using that saved PaymentMethod.
+
+
+Payment Method: 
+- Purpose: Save a card (or other payment details), possibly to charge now or later.
+- A PaymentMethod on its own is just card (or other) details, stored securely in Stripe. It does not move money.
+- When created, Stripe returns an ID like pm_12345… which can be attached to a Customer for later use.
+
+Steps:
+- Create a PaymentMethod on Stripe → get back an ID (pm_12345).
+- Save the PaymentMethod against the user in Stripe.
+- When needed, create a PaymentIntent and charge the user using that PaymentMethod.
+
+
+
+
+
+
+
+
+
+
 ### Payment Method (Direct Payment)
 
 - another flow of single charge payments is that customer fill the card data on your website. 
