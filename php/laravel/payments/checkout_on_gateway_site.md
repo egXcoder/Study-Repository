@@ -244,3 +244,29 @@ public function checkout(){
 }
 
 ```
+
+
+
+### if i am doing checkout using stripe website, what if after i pay in stripe and now stripe failed to redirect back .. is this means payment is lost now?
+
+
+🚨 If redirect fails (user closes browser, network drops, DNS fails, etc.)
+
+The payment itself is not lost because Stripe already processed it.
+
+Your webhook is the source of truth → it tells you the real status (succeeded, requires_payment_method, canceled, etc.).
+
+The redirect is just for user experience (thank you page, receipt, etc.), not for accounting or order state.
+
+
+### what if webhook broken?
+
+as a third backup you can do a cronjob which check stripe intents and reconcile with the orders
+
+```php
+
+$intents = \Stripe\PaymentIntent::all([
+    'created' => ['gte' => strtotime('-1 day')],
+]);
+
+```
