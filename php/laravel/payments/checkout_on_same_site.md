@@ -1,195 +1,151 @@
 # Direct Payments
 
 
+### Payment Intent
+
+Payment Intent object is critical when initializing payment. 
+
+transitional statuses
+- requires_payment_method .. Newly created PaymentIntent (no method yet).
+- requires_action .. still needs 3D Secure challenge
+- processing.. The payment has been submitted and is being processed by the payment network
+
+final status (they will never change again)
+- succeeded
+- payment_failed
+- canceled .. canceled by the developer or automatically by Stripe (e.g., because it expired or had too many failed attempts).
 
 
+payment is done through
+- normal flow (Typical)
+    - create payment intent and associate it with cart
+    - use intent client secret to create payment method which will finalize it
+    - ui/ux will have a message to say payment successful etc..
 
-### Payment Method + Payment Intent:
+- webhook (backup)
+    - when payment intent succeed or fails.. it will send a request to your webhook 
+    - this is useful if normal flow had issue like network drop
 
-One click one charge .. and optionally payment method can be saved for later usage
+- cronjob
+    - manually go through your carts and check if their payment intents which has transition status and check if they are succeeded or failed and act accordingly
+    - if webhook is down on your side. cronjob will reconcile the intents against orders daily or something
+
+Off-Session (Subscription renewal): 
+
+- charging can happen while customer is on session which means user is here and interacting with your app (off_session: false)
+- or The customer is not present — payment is attempted in the background. (off_session: true)
+
+How Stripe behaves with off_session: true
+- If the payment succeeds without authentication → ✅ PaymentIntent goes to succeeded.
+- If the bank/card requires authentication (3D Secure, SCA, etc.) → Stripe will fail the off-session attempt and mark the PaymentIntent with status=requires_action. You should notify the customer (e.g., “we couldn’t charge your card, please update payment”) and then let them retry on-session.
 
 
-Tip: if you are trying to reuse one of the payment methods.. and card require 3D secure.. then it will ask for 3D secure everytime.. to avoid 3D secure prompt you may need to use Setup Intent
+Tip: By Payment Method we are refering to card data.. its a good practice to save payment methods in stripe for users to make it easy for our users to pay quickly without having to put their card data again.
 
-Tip: for guest checkout.. you can do the same flow.. just skip the part where you link payment method with user
-
-Tip: you can do the below flow but little in reverse, you can create payment intent with php `$paymentIntent = Auth::user()->pay($amount)` before rendering the checkout form then use the intent secret key to create payment method with javascript which would finalize transaction.. notice payment intent will create a placeholder transaction in stripe dashboard. and if user didnt put his card data the placeholder will stay there as incomplete transaction
-
-Tip: payment method typically is card data
+Tip: you can create the intent and finalize it straight away on creation. typically used for off-session (background payment) .. at date of subscription renewal you would try below code..
+```javascript
+const paymentIntent = await stripe.paymentIntents.create({
+  amount: 2000,
+  currency: 'usd',
+  customer: 'cus_123',
+  payment_method: 'pm_123', // default saved card
+  off_session: true,
+  confirm: true, //it means charge it now, otherwise it will be created as requires_confirmation
+});
+```
 
 ```html
 
-@if(Auth::user()->hasPaymentMethod())
-    <form action="{{route('payment_method.oneClick')}}" method="POST">
-        @csrf
-            Payment Methods
-            @foreach(Auth::user()->paymentMethods() as $method)
-            <div>
-                <input type="radio" name="payment_method_id" value="{{$method->id}}"> {{$method->card->last4}}
-            </div>
-            @endforeach
-            {{-- this button will take payment_method_id and use it to charge customer --}}
-            <button class="btn btn-primary">One Click Payment</button>
-            <hr class="my-5">
-        </form>
-    @endif
-    <form action="{{route('payment_method.submit')}}" method="POST" id='payment_method_submit_form'>
-        @csrf
+<div>
+    Pay With Your Card
+    
+    <!-- Stripe Elements Placeholder -->
+    <div id="card-element"></div>
+    
+    <button id="card-button" type="button" onclick="submitPayment({{$cart_id}})">
+        Update Payment Method
+    </button>
+</div>
 
-        Pay With Your Card
-
-        <!-- Stripe Elements Placeholder -->
-        <div id="card-element"></div>
-
-        <input type="hidden" name="payment_method_id" id='payment_method_id'>
-        
-        <button id="card-button" type="button" class="btn">
-            Process Payment
-        </button>
-    </form>
 
 <script src="https://js.stripe.com/v3/"></script>
  
-<script src="https://js.stripe.com/v3/"></script>
- 
-    <script>
-        const stripe = Stripe(@json(config('cashier.key')));
-    
-        const elements = stripe.elements();
-        const cardElement = elements.create('card');
-    
-        cardElement.mount('#card-element');
-    </script>
+<script>
+    const stripe = Stripe(@json(config('cashier.key')));
 
-    <script>
-        const cardHolderName = document.getElementById('card-holder-name');
-        const cardButton = document.getElementById('card-button');
-        
-        cardButton.addEventListener('click', async (e) => {
-            const { paymentMethod, error } = await stripe.createPaymentMethod(
-                'card', cardElement
-            );
-        
-            if (error) {
-                // Display "error.message" to the user...
-            } else {
-                // The card has been verified successfully...
-                document.getElementById('payment_method_id').value = paymentMethod.id;
-                document.getElementById('payment_method_submit_form').submit();
-            }
-        });
-    </script>
-</x-app-layout>
+    const elements = stripe.elements();
+    const cardElement = elements.create('card');
+
+    cardElement.mount('#card-element');
+</script>
+
+<script>
+window.submitPayment = async function(cart_id) {
+    // Call backend to create PaymentIntent and attach it with cart
+    const res = await fetch("{{route('payment_intent.submit')}}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cart_id: cart_id })
+    });
+    const { clientSecret } = await res.json();
+
+
+    // Confirm the payment with card details
+    // if there is 3d secure.. popup will show to complete 3d secure
+    const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {card: cardElement}
+    });
+
+    if (error) {
+        alert("Payment failed: " + error.message);
+        onPaymentFailure(cart_id);
+    } else if (paymentIntent.status === "succeeded") {
+        alert("Payment succeeded!");
+        onPaymentSuccess(cart_id);
+    }
+}
+
+function onPaymentSuccess(cart_id){
+    //call to backend
+    //backend will get payment intent id from cart_id and check payment intent
+    //if stripe payment intent is succeeded then it will be happy to continue
+    //create the order and attach payment intent id with it
+    //delete cart
+    //create payment method against user, then we can use it again
+}
+
+function onPaymentFailure(cart_id){
+    //call to backend to mark payment as failed
+}
+</script>
+
 ```
-
 
 ```php
 
-public function submit(){
-    if(!request('payment_method_id')){
-        return;
-    }
-
-    Auth::user()->createOrGetStripeCustomer();
-
-    if(!$this->isPaymentMethodExistsWithUser(request('payment_method_id'))){
-        Auth::user()->addPaymentMethod(request('payment_method_id'));
-        Auth::user()->updateDefaultPaymentMethod(request('payment_method_id'));
-    }
-    
-    $cart = Cart::session()->first();
-
-    $amount = $cart->courses->sum('price');
-
-    //this card requires 3d authentication 4000 0027 6000 3184
-    $payment = Auth::user()->charge($amount,request('payment_method_id'),[
-        'return_url'=>route('home',['message'=>'payment successfull'])
-    ]);
-
-    if($payment->status == 'succeeded'){
-        //create order
-
-        return redirect()->route('home',['message'=>'Payment Successful']);
-    }
-}
-
-protected function isPaymentMethodExistsWithUser($payment_method_id){
-    $method = Cashier::stripe()->paymentMethods->retrieve($payment_method_id);
-    $last4 = $method->card->last4;
-
-    if(Auth::user()->hasPaymentMethod()){
-        foreach(Auth::user()->paymentMethods() as $method){
-            $l4 = $method->card->last4;
-
-            if($last4 == $l4){
-                return true;
-            }
-        }
-    }
-
-    return false;
-}
-
-public function oneClick(){
-    if(!request('payment_method_id')){
-        return;
-    }
-
-    $cart = Cart::session()->first();
-
-    $amount = $cart->courses->sum('price');
-
-    try {
-        $payment = Auth::user()->charge($amount, request('payment_method_id'), [
-            'return_url' => route('payment_method.confirm'),
-        ]);
-
-        // If payment succeeded immediately
-        if ($payment->status === 'succeeded') {
-            return redirect()->route('payment_method.confirm', ['payment_intent' => $payment->id]);
-        }
-
-        // Fallback (shouldn't happen often)
-        return redirect()->route('home')->with('message', 'Payment created but not completed');
-
-    } catch (IncompletePayment $exception) {
-        // Redirect user to Stripe 3D Secure page
-        return redirect()->route(
-            'cashier.payment',
-            [$exception->payment->id, 'redirect' => route('payment_method.confirm', ['payment_intent' => $exception->payment->id])]
-        );
-    }
-}
-
-public function confirm()
+class PaymentIntentController extends Controller
 {
-    $paymentIntentId = request('payment_intent');
-
-    if (! $paymentIntentId) {
-        return redirect()->route('home')->with('message', 'Missing payment intent');
+    public function index(){
+        $cart = Cart::session()->first();
+        return view('payment_intent.index',['cart_id'=>$cart->id]);
     }
 
-    // Fetch the payment intent from Stripe
-    $paymentIntent = Cashier::stripe()->paymentIntents->retrieve($paymentIntentId);
+    public function submit(){
+        $cart = Cart::find(request('cart_id'));
 
-    // Check if succeeded
-    if ($paymentIntent->status === 'succeeded') {
-        // Get payment method details
-        $paymentMethodId = $paymentIntent->payment_method;
+        $intent = Auth::user()->pay($cart->courses->sum('price'),[
+            'metadata' => [
+                'cart_id' => $cart->id,
+            ],
+        ]);
+        
+        // Store ID for reconciliation later
+        $cart->update(['payment_intent_id'=>$intent->id]);
 
-        $paymentMethod = Cashier::stripe()->paymentMethods->retrieve($paymentMethodId);
-
-        $cardLast4 = $paymentMethod->card->last4 ?? 'unknown';
-        $cardBrand = $paymentMethod->card->brand ?? 'unknown';
-
-        // ✅ Now you can create your order
-        // Order::create([...]);
-
-        return redirect()->route('home')->with('message', "Payment successful using $cardBrand ending in $cardLast4");
+        return response()->json([
+            'clientSecret' => $intent->client_secret,
+        ]);
     }
-
-    return redirect()->route('home')->with('message', 'Payment failed or still pending');
 }
-
 
 ```
