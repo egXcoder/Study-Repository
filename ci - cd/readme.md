@@ -53,13 +53,15 @@ With branch protection rules (best practice) .. you can protect branch with vari
 - The team culture (code review discipline) makes sure people don’t bypass the process.
 
 
-## CI / Workflow
+## CI ..  Workflow or Pipeline
 
 A workflow is just the set of automated steps your CI/CD system runs when something happens (like pushing code, opening a pull request, or merging to main).
 
+On GitHub Actions, it’s called a workflow. On GitLab, it’s called a pipeline.
+
 github actions has workflows instructions for different environments ready to be used ..
 
-workflows are added typically .github/workflows/workflow1.yml
+workflow instructions are added typically into files .github/workflows/workflow1.yml
 
 on pushing or pull request workflow is triggered and it either success if all steps success or fails is any of step fails
 
