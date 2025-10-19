@@ -43,9 +43,17 @@ Typical Tech Stack Example
 - CD: ArgoCD, Spinnaker, GitLab, Ansible
 - Deploy target: Kubernetes, AWS, GCP, DigitalOcean, Bare Metal
 
+## Pull Request
+
+Pull request is like merge request .. when you develop another branch and you want to merge it with another branch. 
+
+With branch protection rules (best practice) .. you can protect branch with various rules such as Require pull requests before merging .. Require status checks to pass → CI workflows (tests, lint, build) must succeed before merging... Require approvals → At least 1 (or more) teammates must approve before merging.
+- Technically, Git can’t stop you.
+- The platform (GitHub/GitLab) enforces rules.
+- The team culture (code review discipline) makes sure people don’t bypass the process.
+
 
 ## CI / Workflow
-
 
 A workflow is just the set of automated steps your CI/CD system runs when something happens (like pushing code, opening a pull request, or merging to main).
 
@@ -59,24 +67,18 @@ If that command exits with a non-zero status code (i.e., an error), the whole jo
 
 🟢 When a workflow passes
 - By default: it just means ✅ “all checks/tests succeeded.”
-- In practice, many teams use this as a gate: Code can now be merged into main manually. Or automatically deployed (if you have CD = Continuous Deployment).
+- Code can be manually merged into main. Or automatically deployed (if you have CD = Continuous Deployment).
 
 Example:
-- On GitHub/GitLab, a PR won’t be mergeable until the workflow passes.
+- On GitHub/GitLab,if Protected branches then a PR won’t be mergeable until the workflow passes.
 - On CD setups, a passing workflow triggers deployment to staging/prod.
-- So: Pass = green light for merge/deploy.
 
 🔴 When a workflow fails
 - By default, GitHub only shows a warning if checks fail. It still allows you (or anyone with write access) to press Merge.
-- By default: ❌ “something is wrong, stop here.”
-- The PR/merge is blocked .. No deployment will happen (you don’t want broken code going live).
 - You (or the developer who pushed) get notified (email, Slack, etc.).
-- Protected branches: Many teams configure branch protection rules (like for main or master). If these are enabled, you cannot merge until workflows pass. For example:
+- Protected branches: Many teams configure branch protection rules (like for main or master). If these are enabled, you can have PR/merge is blocked. For example:
     - "Require status checks to pass before merging"
     - "Require pull request reviews before merging"
-
-
-Tip: pull request is just when you develop another branch and you want to merge it with another branch. pull request is like merge request
 
 
 ```yaml
