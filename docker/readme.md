@@ -328,14 +328,11 @@ its used as development environment when
   - software require complex setup to run like microservices, multiple databases, queues, search engines
   - you have multiple projects. each project require different setup
 
-
-Docker is extremely common in CI/CD pipelines
+docker is used as a foundation of some useful techniques like CI/CD pipelines
 
   
-
 Why Docker might be overkill
 - Extra resource usage: Docker Desktop (especially on Windows/Mac) eats RAM, CPU, and battery.
 - Added complexity: You’ll need Dockerfiles, docker-compose, volume mounts, networking, and logs.
 - Maintenance: Images need updating, containers need restarting, and debugging can be trickier.
-- If your project is simple, installing the webserver + DB natively (or via a simple package manager like apt/brew) is faster and lighter.
-
+- If your project is simple such as installing the webserver + DB .. then natively (or via a simple package manager like apt/brew) is faster and lighter.
