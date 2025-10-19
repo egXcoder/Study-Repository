@@ -102,7 +102,7 @@ jobs:
     runs-on: ubuntu-latest #It’s a virtual machine (VM) image provided by GitHub for running your jobs.
     needs: test           # only run if "test" passes
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4 # Checks out your repo (like running git clone).Makes the code available in the workspace ($GITHUB_WORKSPACE). GitHub Actions are just GitHub repositories. Each action can be updated over time. @v4 means: “use version 4 of this action” (stable release).
       - run: npm run build
 
 ```
