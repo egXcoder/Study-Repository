@@ -7,47 +7,15 @@ It lets clients ask the server exactly for the data they need — nothing more, 
 
 ## Key Ideas
 
-### Single endpoint
-
-GraphQL: /graphql → send one query that says:
+Single endpoint GraphQL: /graphql it can do everything depend on the request body
 
 
-```graphql
-{
-  user(id: 123) {
-    name
-    posts {
-      title
-      comments {
-        text
-      }
-    }
-  }
-}
+Consume GraphQL
+- Query → fetch data. (discussed in separate page)
+- Mutation → modify data (like POST/PUT in REST) (discussed in separate page)
+- Subscription → real-time updates (websockets) (discussed in separate page)
 
-```
-
-### Strong typing
-
-GraphQL has a schema that defines types, queries, and mutations.
-
-```graphql
-
-type User {
-  id: ID!
-  name: String!
-  posts: [Post!]
-}
-
-```
-
-### Operations
-
-Query → fetch data.
-
-Mutation → modify data (like POST/PUT in REST).
-
-Subscription → real-time updates (websockets).
+Build your graphql server (discussed in separate page)
 
 
 
