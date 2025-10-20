@@ -18,10 +18,36 @@ Consume GraphQL
 Build your graphql server (discussed in separate page)
 
 
+### When to use Graphql?
+
+it is there to solve the problem of The client downloads more data than it needs
+
+| Feature               | REST API                                | GraphQL                                       |
+|-----------------------|-----------------------------------------|-----------------------------------------------|
+| Data Fetching         | Multiple endpoints, fixed responses     | Single endpoint, client-defined responses      |
+| Over/Under-fetching   | Common problem                          | Solved by design                              |
+| Caching               | Simple (HTTP caching)                   | Complex (requires custom setup)               |
+| Learning Curve        | Lower (builds on HTTP)                  | Higher (new concepts, tooling)                |
+| File Uploads          | Straightforward                         | Possible, but less standard                   |
+| Real-time             | Typically requires WebSockets/SSE       | Native via Subscriptions                      |
+| API Evolution         | Versioning endpoints (e.g., /v2/)       | Deprecating fields, additive changes          |
+| Best For              | Simple, cacheable, resource-driven APIs | Complex systems, fast-moving frontends, mobile-heavy apps |
 
 
+### Why Called Graph?
 
-Type vs field
+The “Graph” in GraphQL doesn’t mean you’ll always see a graph UI with nodes and edges like in Neo4j or visualization tools. Instead, it refers to the graph data model behind the API:
+
+Nodes (Objects/Entities):
+These are the types in your schema (e.g., User, Post, Comment).
+
+Edges (Relationships):
+The fields that connect one type to another (e.g., a User has many Posts, a Post has many Comments).
+
+When you write a GraphQL query, you’re basically walking the graph of your data: starting from a root type (the Query type) and traversing along fields (edges) to reach connected objects (nodes).
+
+
+### Q: Type vs field
 
 User → refers to a GraphQL type (object type, interface, etc.) and its (Capitalized)
 
