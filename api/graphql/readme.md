@@ -47,6 +47,25 @@ The fields that connect one type to another (e.g., a User has many Posts, a Post
 When you write a GraphQL query, you’re basically walking the graph of your data: starting from a root type (the Query type) and traversing along fields (edges) to reach connected objects (nodes).
 
 
+### Is GraphQl Acts like a reverse proxy?
+
+Yes — GraphQL servers often act like a reverse proxy (or better: an “API gateway”)
+
+Here’s how:
+
+- Client defines exactly what it wants
+    - The GraphQL query says: “I need a user, their posts, and the comments on those posts.”
+
+- GraphQL server resolves it
+    - The GraphQL layer doesn’t store the data itself (unless you want it to).
+    - Instead, resolvers go fetch data from underlying sources:
+        - A REST API endpoint
+        - A database
+        - A microservice
+        - Even another GraphQL API
+- GraphQL merges results into one response
+    - The client gets exactly the shape it asked for, in a single round trip.
+
 ### Q: Type vs field
 
 User → refers to a GraphQL type (object type, interface, etc.) and its (Capitalized)
