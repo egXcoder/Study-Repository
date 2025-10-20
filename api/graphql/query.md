@@ -1,70 +1,35 @@
-# GraphQL
-
-GraphQL is a query language for APIs (created by Facebook, now open-source).
-
-
-It lets clients ask the server exactly for the data they need — nothing more, nothing less.
-
-
-## Key Ideas
-
-### Single endpoint
-
-GraphQL: /graphql → send one query that says:
-
-
-```graphql
-{
-  user(id: 123) {
-    name
-    posts {
-      title
-      comments {
-        text
-      }
-    }
-  }
-}
-
-```
-
-### Client controls the shape of the data
-
-No more overfetching (getting 50 fields but using 2).
-
-### Strong typing
-
-GraphQL has a schema that defines types, queries, and mutations.
-
-```graphql
-
-type User {
-  id: ID!
-  name: String!
-  posts: [Post!]
-}
-
-```
-
-### Operations
-
-Query → fetch data.
-
-Mutation → modify data (like POST/PUT in REST).
-
-Subscription → real-time updates (websockets).
-
-
-## Query
+# Query
 
 A query in GraphQL is the way clients ask for data (like SELECT in SQL, or GET in REST).
 
-Tip: query keyword .. tells GraphQL this is a read operation. (You can omit it and still works)
 
-
-Simple Example
+### Simple Example
 ```graphql
+<!-- anonymous query (no name). -->
 query {
+  user {
+    id
+    name
+    email
+  }
+}
+```
+```graphql
+<!-- named query (GetUser). -->
+<!-- Naming is useful for debugging — error messages and logs will reference GetUser. -->
+<!-- Required if you want to persist queries or use them in Apollo Client caching, because the name identifies the query. -->
+<!-- Required if your request contains multiple operations -->
+query GetUser{
+  user {
+    id
+    name
+    email
+  }
+}
+```
+```graphql
+<!-- This is shorthand syntax — same as query { ... }. -->
+{
   user {
     id
     name
@@ -85,7 +50,7 @@ query {
 
 ```
 
-Multiple Fields And Arguments
+### Multiple Fields And Arguments
 ```graphql
 {
   user(id: 1) {
@@ -148,7 +113,7 @@ Multiple Fields And Arguments
 ```
 
 
-Aliases
+### Aliases
 
 ```graphql
 
@@ -204,7 +169,7 @@ fetch("https://mygraphqlapi.com/graphql", {
 
 ```
 
-More than one operation
+### More than one operation
 
 ```graphql
 query GetPosts($limit: Int!) {
@@ -251,96 +216,45 @@ fetch("https://mygraphqlapi.com/graphql", {
 
 ```
 
-Fragments
+### Fragments
 
-fragments must always reference a type, not a field
+A fragment in GraphQL is a reusable piece of a query. and must always reference a type, not a field
 
-
-
-Type vs field
-
-User → refers to a GraphQL type (object type, interface, etc.) and its (Capitalized)
-
-user → refers to a field on a type or on the root Query object and its (lowercase)
-
-Tip: ID! .. means not nullable
+🔹 Why use fragments?
+- DRY (Don’t Repeat Yourself) .. Instead of repeating the same fields in multiple queries, define them once.
+- Consistency  .. Ensures queries always fetch the same fields.
+- Maintainability .. Update the fragment once → all queries using it automatically get the change.
 
 ```graphql
 
-type User {          # GraphQL type → always capitalized by convention
-  id: ID!
-  name: String
-  email: String
+# Use it in a query
+query GetUsers {
+  users {
+    ...UserFields
+  }
 }
 
-type Query {
-  user(id: ID!): User   # user = field on Query, returns type User
+# Use it in another query
+query GetCurrentUser {
+  currentUser {
+    ...UserFields
+  }
+}
+
+# Define a fragment
+fragment UserFields on User {
+  id
+  name
+  email
+}
+
+# Nesting Fragment
+fragment PostFields on Post {
+  id
+  title
+  author {
+    ...UserFields
+  }
 }
 
 ```
-
-### Q: what is the common framework language is used to expose graphql and which is common to consume graphql?
-
-- Expose GraphQL (server-side implementation)
-- Consume GraphQL (client-side implementation)
-
-
-#### Exposing GraphQL (Server-side)
-
-You need a server framework that defines the schema, resolvers, and executes queries.
-
-The most common by language:
-
-- JavaScript / TypeScript
-    - Apollo Server → probably the most popular
-    - GraphQL Yoga
-    - Express-GraphQL (simple, minimal)
-
--Python
-    - Graphene
-    - Ariadne
-    - Strawberry
-
--Java
-    - graphql-java (basis for Spring Boot GraphQL)
-    - Spring for GraphQL
-
--PHP
-    - lighthouse-php for Laravel
-    - graphql-php
-
-- Ruby
-    - graphql-ruby
-
-- Go
-    - gqlgen
-
-Most common in industry today:
-👉 Apollo Server (Node.js) and Spring Boot GraphQL (Java)
-
-
-#### Consuming GraphQL (Client-side)
-
-Clients send queries/mutations to the GraphQL server.
-
-- JavaScript (frontend)
-    - Apollo Client → most popular React integration
-    - Relay (from Facebook, used in Facebook apps)
-    - urql (lightweight alternative to Apollo)
-
-- Mobile (Android/iOS)
-    - Apollo Kotlin
-    - (Android)
-    - Apollo iOS
-    - Relay also has mobile integrations
-
-- Other languages (using HTTP requests directly):
-
-- Python: requests or gql
-
-- PHP: Guzzle
-
-- Go: graphql-go
-
-Most common client today:
-👉 Apollo Client (React)
