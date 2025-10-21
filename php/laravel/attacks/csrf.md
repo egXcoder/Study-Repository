@@ -66,6 +66,16 @@ Strict: never sends cookies on cross-site requests
 None: Required if your site needs to send cookies in cross-site requests
 
 
+Q: why not to use samesite = strict .. what are the use cases i may need this as lax?
+
+- Email links or shared links.. User clicks a link from Gmail or a Slack message: https://example.com/dashboard .. Browser will not send cookies, so the user may be forced to log in again.
+
+- OAuth / SSO redirects: If your site integrates with Google/Facebook login: OAuth redirects are cross-site requests, so cookies won’t be sent → session lost or login fails.
+
+Why Lax is usually chosen: Lax balances security and usability.
+
+
+
 ### Same Origin Policy and CORS
 
 Same-Origin Policy (SOP): by default, browsers block JS from reading responses from different origins.
