@@ -52,11 +52,19 @@ client send the token:
 
 ### SameSite Cookies
 
-Modern browsers support a cookie attribute called SameSite.
+Modern browsers support a cookie attribute called SameSite. This tells the browser: Don’t send this cookie with cross-site requests.
 
-Set-Cookie: session=xyz; SameSite=Lax
+`Set-Cookie: session=xyz; SameSite=Lax`
 
-This tells the browser: Don’t send this cookie with cross-site requests. This blocks CSRF attempts from external origins.
+Lax: send cookie only when user actioned directly like clicked a button or a link (default in laravel). So it blocks many CSRF attacks, especially those using hidden forms, <img> tags, and automatic GET requests.
+- Visiting https://yourbank.com → cookie sent ✅
+- External site <img src="https://yourbank.com/..."> → cookie not sent ❌
+- Clicking a link from another site to your site → cookie is sent ✅
+
+Strict: never sends cookies on cross-site requests
+
+None: Required if your site needs to send cookies in cross-site requests
+
 
 ### Same Origin Policy and CORS
 
