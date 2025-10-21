@@ -74,7 +74,7 @@ Q: why not to use samesite = strict .. what are the use cases i may need this as
 
 Why Lax is usually chosen: Lax balances security and usability.
 
-
+Use cases for Strict Highly sensitive apps where any cross-site request is unacceptable, e.g.: Admin dashboards for critical systems .. Banking apps with extra layers of CSRF protection
 
 ### Same Origin Policy and CORS
 
