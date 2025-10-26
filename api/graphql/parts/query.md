@@ -1,11 +1,12 @@
 # Query
 
-A query in GraphQL is the way clients ask for data (like SELECT in SQL, or GET in REST).
+A query is ask for data
 
 
-### Simple Example
+### Intro
+
+- anonymous query (no name)
 ```graphql
-<!-- anonymous query (no name). -->
 query {
   user {
     id
@@ -14,11 +15,12 @@ query {
   }
 }
 ```
+
+- named query
+
+Naming is useful for debugging — error messages and logs will reference GetUser.
+Required if you want to persist queries or use them in Apollo Client caching, because the name identifies the query.
 ```graphql
-<!-- named query (GetUser). -->
-<!-- Naming is useful for debugging — error messages and logs will reference GetUser. -->
-<!-- Required if you want to persist queries or use them in Apollo Client caching, because the name identifies the query. -->
-<!-- Required if your request contains multiple operations -->
 query GetUser{
   user {
     id
@@ -27,8 +29,8 @@ query GetUser{
   }
 }
 ```
+- shorthand syntax — same as query { ... }
 ```graphql
-<!-- This is shorthand syntax — same as query { ... }. -->
 {
   user {
     id
@@ -37,6 +39,9 @@ query GetUser{
   }
 }
 ```
+
+Response 
+
 ```json
 {
   "data": {
