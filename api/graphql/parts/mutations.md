@@ -4,66 +4,7 @@ Mutations → used to change data (write/update/delete).
 
 When you call a mutation, you can also ask for the fields of the changed object that you want back.
 
-### Schema
-
-```graphql
-
-type User {
-  id: ID!
-  name: String!
-  email: String!
-}
-
-type Mutation {
-  createUser(name: String!, email: String!): User
-  updateUser(id: ID!, name: String, email: String): User
-  deleteUser(id: ID!): Boolean
-}
-
-
-```
-
-### Create User
-
-```graphql
-
-mutation {
-  createUser(name: "Ahmed", email: "ahmed@example.com") {
-    id
-    name
-    email
-  }
-
-  updateUser(id: "123", name: "Ahmed Ibrahim") {
-    id
-    name
-    email
-  }
-
-  deleteUser(id: "123")
-}
-
-
-```
-```json
-
-{
-  "data": {
-    "createUser": {
-      "id": "101",
-      "name": "Ahmed",
-      "email": "ahmed@example.com"
-    },
-    "updateUser": {
-      "id": "101",
-      "name": "Ahmed Ibrahim",
-      "email": "ahmed@example.com"
-    },
-    "deleteUser": true
-  }
-}
-
-```
+## Send Mutation
 
 ```javascript
 
@@ -96,10 +37,7 @@ fetch('/graphql', {
 .then(data => console.log('GraphQL response:', data))
 .catch(err => console.error('Error:', err));
 
-
-
 // or
-
 
 fetch('/graphql', {
   method: 'POST',
@@ -140,25 +78,6 @@ fetch('/graphql', {
 
 ### Named Mutations
 
-```graphql
-
-mutation CreateUserOp {
-  createUser(name: "Ali", email: "ali@example.com") {
-    id
-    name
-  }
-}
-
-mutation UpdateUserOp {
-  updateUser(id: "101", name: "Ahmed Updated") {
-    id
-    name
-  }
-}
-
-
-```
-
 ```javascript
 
 fetch('/graphql', {
@@ -192,24 +111,6 @@ fetch('/graphql', {
 ### Error Happening
 
 error is showing in response.. unless server crashes then it will return 500
-
-```graphql
-
-mutation {
-  createUser(name: "Ali", email: "ali@example.com") {
-    id
-    name
-  }
-
-  updateUser(id: "9999", name: "Ahmed Ibrahim") {
-    id
-    name
-  }
-
-  deleteUser(id: "123")
-}
-
-```
 
 ```json
 
