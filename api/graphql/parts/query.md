@@ -1,44 +1,33 @@
-# Query
-
-A query is ask for data
+# Query .. Clients asking for data
 
 
-### Intro
-
-- anonymous query (no name)
-```graphql
-query {
-  user {
-    id
-    name
-    email
-  }
-}
-```
-
-- named query
-
-Naming is useful for debugging — error messages and logs will reference GetUser.
-Required if you want to persist queries or use them in Apollo Client caching, because the name identifies the query.
-```graphql
-query GetUser{
-  user {
-    id
-    name
-    email
-  }
-}
-```
-- shorthand syntax — same as query { ... }
 ```graphql
 {
   user {
     id
-    name
     email
   }
 }
 ```
+
+```graphql
+query {
+  user {
+    id
+    email
+  }
+}
+```
+
+```graphql
+query GetUser{
+  user {
+    id
+    email
+  }
+}
+```
+
 
 Response 
 
@@ -55,7 +44,12 @@ Response
 
 ```
 
-### Multiple Fields And Arguments
+Tip: if "query" is omitted completely. graphql will guess its a query
+
+Tip: you can do "query GetUser". its best practice on production environment unless you have very simple use case then you can omit it
+
+
+## Arguments and relations
 ```graphql
 {
   user(id: 1) {
@@ -118,7 +112,7 @@ Response
 ```
 
 
-### Aliases
+## Aliases
 
 ```graphql
 
@@ -138,18 +132,37 @@ query{
 }
 ```
 
-Query with variables
+## More than one operation
 
-```graphql
+```javascript
+fetch("https://mygraphqlapi.com/graphql", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    query: `
+      query GetPosts {
+            posts(limit: 5) {
+                id
+                title
+            }
+        }
 
-query GetPosts($limit: Int!) {
-  posts(limit: $limit) {
-    id
-    title
-  }
-}
+        query GetUser {
+            user(id: 5) {
+                name
+                email
+            }
+        }
+    `,
+    operationName: "GetUser"
+  })
+})
+  .then(res => res.json())
+  .then(data => console.log(data));
 
 ```
+
+## Query with variables
 
 ```javascript
 
@@ -174,54 +187,7 @@ fetch("https://mygraphqlapi.com/graphql", {
 
 ```
 
-### More than one operation
-
-```graphql
-query GetPosts($limit: Int!) {
-  posts(limit: $limit) {
-    id
-    title
-  }
-}
-
-query GetUser($userId: ID!) {
-  user(id: $userId) {
-    name
-    email
-  }
-}
-
-```
-```javascript
-fetch("https://mygraphqlapi.com/graphql", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    query: `
-      query GetPosts($limit: Int!) {
-            posts(limit: $limit) {
-                id
-                title
-            }
-        }
-
-        query GetUser($userId: ID!) {
-            user(id: $userId) {
-                name
-                email
-            }
-        }
-    `,
-    variables: { "userId": "123" },
-    operationName: "GetUser"
-  })
-})
-  .then(res => res.json())
-  .then(data => console.log(data));
-
-```
-
-### Fragments
+## Fragments
 
 A fragment in GraphQL is a reusable piece of a query. and must always reference a type, not a field
 
@@ -239,27 +205,11 @@ query GetUsers {
   }
 }
 
-# Use it in another query
-query GetCurrentUser {
-  currentUser {
-    ...UserFields
-  }
-}
-
 # Define a fragment
 fragment UserFields on User {
   id
   name
   email
-}
-
-# Nesting Fragment
-fragment PostFields on Post {
-  id
-  title
-  author {
-    ...UserFields
-  }
 }
 
 ```
