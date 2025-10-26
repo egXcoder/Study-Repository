@@ -2,53 +2,91 @@
 
 A subscription is a way for the server to push real-time updates to clients. no polling by client ..
 
-
 it rely on websocket
 
+Graphql have their own in-memory pubsub that you can use to publish and listen to streams, however you can use different pubsub like redis or whatever
 
-### Schema
 
-```graphql
+## Server
 
-type Subscription {
-  userCreated: User
-}
+```js
 
-```
+// resolvers.js
+const { PubSub } = require('graphql-subscriptions');
 
-Example
+const users = [];
 
-```graphql
-subscription {
-  userCreated {
-    id
-    name
-    email
-  }
-}
-```
+module.exports = (pubsub) => ({
+  Mutation: {
+    createUser: (_, { name, email }) => {
+      const user = { id: String(users.length + 1), name, email };
+      users.push(user);
 
-When a new user is added via a mutation, all clients subscribed to userCreated will automatically get data like:
+      // Notify subscribers
+      pubsub.publish('USER_CREATED', { userCreated: user });
 
-```json
-
-{
-  "data": {
-    "userCreated": {
-      "id": "101",
-      "name": "Ahmed",
-      "email": "ahmed@example.com"
-    }
-  }
-}
-
+      return user;
+    },
+  },
+  Subscription: {
+    userCreated: {
+      // Every subscription listens on USER_CREATED topic
+      subscribe: () => pubsub.asyncIterator(['USER_CREATED']),
+    },
+  },
+});
 
 ```
 
 
-listen to subscription using apollo client
+```js
 
-```javascript
+// server.js
+const { createServer } = require('http');
+const { ApolloServer } = require('apollo-server');
+const { makeExecutableSchema } = require('@graphql-tools/schema');
+const { WebSocketServer } = require('ws');
+const { useServer } = require('graphql-ws/lib/use/ws');
+const { PubSub } = require('graphql-subscriptions');
+
+const typeDefs = require('./schema');
+const createResolvers = require('./resolvers');
+
+const pubsub = new PubSub();
+const schema = makeExecutableSchema({
+  typeDefs,
+  resolvers: createResolvers(pubsub),
+});
+
+const server = new ApolloServer({ schema });
+const httpServer = createServer();
+
+async function start() {
+  await server.start();
+  server.applyMiddleware({ app: httpServer });
+
+  // WebSocket server
+  const wsServer = new WebSocketServer({
+    server: httpServer,
+    path: '/graphql',
+  });
+
+  useServer({ schema }, wsServer);
+
+  httpServer.listen(4000, () => {
+    console.log('🚀 GraphQL running at http://localhost:4000/graphql');
+    console.log('💬 Subscriptions over ws://localhost:4000/graphql');
+  });
+}
+
+start();
+
+```
+
+
+## Client
+
+```js
 
 import { WebSocketLink } from "@apollo/client/link/ws";
 import { ApolloClient, InMemoryCache, gql } from "@apollo/client";
@@ -68,7 +106,7 @@ const client = new ApolloClient({
 client.subscribe({
   query: gql`
     subscription {
-      userCreated {
+      USER_CREATED {
         id
         name
         email

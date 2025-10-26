@@ -24,8 +24,6 @@ Use GraphQL
 - Mutation → modify data (like POST/PUT in REST) [explained here](./parts/mutations.md)
 - Subscription → real-time updates (websockets) [explained here](./parts/subscriptions.md)
 
-Build your graphql server (discussed in separate page)
-
 ## Questions
 
 [explained here](./parts/questions.md)
