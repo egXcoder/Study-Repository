@@ -29,30 +29,3 @@ Build your graphql server (discussed in separate page)
 ## Questions
 
 [explained here](./parts/questions.md)
-
-
-
-
-
-## Q: Type vs field
-
-User → refers to a GraphQL type (object type, interface, etc.) and its (Capitalized)
-
-user → refers to a field on a type or on the root Query object and its (lowercase)
-
-Tip: ID! .. means not nullable
-
-```graphql
-
-type User {          # GraphQL type → always capitalized by convention
-  id: ID!
-  name: String
-  email: String
-}
-
-type Query {
-  user(id: ID!): User   # user = field on Query, returns type User
-}
-
-```
-
