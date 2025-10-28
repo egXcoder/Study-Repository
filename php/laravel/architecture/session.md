@@ -60,18 +60,3 @@ As Extra safety for session data you can encrypt it using your laravel applicati
 after login/logout/register.. you probably want to `session()->regenerate()` and this will regenerate id in server and in cookie but keeps the session data the same. the only reason to do that is to prevent session fixation attack [Explained here](../attacks/session_fixation.md)
 
 Tip: with every request sent, there is a middleware called EncryptCookie which take the cookie data and encrypt it using app_key and random values and put it in client cookie as encrypted. everytime encryption run it generate different text. from client perspective it feels like cookie values are changing but not really it points to same thing after laravel decrypt it
-
-
-
-
-
-
-session encryption
-session regeneration
-session database
-session redis
-Secure & HttpOnly cookies Prevents JS from reading session cookies.
-CSRFRelies on session to store CSRF tokens per user.
-
-
-by default laravel put larave_session and XSRF-TOKEN into cookie
