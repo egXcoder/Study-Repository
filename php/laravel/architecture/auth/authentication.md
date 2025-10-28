@@ -10,6 +10,8 @@ Guard is the class responsible to say `are you a user`? laravel out of the box o
 - Token Guard (api_token column in users table) [Explained here](./guard/token.md)
 - Custom Guard [Explained here](./guard/customguard.md)
 
+Guards Config [Explained here](./guard/config.md)
+
 
 ## Sanctum and Passport
 
@@ -26,3 +28,11 @@ Passport [Explained here](./passport.md)
 - Full OAuth2 server implementation.
 - For more complex scenarios: token scopes, clients, refresh tokens.
 - Provides a passport guard.
+
+
+## Summary
+
+- Session ... out of box laravel web guard
+- Token .. out of box laravel api guard .. users.api_token
+- Sanctum .. sanctum guard .. api stateful using session (best for spa application)
+- Sanctum .. sanctum guard .. api personal_tokens .. every user can have multiple tokens

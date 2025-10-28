@@ -172,7 +172,7 @@ Auth::extend('jwt', function ($app, $name, array $config) {
 
 ```
 
-## Useage
+## Usage
 
 ```php
 
