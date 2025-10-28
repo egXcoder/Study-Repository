@@ -7,7 +7,7 @@ Are you a user?
 
 Guard is the class responsible to say `are you a user`? laravel out of the box offer:
 - Session Guard [Explained here](./guard/session.md)
-- Token Guard (api_token column in users table)
+- Token Guard (api_token column in users table) [Explained here](./guard/token.md)
 - Custom Guard
 
 
@@ -17,36 +17,6 @@ Guard is the class responsible to say `are you a user`? laravel out of the box o
 - Guard uses UserProvider with the extracted data to see if it matches one of database users
 
 ### Laravel Supported Drivers
-
-1️⃣ Session guard (session) – default for web
-
-- Stores authentication info in sessions and uses cookies.
-- Used for traditional web login.
-- Tracks logged-in user via $_SESSION.
-
-```php
-'guards' => [
-    'web' => [
-        'driver' => 'session',
-        'provider' => 'users',
-    ],
-],
-```
-
-2️⃣ Token guard (token) – simple API tokens
-
-- Checks static token stored in DB (api_token column).
-- Stateless: client sends token in header (Authorization: Bearer ... or query string).
-- Minimal; does not support JWT.
-
-```php
-'guards' => [
-    'api' => [
-        'driver' => 'token',
-        'provider' => 'users',
-    ],
-],
-```
 
 3️⃣ Custom guards
 
@@ -251,65 +221,6 @@ so its better to rely on laravel internal guard or on a package that has written
 
 
 ### How User Login/out?
-
-#### Session Guard
-
-there is a login/logout methods declared within guard that helps you login/logout
-
-- Login
-
-    ```php
-    $user = User::where('email', $request->email)->first();
-
-    if ($user && Hash::check($request->password, $user->password)) {
-        Auth::login($user); // <- session guard stores user ID in session
-    }
-    ```
-
-    - Behind the scenes:
-    - $this->user = $user; inside the guard
-    - $request->session()->put('login_key', $user->id);
-
-- Logout
-
-    ```php
-    Auth::logout();
-    ```
-
-    Behind the scenes:
-    - Guard removes the session key.
-    - $this->user is cleared.
-    - Next request, $guard->user() will return null.
-
-#### Token Guard
-
-no login/logout methods. you have to do it manually
-
-- Login
-
-    ```php
-    $user = User::where('email', $request->email)->first();
-
-    if ($user && Hash::check($request->password, $user->password)) {
-        $token = Str::random(60);
-        $user->api_token = hash('sha256', $token);
-        $user->save();
-
-        return ['token' => $token];
-    }
-    ```
-
-    Client stores the token and sends it in Authorization header for future requests
-
-- Logout
-
-    ```php
-    $user = Auth::guard('api')->user();
-    $user->api_token = null; // or delete the token
-    $user->save();
-    ```
-
-    After this, the token is invalid, and subsequent requests will fail authentication.
 
 
 #### Custom Guard
