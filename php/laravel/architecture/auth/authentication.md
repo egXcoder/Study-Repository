@@ -8,17 +8,7 @@ Are you a user?
 Guard is the class responsible to say `are you a user`? laravel out of the box offer:
 - Session Guard [Explained here](./guard/session.md)
 - Token Guard (api_token column in users table) [Explained here](./guard/token.md)
-- Custom Guard
-
-
-
-
-- Guard extract session or token data from request
-- Guard uses UserProvider with the extracted data to see if it matches one of database users
-
-### Laravel Supported Drivers
-
-
+- Custom Guard [Explained here](./guard/customguard.md)
 
 
 ## Sanctum and Passport
