@@ -5,7 +5,10 @@ Are you a user?
 
 ## Guard
 
-Guard is a strategy to authenticate user with every request. it uses request data and UserProvider class to see if user is authenticated
+Guard is the class responsible to say if you are a user?
+- Session Guard
+- Token Guard (api_token column in users table)
+- Custom Guard
 
 - Guard extract session or token data from request
 - Guard uses UserProvider with the extracted data to see if it matches one of database users
