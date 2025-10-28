@@ -46,22 +46,28 @@ Schema::create('personal_access_tokens', function (Blueprint $table) {
 ```
 
 ## SPA Authentication (Session + CSRF)
+
+### Flow:
 - The frontend logs in via /login (using email/password).
 - Sanctum issues a session cookie.
 - The SPA sends requests with that cookie — Laravel automatically identifies the user by auth:santum guard
 - CSRF protection is handled with /sanctum/csrf-cookie.
 
-
-by default laravel treat api as stateless. no session and no cookie and no csrf check. let me proof it to you if you go to app/Http/kernel.php and look at api middlewares, you wont find start session or encrypt cookie. if sanctum will use session based authentication, there are multiple middlewares needs to run like StartSession. so it grouped all of these middlewares in one middleware called EnsureFrontendRequestsAreStateful::class
+### Middleware
+by default laravel treat api as stateless. no session and no cookie and no csrf check. let me prove it to you if you go to app/Http/kernel.php and look at api middlewares, you wont find start session or encrypt cookie. if sanctum will use session based authentication, there are multiple middlewares needs to run like StartSession. so it grouped all of these middlewares in one middleware called EnsureFrontendRequestsAreStateful::class
 
 what EnsureFrontendRequestsAreStateful middleware is doing is this:
 - check if api request is coming from a domain allowed in .env `SANCTUM_STATEFUL_DOMAINS=localhost,127.0.0.1,spa.myapp.test`
-- if matches, then it will start multiple of middlewares
-    - encrypt cookies
-    - start session
-    - verify csrf token
+- if matches, then it will start multiple of middlewares encrypt cookies, start session, verify csrf token
 
-client should send cookie and csrf with api requests 
-- you should first make a request to the `/sanctum/csrf-cookie` endpoint to initialize CSRF protection for the application: During this request, Laravel will set an XSRF-TOKEN cookie in client. axios will send header X-XSRF-TOKEN header on subsequent requests to pass csrf validation
-- `axios.defaults.withXSRFToken = true;` automatically send the X_XSRF-TOKEN on header
+### Client
+- you should first make a request to the `/sanctum/csrf-cookie` to have XSRF-TOKEN cookie in client.
+- `axios.defaults.withXSRFToken = true;` automatically send the X_XSRF-TOKEN on header using XSRF-TOKEN cookie
 - `axios.defaults.withCredentials = true;` send cookies with the request .. If you forget this option, no cookies will be sent
+
+### Guard
+axios uses web guard. its defined in config/sanctum.php. when you login with guard it use the session to login
+
+### login/logout
+
+TODO::
