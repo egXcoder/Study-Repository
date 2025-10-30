@@ -34,6 +34,15 @@ grant_type=client_credentials
 &client_id=3
 &client_secret=AbCdEfGh123456
 
+
+# or
+
+POST /oauth/token
+Authorization: Basic YWJjOjEyMw==   # base64(client_id:client_secret)
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials
+
 ```
 
 ```json
