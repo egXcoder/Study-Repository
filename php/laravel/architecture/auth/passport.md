@@ -76,5 +76,5 @@ A grant type in OAuth2 defines how the client obtains an access token
 - Password Grant: App Exchange email and password to access token .. Legacy and discouraged [Explained here](./passport/password_grant.md)
 - Client Credentials Grant: Internal Server-to-server [Explained here](./passport/client_credentials.md)
 - Authorization Code Grant: api requests on behalf of a user [Explained here](./passport/authorization_code.md)
-- Authorization Code with PKCE: Same as Authorization Code, but adds PKCE (Proof Key for Code Exchange) to prevent code interception. Recommended for native/mobile/public clients.
-- Refresh Token Grant: Lets the client refresh an expired access token without re-authenticating the user. Usually accompanies authorization code flow.
+- Authorization Code with PKCE: More security for authorization code for SPA and Mobile [Explained here](./passport/authorization_code_with_pkce.md)
+- Refresh Token Grant: client refresh an expired access token without re-authenticating the user. Usually accompanies authorization code flow.
