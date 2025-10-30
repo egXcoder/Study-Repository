@@ -8,6 +8,7 @@ It allows a third-party app to get limited access to a user’s data without eve
 - client_secret = abc123secret
 - redirect_uri = https://3rd-party-app.com/callback
 
+Tip: you can define multiple redirect urls in database by using comma `https://app.example.com/callback,https://staging.example.com/callback`
 
 ## User At 3rd party Start Process
 
