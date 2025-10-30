@@ -65,46 +65,16 @@ class User extends Authenticatable
 
 ## Authentication Methods (Grant Types)
 
-1- Personal Tokens [Explained here](./passport/personal_token.md)
+- Personal Tokens [Explained here](./passport/personal_token.md)
+- oauth2
 
 
+## Grant Types
 
+A grant type in OAuth2 defines how the client obtains an access token
 
-
-
-
-
-### Password Grant
-
-Used when your own frontend (e.g. Vue, React, mobile app) wants to authenticate a user directly using email/password. Your own SPA or mobile app (first-party clients).
-
-
-Example:
-
-```bash
-
-POST /oauth/token
-Content-Type: application/json
-
-{
-  "grant_type": "password",
-  "client_id": "3",
-  "client_secret": "your-client-secret",
-  "username": "john@example.com",
-  "password": "secret",
-  "scope": ""
-}
-
-
-```
-
-
-
-
-
-
-
-
-## Token Types
-
-### Personal Access Token
+- Password Grant: Legacy and discouraged [Explained here](./passport/password_grant.md)
+- Authorization Code Grant: The most secure and common flow — user logs in via browser, gets redirected to authorization server, which issues a short-lived code that your backend exchanges for an access token.
+- Authorization Code with PKCE: Same as Authorization Code, but adds PKCE (Proof Key for Code Exchange) to prevent code interception. Recommended for native/mobile/public clients.
+- Client Credentials Grant: Server-to-server
+- Refresh Token Grant: Lets the client refresh an expired access token without re-authenticating the user. Usually accompanies authorization code flow.
