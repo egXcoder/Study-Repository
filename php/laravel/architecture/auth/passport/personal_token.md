@@ -119,3 +119,41 @@ Passport::personalAccessTokensExpireIn(now()->addMonths(6));
 
 Tip: everytime createToken is called it will add a record in oauth_access_tokens even if its same name it will add two records
 
+
+### Pros and Cons
+
+Pros:
+- You can create a token directly without a full OAuth authorization code flow.
+- Fine-grained access control: using scopes
+
+Cons:
+- You may accumulate many active tokens: If a user logs in often and you issue a new token each time, the DB fills up and all tokens stay valid.
+- Security risk if leaked: Acts like a password: If someone steals the token, they can access the API until it expires or is revoked.
+- Logout doesn’t automatically revoke the token unless you code it.
+- Shouldn’t be used for frontend web apps — use Laravel Sanctum instead.
+
+Dont Use For
+| Situation                                 | Better Alternative                                               |
+| ----------------------------------------- | ---------------------------------------------------------------- |
+| A SPA app                                 | Use Sanctum (it manages cookies, CSRF, and sessions)             |
+| Frequent login/logout cycles              | Use session-based auth (web guard)                               |
+| Sensitive multi-user public API           | Use full OAuth2 authorization code grant                         |
+
+
+
+## Q: assume i have a bank account and i want to let a developer do some automated requests on my behalf, should issue personal token for him or use oauth2?
+
+you shouldnt issue a personal token because:
+- personal tokens are like passwords
+- if token is stolen by anyone, anyone can do requests on your behalf
+- once shared, it’s a security risk.
+
+typically, as long as its 3rd party software, you should go with `oauth2` route as it has more defence mechanisms as OAuth2 adds multiple layers of protection:
+- Short-lived tokens → limit time window of compromise.
+- Refresh tokens → allow renewing safely without re-login.
+- Scopes → limit permissions (“read only”, “transfer disabled”).
+- Client ID + Secret binding → token only valid for that specific app.
+- Revocation endpoints → user can revoke that app without affecting others.
+- PKCE (Proof Key for Code Exchange) → prevents interception during login.
+
+so oauth2 is more complex to setup but its safer and its the ideal way for 3rd party softwares
