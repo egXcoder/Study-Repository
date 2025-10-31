@@ -192,20 +192,28 @@ class Role extends Model {
 
 $cart = User::find(1);
 
-//Attaching (adding record to database to pivot table if its already there then add it again)
+//Attaching (always all) (if its already there then add it again)
 $user->roles()->attach($role); // attach one
 $user->roles()->attach($role->id); // attach one
 $user->roles()->attach([1, 2, 3]); // attach multiple roles with ids 1,2,3
 $user->roles()->attach(2, ['expires_at' => now()->addDays(30)]); // attach with extra pivot data
 
-//detaching (if exists multiple times then it will remove them all)
+//detaching (always remove) (if exists multiple times then it will remove them all)
 $user->roles()->detach($role);
 $user->roles()->detach($role->id); 
 
-// User currently has roles [1, 2, 3]
+//Syncing (always Keeps only the given records) 
+//User currently has roles [1, 2, 3]
 $user->roles()->sync([2, 4]); //this will make sure database has only 2,4 and remove otherwise
 
-// User currently has roles [1, 2, 3]
+// syncWithoutDetach (syncing without removing)
+//User currently has roles [1, 2, 3]
 $user->roles()->syncWithoutDetach([2, 4]); //user now will have 1,2,3,4
 
 ```
+
+Tip:
+- Attaching: always add (if its already there then add it again)
+- Detach: always remove (if exists multiple times then it will remove them all)
+- Sync: always keep only the given record
+- SyncWithoutDetach: sync without remove
