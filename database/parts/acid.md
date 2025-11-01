@@ -107,7 +107,7 @@ That’s the core tradeoff of durability.
 ### Techniques for Durability
 
 - Write-Ahead Log (WAL)
-    Most relational databases (PostgreSQL, MySQL InnoDB, SQL Server, etc.) use this. Instead of rewriting entire tables, the DB logs only the changes (deltas) to a special WAL file. The WAL is immediately flushed to disk before confirming the commit. If the database crashes, it can replay the WAL entries to restore the latest consistent state.
+    Most relational databases (PostgreSQL, MySQL InnoDB, SQL Server, etc.) use this. Instead of rewriting entire tables, the DB logs only the changes (deltas) to a special WAL file. When Transaction commit The WAL is immediately flushed to disk before db confirming the commit. If the database crashes, it can replay the WAL entries to restore the latest consistent state.
 
     Advantages:
     - Fast (sequential I/O)

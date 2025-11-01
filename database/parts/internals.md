@@ -230,7 +230,16 @@ Tip:if you have many indexes on a table, and you are doing updates even for not 
 
 Tip: because updating records is essentially adding data, postgres can have bloating as old tuple versions stay until vacuumed by a postgres command
 
+### WAL (Write Ahead Log)
 
+when transaction update and not committed yet.. it will create the new tuple in memory. then add it to wal in memory but dont persist it.. if database restart now.. he wont find the uncommitted tuples either in heap or wal because it didnt persist. till transaction commit. so wal is fsync into disk
+
+| Step | Component                | What happened                                                 | Persistent?           |
+| ---- | ------------------------ | ------------------------------------------------------------- | --------------------- |
+| 1    | **Shared buffers**       | New tuple version created in memory (not yet written to disk) | ❌ Lost on crash       |
+| 2    | **WAL buffers**          | WAL record describing the change created in memory            | ❌ Lost unless flushed |
+| 3    | **Heap files on disk**   | Not yet modified — still contain old version                  | ✅ Safe and unchanged  |
+| 4    | **COMMIT record in WAL** | ❌ Never written (you didn’t commit)                           | ❌ Missing             |
 
 
 ### Pros and Cons of Postgres or MMVC (multi version concurrent control) Model
