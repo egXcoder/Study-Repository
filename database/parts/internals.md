@@ -85,6 +85,14 @@ Each tuple stores:
     - xmin: transaction ID that created it
     - xmax: transaction ID that deleted/replaced it
 
+Tip: The word tuple comes from mathematics — specifically, from the idea of an ordered list of values.
+- Table: Likes(user_id, post_id, count)
+- Tuples:
+    - (1, 5, 3)
+    - (2, 8, 2)
+    - (3, 5, 1)
+
+
 ### Transaction Ids
 - Transaction IDs are sequential 32-bit integers.. 
 - XID start from 3 -> 4 billion
