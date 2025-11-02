@@ -146,6 +146,65 @@ Cleaning Up Old Commit Log Data:
 - committed tuples which are very old will take xmin = 2 and xid entries will be removed from the commit log
 
 
+### WAL (Write Ahead Log) in postgres / Redo Log in mysql
+
+#### Challenge
+- Even small changes in the database often modify multiple pages scattered across storage.
+- Flushing each changed page immediately to disk causes high I/O overhead, which can hurt performance and wear out the disk.
+- One might think: “Why not group multiple changes and flush them together?” — this would reduce I/O.
+- However, if the database crashes while these grouped changes are still in memory, data could be lost.
+- therefore, there is no escape from flushing into disk but it has to be very quick i/o and to be in one place
+- Therefore, flushing changes to disk cannot be avoided — it must happen safely, quickly, and in a sequential, centralized place.
+
+#### Solution
+- The WAL is an append-only log that records database changes sequentially.
+- It stores minimal information — typically the deltas (what has changed) since the last checkpoint.
+- WAL tracks committed changes: when a transaction commits, an entry is added to the WAL marking it as committed.
+- Periodically, the database applies WAL changes in batches to the main data files, improving I/O efficiency.
+- In case of a crash, the database can replay the WAL to redo committed changes, restoring the database to a consistent state.
+
+
+#### Q: what do you mean by checkpoint and how its set?
+
+a checkpoint is the point up to which all changes have been safely written to the data files.
+
+#### Q: when WAL is cleaned because surely its not going to grow forever?
+
+When Wal entries flushed to disk and a checkpoint is set .. these WAL entries can be truncated or recycled.
+
+#### Q: how WAL enries are truncated?
+- WAL is split into segments (or log files).
+- Database writes WAL entries sequentially into the current segment.
+- When a segment fills up, the database moves to the next segment to continue writing.
+- All changes in that segment have been persisted to the main data files (i.e., a checkpoint has been performed).
+- Once this is true, the segment can be marked as reusable for future WAL entries.
+
+
+#### Q: where uncommitted data is stored?
+Uncommitted changes are primarily stored in memory, specifically in the buffer pool in InnoDB.
+
+Tip: Even though uncommitted changes originated in memory, they can reach disk under normal operation.
+
+#### Q: is WAL tracks uncommitted data?
+WAL Tracks Both Uncommitted and Committed Changes
+- in InnoDB (or PostgreSQL), WAL entries are written, even if the transaction hasn’t committed yet.
+- on commit, a commit record is written into WAL. This marks all previous WAL entries for that transaction as committed.
+- During crash recovery: WAL is scanned sequentially.
+    - Entries for committed transactions are reapplied to the data files.
+    - Entries for uncommitted transactions are ignored / rolled back.
+
+#### Q: Why uncommitted data can reach disk?
+- Dirty pages flushed by background threads or checkpoints
+    - InnoDB periodically flushes dirty pages to reduce memory pressure and keep I/O smooth.
+    - These dirty pages may contain changes from uncommitted transactions.
+- Memory eviction
+    - If the buffer pool is full, the database must evict pages.
+    - Any dirty page must be written to disk, even if some transactions are still uncommitted.
+- Performance batching
+    - Writing pages to disk in batches is faster than writing every page immediately.
+    - This may include uncommitted changes.
+
+
 ### What Happens on Create?
 
 T1 create a record .. T1 xid = 101..
@@ -159,11 +218,11 @@ Row:
 lets suppose T1 didnt commit yet.. 
 - T1 run a query `select * from likes`
     - query is converted to `select * from likes where xmin<=101`
-    - it will find the new tuple, and do visibility check .. xmin = 101 which is my transaction id .. so show it
+    - it will find one tuple, and do visibility check .. xmin = 101 which is my transaction id .. so show it
 
 - T2 run a query `select * from likes`
     - query is converted to `select * from likes where xmin<=102`
-    - it will find the new tuple, and visibility check .. xmin = 101 .. hey commit log what is the status of xid=101? still in progress!! okay .. don't show it
+    - it will find one tuple, and visibility check .. xmin = 101 .. hey commit log what is the status of xid=101? still in progress!! okay .. don't show it
 
 lets support T1 commit now..
 - T2 run a query `select * from likes`
@@ -174,6 +233,7 @@ lets support T1 commit now..
 ### What Happens on UPDATE?
 - It doesn’t modify the row in place. just marks the old one as expired (xmax)
 - It creates a new tuple (new CTID)
+- it add entry in all indexes and mark old index as dead till vacuum later on which mark it as reusable
 
 T2 update record .. T2 xid = 102.. even before commit it will write to heap the below
 
@@ -226,20 +286,10 @@ When you create an index in PostgreSQL (e.g., on email), it create a structure l
 
 so when you lookup for email, first it will find possible keys and gather their ctid. then go and fetch them from heap
 
-Tip:if you have many indexes on a table, and you are doing updates even for not indexed column. you are going to touch all indexes which is bad and unncessary
+Tip:if you have many indexes on a table, and you are doing updates even for not indexed column. you are going to touch all indexes which is bad and unncessary unless you enable (heap only update)
 
-Tip: because updating records is essentially adding data, postgres can have bloating as old tuple versions stay until vacuumed by a postgres command
+Tip: because updating records is essentially adding data, postgres tends to always grow file size. vacuum try to oppose that by keeping size reusable as best as it can
 
-### WAL (Write Ahead Log)
-
-when transaction update and not committed yet.. it will create the new tuple in memory. then add it to wal in memory but dont persist it.. if database restart now.. he wont find the uncommitted tuples either in heap or wal because it didnt persist. till transaction commit. so wal is fsync into disk
-
-| Step | Component                | What happened                                                 | Persistent?           |
-| ---- | ------------------------ | ------------------------------------------------------------- | --------------------- |
-| 1    | **Shared buffers**       | New tuple version created in memory (not yet written to disk) | ❌ Lost on crash       |
-| 2    | **WAL buffers**          | WAL record describing the change created in memory            | ❌ Lost unless flushed |
-| 3    | **Heap files on disk**   | Not yet modified — still contain old version                  | ✅ Safe and unchanged  |
-| 4    | **COMMIT record in WAL** | ❌ Never written (you didn’t commit)                           | ❌ Missing             |
 
 
 ### Pros and Cons of Postgres or MMVC (multi version concurrent control) Model
@@ -248,25 +298,20 @@ Pros:
 - Readers Don’t Block Writers (and vice versa)
     - PostgreSQL is famous for this — SELECT queries don’t block INSERT/UPDATE/DELETE.
 
-- Each transaction works on its own version of the database, so it never sees “half-done” changes from others.
-
 - Fewer Locks & Deadlocks
-    - Because readers don’t take locks, lock contention is much lower. There are fewer cases of “deadlock detected” errors compared to traditional locking models.
+    - Because readers don’t take locks, lock contention is much lower. 
+    - There are fewer cases of “deadlock detected” errors compared to traditional locking models.
 
 Cons:
 - Storage Bloat: 
     - Every update creates a new version of a row, which increase table size rapidly.
 
 - Vacuum / Garbage Collection Overhead: 
-    
-    Dead tuples must be periodically cleaned up (in PostgreSQL by autovacuum). This process:
     - adds background I/O load
     - can fragment data and slow down sequential scans
     - needs careful tuning
 
-- VACUUM Lag Can Hurt Performance:
-
-    If autovacuum can’t keep up:
+- If No Vacuum:
     - tables become bloated
     - queries get slower
     - disk usage spikes
@@ -277,3 +322,111 @@ Cons:
 
 - Visibility Checks Add Minor CPU Overhead:
     - Every read must check: whether a row’s xmin (created by tx) and xmax (deleted by tx) are visible This adds a little logic to each read. Usually minor — but measurable at scale.
+
+
+
+## Mysql
+
+### MVCC
+
+The main goal of MVCC is to allow: Concurrent reads and writes without locking.
+
+
+InnoDB tables have hidden system columns for every row:
+
+| Column        | Description                                                               |
+| ------------- | ------------------------------------------------------------------------- |
+| `DB_TRX_ID`   | The ID of the transaction that last modified this row                     |
+| `DB_ROLL_PTR` | A pointer to the **undo log record** for the previous version of this row |
+| `DB_ROW_ID`   | A unique row ID (used internally if there’s no primary key)               |
+
+
+### Transaction Ids
+- InnoDB transaction IDs are sequential, monotonically increasing numbers.
+- Modern MySQL uses 64-bit trx IDs
+- wraparound is essentially impossible in normal use because its 64bit so possible max value of xid is enormous
+
+### Commit Log
+
+there is no separate commit log which track transactions (in progress, committed, rolledback, etc..) like postgres
+
+
+### Redo Logs (Similar to WAL of postgres)
+
+redo log is same idea of postgres WAL
+
+
+### Undo Logs
+
+store the previous versions of rows that are modified by transactions.
+
+- it Provide older versions of rows for consistent reads. So other transactions can see a snapshot of the database as it was before your update.
+
+- If a transaction rolls back, InnoDB uses the undo log to restore the row to its previous state.
+
+- Cleaning: When no active transaction needs an old version, the purge thread removes it.
+
+
+### What Happens on Create?
+
+T1 creates a record … T1 trx_id = 101
+
+Row (in buffer pool):
+- trx_id = 101 … created by T1
+- DB_ROLL_PTR → points to undo log (for rollback)
+- row data = { user_id=1, post_id=42 }
+
+
+Suppose T1 did not commit yet
+- T1 runs: SELECT * FROM likes
+    - Visibility check: row trx_id = 101 → created by T1 itself → show it
+- T2 runs: SELECT * FROM likes
+    - Visibility check: row trx_id = 101 → check in-memory transaction list → T1 still active / not committed → do not show it
+
+Suppose T1 commit
+- T2 runs: SELECT * FROM likes
+    - Visibility check: row trx_id = 101 → check in-memory transaction list → T1 committed → show it
+
+
+### What Happens on UPDATE?
+- Old row is copied to undo log to
+    - ability to rollback the heap to this version if transaction rollback
+    - other transactions can see this record
+- New row behavior:
+    - if it can fill within page it will be updated in place
+    - if it cant, then put it into another page, and put a pointer in the original location to point to the new location
+
+Tip: InnoDB uses a clustered index, meaning rows are physically stored in primary key order, which helps maintain sequential organization even when row versions move between pages.
+
+T2 updates a record … T2 trx_id = 102
+
+Old Row:
+- trx_id = 101 … created by T1
+- DB_ROLL_PTR → points to undo log for old version
+- row data = { user_id=1, post_id=42 }
+
+New Row:
+- trx_id = 102 … created by T2
+- DB_ROLL_PTR → points to undo log for rollback if T2 aborts
+- row data = { user_id=1, post_id=43 }
+
+Suppose T2 is not committed yet
+- T2 runs: `SELECT * FROM likes`
+    - Visibility check: latest row with trx_id = 102 → created by T2 → show it
+
+- T3 runs: `SELECT * FROM likes`
+    - Finds two rows (trx_id 101 and 102)
+    - Visibility check: latest row trx_id = 102 → T2 not committed → ignore
+    - Fallback to older row trx_id = 101 → committed → show this row
+
+lets suppose T2 committed
+- T3 runs: `SELECT * FROM likes`
+    - Latest row trx_id = 102 → committed → show this row
+
+When purge purge thread runs
+- delete old row versions by marking as reusable space
+- Any old row with trx_id = aborted → undo log cleaned → trx_id reset or row discarded
+
+
+## Q: it feels like mysql and postgres both are doing almost same thing in terms of mvcc
+yes, they are the same.. The main differences are where old versions are stored (in-place vs undo log) and how commits are tracked internally.
