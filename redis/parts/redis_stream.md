@@ -1,38 +1,37 @@
+## Redis Stream
+
 A Redis Stream is an append-only log where you add messages, and consumers can read them at their own pace.
 
 Example stream name: "mystream"
 
 When you add messages, each gets a unique ID.
 
-- [Basic Usage]
-    - `XADD mystream * user_id 123 action "login"` add a message
-        - xadd .. add a message
-        - mystream .. stream name
-        - * auto generate unique id (instead you can put your unique id manually but rarely  used)
-        - each message is key value pair message = {"user_id":123,"action":"login"}
-        - this command will return output of unique id of message = 1696512367893-0
+- `XADD mystream * user_id 123 action "login"` add a message to stream
+    - * auto generate unique id (instead you can put your unique id manually but rarely  used)
+    - each message is key value pair message = {"user_id":123,"action":"login"}
+    - this command will return output of unique id of message = 1696512367893-0
 
-    - `XREAD BLOCK 0 STREAMS mystream $` block untill message arrive, once message arrive it returns
-        - xread .. read message
-        - block 0 .. block forever ... (block 5000 block for 5 seconds)
-        - STREAMS mystream .. listen on this stream (can be multiple streams as well)
-        - $ after now (it can be 1696512323123-0 then its after this id)
+- `XREAD BLOCK 0 STREAMS mystream $` block untill message arrive, once message arrive it returns
+    - xread .. read message
+    - block 0 .. block forever ... (block 5000 block for 5 seconds)
+    - STREAMS mystream .. listen on this stream (can be multiple streams as well)
+    - $ after now (it can be 1696512323123-0 then its after this id)
 
-    - `XREAD STREAMS mystream 1696512360000-0` .. read messages >= 1696512360000-0 with no blocking, so read them now
+- `XREAD STREAMS mystream 1696512360000-0` .. read messages >= 1696512360000-0 with no blocking, so read them now
 
-    - `XRANGE mystream - +` read all messages from start to finish
-        - read from stream in range XRANGE <stream> <start-id> <end-id>
-        - (-) the earlies possible id
-        - (+) the latest possible id
-        - its dangerouse if stream has many messages
+- `XRANGE mystream - +` read all messages from start to finish
+    - read from stream in range XRANGE <stream> <start-id> <end-id>
+    - (-) the earlies possible id
+    - (+) the latest possible id
+    - its dangerouse if stream has many messages
 
-    - `XRANGE mystream - + COUNT 100` get only 100 then we are safe
+- `XRANGE mystream - + COUNT 100` get only 100 then we are safe
 
-    - `XREVRANGE mystream + - COUNT 100` .. latest 100 message .. read messages in reverse order from newest to oldest 
+- `XREVRANGE mystream + - COUNT 100` .. latest 100 message .. read messages in reverse order from newest to oldest 
 
-    - `XRANGE mystream 1696512355000-0 +` .. from id till latest
-    - `XRANGE mystream 1696512355000-0 1696512360000-0` .. from id to id
-    - `XRANGE mystream 1696512423123-0 1696512423123-0` .. read a specific message id
+- `XRANGE mystream 1696512355000-0 +` .. from id till latest
+- `XRANGE mystream 1696512355000-0 1696512360000-0` .. from id to id
+- `XRANGE mystream 1696512423123-0 1696512423123-0` .. read a specific message id
 
 - [Message Queue]
     - Idea:
@@ -70,7 +69,7 @@ When you add messages, each gets a unique ID.
         - `XPENDING mystream mygroup` .. give summary of pending messages
         - `XPENDING mystream mygroup - + 10` .. get 10 pending messages
 
-Q: i can open many listeners to stream using worker-1? then i can put like 10 workers and name them all worker 1?
+### Q: i can open many listeners to stream using worker-1? then i can put like 10 workers and name them all worker 1?
 
 You can technically start multiple listeners using the same consumer name. but that’s a BAD idea in Redis Streams
 - Redis sees them as one single consumer, not 10.
@@ -84,11 +83,10 @@ You can technically start multiple listeners using the same consumer name. but t
     Process B (same name) tries to ACK it
     If ACK happens twice → error or data inconsistencies
 
-Q: can i see the messages that not assigned to workers yet?
-Redis does not provide a direct command like: “Give me only undelivered messages”
-you have to run a script to extract them
+### Q: can i see the messages that not assigned to workers yet?
+Redis does not provide a direct command like: “Give me only undelivered messages”. you have to run a script to extract them
 
-Q: what should i do if worker failed to process message? should worker still acknowledge it?
+### Q: what should i do if worker failed to process message? should worker still acknowledge it?
 YES, in most real-world systems you should still XACK failed messages.. If you don’t ACK them, they will remain stuck in the pending list forever and never be reprocessed unless you explicitly reclaim or delete them.
 
 Best practice is:
@@ -99,7 +97,7 @@ Best practice is:
     - Store the message somewhere else (dead-letter queue/stream)
     - Then XACK so it no longer remains pending
 
-Q: now if stream keep getting messages, will it build up forever, or there is a way to shrink it later?
+### Q: now if stream keep getting messages, will it build up forever, or there is a way to shrink it later?
 
 By default, a Redis Stream will grow forever — every new XADD just keeps adding entries, and Redis won’t delete anything automatically.
 
@@ -110,7 +108,7 @@ By default, a Redis Stream will grow forever — every new XADD just keeps addin
     - `XTRIM mystream MAXLEN ~ 10000`
 
 
-Q: on real world scenarios, redis stream is difficult to debug?
+### Q: on real world scenarios, redis stream is difficult to debug?
 
 you are correct
 
@@ -128,7 +126,7 @@ You need to combine: XPENDING → only pending .. XRANGE → all messages
 
 
 
-Q: How Real-World Teams Make Streams Debug-Friendly (best they can)?
+### Q: How Real-World Teams Make Streams Debug-Friendly (best they can)?
 - Unique consumer names (worker-1, worker-2, etc...)
 - Use XACK religiously: Every message should be ACKed after handling, even failed ones (after logging or moving them).
 - Add monitoring around pending messages: `XPENDING mystream mygroup - + 100` Alert if too many pending messages pile up.
@@ -138,7 +136,7 @@ Q: How Real-World Teams Make Streams Debug-Friendly (best they can)?
 
 
 
-Q: why would i use redis stream, i feel it has many difficulies especially on debugging?
+### Q: why would i use redis stream, i feel it has many difficulies especially on debugging?
     - easy setup
     - fast performance
     - is presistence
