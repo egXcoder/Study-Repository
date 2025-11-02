@@ -324,6 +324,9 @@ Cons:
     - Every read must check: whether a row’s xmin (created by tx) and xmax (deleted by tx) are visible This adds a little logic to each read. Usually minor — but measurable at scale.
 
 
+#### Q: is postgres work with clustered index?
+- PostgreSQL tables are heap-organized by default, meaning rows are stored in insertion order, not sorted by any index.
+- Creating an index (primary or secondary) does not automatically sort the table. Indexes point to the ctid of the rows in the heap.
 
 ## Mysql
 
