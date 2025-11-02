@@ -7,5 +7,5 @@
 
 
 ## Sanctum and Passport
-
-- Sanctum [Explained here](./auth/sanctum.md)
+- Sanctum [Explained here](./sanctum/readme.md)
+- Passport [Explained here](./passport/readme.md)
