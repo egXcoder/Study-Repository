@@ -1,17 +1,13 @@
 # Auth
 
 
-### Authentication 
-- Are you a user? [Explained Here](./authentication/readme.md)
+- Are you a user? [Authentication](./authentication/readme.md)
 
-### Authorization.. 
-- if you are user, what permission you have?  [Explained Here](./authorization.md)
+- if you are user, what permission you have?  [Authorization](./authorization.md)
 
-### Sanctum 
-- [Explained here](./sanctum/readme.md)
+- [Sanctum](./sanctum/readme.md)
 
-### Passport 
-- [Explained here](./passport/readme.md)
+- [Passport](./passport/readme.md)
 
 
 ## Summary of Authentication Methods
