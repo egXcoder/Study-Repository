@@ -13,7 +13,38 @@
 
 
 
-## Summary:
+## Summary of Authentication Methods
+
+### Session Based
+
+- User authenticates using credentials.
+- Backend creates a session for the user.
+- Every request includes a cookie that references the session.
+- Sanctum
+
+
+### API Token
+- User authenticates using credentials.
+- A random token is generated and stored in users.api_token.
+- Client includes this token in each request for authentication.
+- One token per user; valid indefinitely unless revoked.
+- Laravel API guard
+
+
+### Sanctum API Token
+- User authenticates using credentials.
+- Generates a personal access token stored in personal_access_tokens.token.
+- Client includes this token in requests for authentication.
+- Users can have multiple tokens.
+- Tokens are valid indefinitely unless expiration rules are defined or revoked.
+- Uses Laravel Sanctum.
+- Sanctum
+
+### JWT Token
+- JWT holds inside it the necessary information to login like user_id
+- token is signed, so you cant amend data inside the token or generate your own token
+- Highly stateless by design. so you dont have to have session or storing api tokens in database
+- JWT package
 
 ### Personal Token
 - personal token acts exactly like your password
