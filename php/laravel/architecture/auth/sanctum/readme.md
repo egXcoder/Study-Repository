@@ -3,8 +3,8 @@
 Laravel Sanctum is an official Laravel package for API authentication, designed to be simple and lightweight. 
 
 ## Usage:
-- SPA Authentication (Session + CSRF) [Explained here](./spa.md)
-- API Token Authentication (mobile apps, Postman, etc.) [Explained here](./api.md)
+- [SPA Authentication (Session + CSRF)](./spa.md)
+- [API Token Authentication (mobile apps, Postman, etc.)](./api.md)
 
 
 ## Install
