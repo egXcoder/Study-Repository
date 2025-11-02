@@ -102,4 +102,12 @@ When purge purge thread runs
 
 
 ## Q: it feels like mysql and postgres both are doing almost same thing in terms of mvcc
-yes, they are the same.. The main differences are where old versions are stored (in-place vs undo log) and how commits are tracked internally.
+yes, they are the same in core idea.. The main differences are where versions are stored
+
+Mysql
+- old version stored in undo log
+- new version try to be in-place if row can fit in page otherwise be in different location and original location point to it 
+
+Postgres
+- old version kept in its location
+- new version is inserted into heap appending

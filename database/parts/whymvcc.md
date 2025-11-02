@@ -21,7 +21,7 @@ We need to control the concurrent access to rows
     - no readers can read the row.. prevent reading garbage or uncommitted data 
     - no writters can write on the row.. (prevent destroying the row binary data)
 
-Q: What is bad in locking model?
+### Q: What is bad in locking model?
 
 - Blocking & Reduced Concurrency
     - locking is very restrictive and hurt the performance by forcing other queries to block and wait
@@ -36,3 +36,47 @@ Q: What is bad in locking model?
     - Frequent locking and unlocking adds CPU overhead, especially for short transactions.
 
 Tip: this locking model is used in SQL Server
+
+
+## MVCC (Multi version Concurrency Control) (Optimistic Concurrency control)
+
+avoid locking and yet concurrency control
+
+### Core Concepts
+
+- Row Version
+    - Instead of updating a row in place, MVCC keeps multiple versions of the row.
+    - Each version represents the state of the row at a specific point in time.
+
+- Transaction IDs (TrxID / XID)
+    - Every transaction gets a unique ID.
+    - Each row version stores:
+    - Creation transaction ID (xmin in Postgres, stored in InnoDB undo log metadata)
+    - Deletion/expiry transaction ID (xmax in Postgres, or end-trx in undo log)
+    - These IDs are used to determine row visibility for each transaction.
+
+- Visibility Rules
+    - When a transaction reads a row, the database decides which version is visible:
+
+- Undo / Rollback Logs
+    - Old versions of updated or deleted rows are stored in undo logs (InnoDB) or heap (Postgres).
+    - Purpose:
+    - Let readers see previous versions.
+    - Rollback uncommitted changes if the transaction aborts.
+
+- Commit and WAL
+    - When a transaction commits:
+    - Its changes are marked as committed in the Write-Ahead Log (WAL) or redo log.
+    - New versions of rows become visible to other transactions.
+
+- Vacuum / Purge
+    - Over time, old row versions accumulate.
+    - Databases clean them up to save disk/memory:
+    - Postgres: VACUUM removes obsolete tuples.
+    - MySQL InnoDB: purge undo logs for committed transactions.
+
+### Key Benefits of MVCC
+- Readers don’t block writers → high read concurrency.
+- Writers don’t block readers → consistent snapshots.
+- No deadlocks for read-only queries (writes can still conflict).
+- Supports consistent snapshots for reporting and long-running queries.
