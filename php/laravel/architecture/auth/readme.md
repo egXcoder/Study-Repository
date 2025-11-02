@@ -20,8 +20,12 @@
 - anyone have your personal token can act as you straight away
 - personal token should always be used by the user himself. 
 - user shouldnt issue a personal token and give it to someone as its extermely risky
+- Laravel Passport
 
 ### Oauth2
+- OAuth 2.0 is a protocol that allows an application to access resources like APIs
+- Its always on behalf of a user except client credentials grant type
+- Laravel Passport
 
 #### Password Credentials
 - legacy and discouraged
