@@ -110,3 +110,36 @@ Tip: bloom filters acts as cheap early exit instead of going and do the heavy wo
     - Consider periodic REINDEX / OPTIMIZE TABLE to release fragmenation
 
 - Tip: UUIDv4 in okay as long as it’s not your clustered index (primary key).
+
+### Q: why uuidv4 shouldbe be used as clustered index?
+
+assume there is empty table
+- add record with uuid 11223344 .. it will be added to first page
+- add record with uuid 44221341 .. it will be added to first page after first record
+- now record with uuid 2234415  .. it will have to live with its data in middle between record 1 and record 2
+- lets extract page and see can we have the three records and we are still dont exceed page? hopefully yes
+- if not which is most likely to happen. now we have to split page to able to add record in between 
+
+### Q: assume page 1, page 2, page 3, page4 .. how can i split page 2?
+- Original Structure
+    - Page 1: [ 001 ... 099 ]
+    - Page 2: [ 100 ... 199 ]
+    - Page 3: [ 200 ... 299 ]
+    - Page 4: [ 300 ... 399 ]
+- Allocate a new page (call it Page 5)
+- Move half the rows from Page 2 into Page 5
+- Update the parent node to insert a new pointer and key boundary.
+    - Page 1: [ 001 ... 099 ]
+    - Page 2: [ 100 ... 149 ]
+    - Page 5: [ 150 ... 199 ]   <-- newly created
+    - Page 3: [ 200 ... 299 ]
+    - Page 4: [ 300 ... 399 ]
+
+So Two Main Reasons:
+- Inserting records is doing too much work unncessary because
+    - trying to put new record in the middle and possible page split
+- Now we lose the benefit of clustered index. when we query `select * from logs limit 100` 
+    - if sequentially clustered, database brings page 1,2,3 in one i/o operation into memory which helps to bring data quickly
+    - now, since page 5 is in middle of page 2,3 .. we loses the advantage of bringing multiple pages in one go.
+
+Tip: when database bring records from table, it doesnt fetch one page. but fetches multiple pages physically next to each other in one go

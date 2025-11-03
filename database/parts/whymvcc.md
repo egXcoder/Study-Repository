@@ -80,3 +80,22 @@ avoid locking and yet concurrency control
 - Writers don’t block readers → consistent snapshots.
 - No deadlocks for read-only queries (writes can still conflict).
 - Supports consistent snapshots for reporting and long-running queries.
+
+
+### Q: Why Transactions shouldn't be long?
+- Higher chances of conflicts:
+    - Deadlocks if multiple long transactions touch overlapping rows.
+
+- MVCC cleanup issues (Vacuum / Purge Thread)
+    - Long transactions prevent cleanup because: The database must preserve the old row versions for any transaction that started before the long transaction. which reduce functionality of vacuum (postgres) / Purge Thread in mysql
+    - Undo log in mysql is filled with old record versions till its committed
+
+- Recovery is slower
+    - database has to replay or roll back all uncommitted changes.
+
+- Human/logical reasons
+    - Long transactions are harder to reason about.
+
+- In systems using locks like sql server (even MVCC systems have some locks):
+    - Long transactions may hold row-level or table-level locks for a long time.
+    - Other transactions waiting on those locks stall, creating bottlenecks.

@@ -16,7 +16,9 @@ So when a database needs to read a single row, it actually loads the entire page
 
 ## I/O (Input/Output)
 
-An I/O is one read/write operation between disk and memory. Disk I/O is expensive, so databases aim to: Minimize how many pages they read and Reuse pages already in memory (via caching). A single I/O usually fetches multiple rows at once (the whole page).
+- An I/O is one read/write operation between disk and memory. 
+- Disk I/O is expensive, so databases aim to: Minimize how many pages they read and Reuse pages already in memory (via caching). 
+- A single I/O usually fetches multiple pages at once. thats why clustering table where data is stored physically sequential is favoured
 
 ## Clustered Table
 - table’s data itself is physically stored in the order of the index. (usually the primary key). 
