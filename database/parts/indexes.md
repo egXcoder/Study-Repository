@@ -65,3 +65,36 @@ Postgres allows adding “included columns” that are stored in the index, but 
 - Now the index contains everything the query needs — both grade and id — 
 - so PostgreSQL can serve the query without touching the table.
 - This is Known as Index Only Scan
+
+
+### Creating Index On Production
+- in `mysql 8`, by default creating index is `not blocking`
+- in `postgres`: creating index is `blocking`, but you can do `CREATE INDEX CONCURRENTLY idx_customer ON customers(customer_id);`
+
+How it works internally:
+- Phase 1 → Scans table and builds the index in the background. Writes during this time are tracked.
+- Phase 2 → Scans again to catch changes that happened while building. Finalizes and validates the index.
+- This double scan is why it’s slower but non-blocking.
+
+
+
+## Bloom Filter
+
+Let’s imagine you’re running a service that stores millions of usernames.
+
+You want to quickly check if a username exists without hitting the database each time (because that’s slow).
+
+### Creating bloom filter:
+- Create a bit array.. Example: 10 bits → [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+- insert username into bloom filter .. h("Ali")%10 = 9
+- bloom filter will be [0, 0, 0, 0, 0, 0, 0, 0, 1, 0]
+
+### Query:
+- is ali exists? h("Ali")%10 = 9 .. ali might exist .. its better if you query the database for it
+- is ahmed exists? h("Ali")%10 = 8 .. ahmed doesnt exist .. no need to query database. i am sure doesnt exist.
+
+Tip: if bloom filters are all filled with 1 bits, then its useless, for bloom filter to be useful you need to have 0s and 1s
+
+Tip: bloom filters acts as cheap early exit instead of going and do the heavy work. its like.. does this value might exist? should i bother and dig more?
+
+
