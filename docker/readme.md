@@ -164,6 +164,14 @@ nginx        latest    1234abcd       3 days ago      187MB
     - mount directory from host to container
     - `docker run -d -p 8080:80 -v /home/user/mywebsite:/usr/local/apache2/htdocs/ httpd`
 
+- `docker exec -it redis redis-cli`
+    - run a new command inside a running container.
+
+- `docker exec -u root -it myapp bash`
+    - run command inside a running container as root
+
+- `docker exec myapp cat /etc/nginx/nginx.conf`
+    - run one command to check configuration inside a container
 
 ### List Containers
 - `docker ps` .. list running containers
