@@ -10,3 +10,5 @@
 - Mysql [Explained Here](./parts/mysql/mvcc.md)
 
 ## Explain and Explain Analysis [Explained Here](./parts/explain.md)
+
+## Indexes [Explained Here](./parts/indexes.md)
