@@ -98,3 +98,15 @@ Tip: if bloom filters are all filled with 1 bits, then its useless, for bloom fi
 Tip: bloom filters acts as cheap early exit instead of going and do the heavy work. its like.. does this value might exist? should i bother and dig more?
 
 
+## UUID
+
+- Databases like ordered inserts.
+- Random UUIDs (v4) cause index fragmentation, page splits, and IO thrashing if used in clustered indexes
+- Sequential or semi-ordered IDs (e.g. UUIDv1, UUIDv7, ULID, Snowflake) preserve temporal order while staying globally unique.
+
+- If you must use UUIDv4:
+    - Don’t make it the clustered primary key.
+    - Use an autoincrement surrogate key or timestamp-based UUID for clustering.
+    - Consider periodic REINDEX / OPTIMIZE TABLE to release fragmenation
+
+- Tip: UUIDv4 in okay as long as it’s not your clustered index (primary key).
