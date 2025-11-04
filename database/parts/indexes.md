@@ -187,3 +187,13 @@ Pros:
 Cons:
 - duplicating key twice, one in internal nodes and again in leaf nodes
 - Even if your search key is found in an internal node, you still have to go down to the leaf to fetch the actual value.
+
+
+### Q: if i am putting a secondary index on uuid so that i want to always get it by single lookup rather than range. is their indexes will help me in mysql or postgres? or i should use b+tree anyway?
+
+Mysql InnoDB (default engine):
+- All secondary indexes are B+Trees, no exception.
+
+Postgres offers more index types, including:
+- btree (default)
+- hash: Optimized for equality (=) only, smaller, sometimes faster lookups
