@@ -136,8 +136,8 @@ assume there is empty table
     - Page 4: [ 300 ... 399 ]
 
 So Two Main Reasons:
-- Inserting records is doing too much work unncessary because
-    - trying to put new record in the middle and possible page split
+- Inserting records is doing too much work unncessary because of possible page split
+- all secondary indexes in mysql are storing primary index as well, and uuid size is big
 - Now we lose the benefit of clustered index. when we query `select * from logs limit 100` 
     - if sequentially clustered, database brings page 1,2,3 in one i/o operation into memory which helps to bring data quickly
     - now, since page 5 is in middle of page 2,3 .. we loses the advantage of bringing multiple pages in one go.
