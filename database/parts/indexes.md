@@ -157,6 +157,9 @@ Plain `B-Trees` are rarely used today except in low-level or academic contexts. 
 - Internal node [20] has a value too (B).
 - Leaf nodes also hold key/value pairs.
 
+Tip: top structure is degree of 3 .. 
+    - each node can contain up to 3 childs
+    - each node can contain up to 2 elements
 Pros:
 - Slightly faster lookup for a single key (fewer hops).
 
