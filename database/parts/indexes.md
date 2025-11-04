@@ -77,7 +77,6 @@ How it works internally:
 - This double scan is why it’s slower but non-blocking.
 
 
-
 ## Bloom Filter
 
 Let’s imagine you’re running a service that stores millions of usernames.
@@ -98,34 +97,40 @@ Tip: if bloom filters are all filled with 1 bits, then its useless, for bloom fi
 Tip: bloom filters acts as cheap early exit instead of going and do the heavy work. its like.. does this value might exist? should i bother and dig more?
 
 
-## UUID
+## UUID as clustered index
 
 - Databases like ordered inserts.
 - Random UUIDs (v4) cause index fragmentation, page splits, and IO thrashing if used in clustered indexes
-- Sequential or semi-ordered IDs (e.g. UUIDv1, UUIDv7, ULID, Snowflake) preserve temporal order while staying globally unique.
 
 - If you must use UUIDv4:
     - Don’t make it the clustered primary key.
-    - Use an autoincrement surrogate key or timestamp-based UUID for clustering.
+    - Use an autoincrement surrogate key or timestamp-based UUID for clustering like uuidv7
     - Consider periodic REINDEX / OPTIMIZE TABLE to release fragmenation
 
 - Tip: UUIDv4 in okay as long as it’s not your clustered index (primary key).
 
-### Q: why uuidv4 shouldbe be used as clustered index?
+### Q: why uuidv4 shouldn't be be used as clustered index?
+
+So Main Reasons:
+- Inserting records is doing too much work unncessary because of possible page split
+- all secondary indexes in mysql are storing primary index as well, and uuid size is big
+- Now we lose the benefit of clustered index. when we query `select * from logs limit 100` 
+    - if sequentially clustered, database brings page 1,2,3 in one i/o operation into memory which helps to bring data quickly
+    - now, since page 5 is in middle of page 2,3 .. we loses the advantage of bringing multiple pages in one go.
 
 assume there is empty table
 - add record with uuid 11223344 .. it will be added to first page
-- add record with uuid 44221341 .. it will be added to first page after first record
+- add record with uuid 44221341 .. it will be added after first record
 - now record with uuid 2234415  .. it will have to live with its data in middle between record 1 and record 2
 - lets extract page and see can we have the three records and we are still dont exceed page? hopefully yes
 - if not which is most likely to happen. now we have to split page to able to add record in between 
 
 ### Q: assume page 1, page 2, page 3, page4 .. how can i split page 2?
 - Original Structure
-    - Page 1: [ 001 ... 099 ]
-    - Page 2: [ 100 ... 199 ]
-    - Page 3: [ 200 ... 299 ]
-    - Page 4: [ 300 ... 399 ]
+    - Page 1: rows [ 001 ... 099 ]
+    - Page 2: rows [ 100 ... 199 ]
+    - Page 3: rows [ 200 ... 299 ]
+    - Page 4: rows [ 300 ... 399 ]
 - Allocate a new page (call it Page 5)
 - Move half the rows from Page 2 into Page 5
 - Update the parent node to insert a new pointer and key boundary.
@@ -135,11 +140,46 @@ assume there is empty table
     - Page 3: [ 200 ... 299 ]
     - Page 4: [ 300 ... 399 ]
 
-So Two Main Reasons:
-- Inserting records is doing too much work unncessary because of possible page split
-- all secondary indexes in mysql are storing primary index as well, and uuid size is big
-- Now we lose the benefit of clustered index. when we query `select * from logs limit 100` 
-    - if sequentially clustered, database brings page 1,2,3 in one i/o operation into memory which helps to bring data quickly
-    - now, since page 5 is in middle of page 2,3 .. we loses the advantage of bringing multiple pages in one go.
 
 Tip: when database bring records from table, it doesnt fetch one page. but fetches multiple pages physically next to each other in one go
+
+
+## B-Tree and B+Tree
+
+Plain `B-Trees` are rarely used today except in low-level or academic contexts. Almost every database and filesystem uses a `B+Tree`, because it’s better for range queries and sequential access.
+
+### B-Tree
+
+         [ 20,B ]
+        /        \
+ [10,A]         [30,C | 40,D]
+
+- Internal node [20] has a value too (B).
+- Leaf nodes also hold key/value pairs.
+
+Pros:
+- Slightly faster lookup for a single key (fewer hops).
+
+Cons:
+- range scans (like WHERE key BETWEEN 10 AND 40) are slower, because data is scattered across internal nodes and leaves.
+- putting the structure in memory is expensive because every element holds the key and value in same time not just key
+
+### B+Tree
+
+A B+Tree is a refinement of the B-Tree, optimized for storage systems. and used globally in database
+
+           [ 20 | 30 ]
+         /      |      \
+ [10,A] ->  [20,B] ->  [30,C | 40,D]
+
+- Internal nodes contain only keys (20, 30).
+- All data lives in the leaf nodes.
+- Leaf nodes are linked together (usually doubly linked) for fast range traversal.
+
+Pros:
+- Sequential access (range scans) is much faster, because all data is in linked leaves and point to each other
+- easier to put the keys structure in memory as it contains only key so less in space
+
+Cons:
+- duplicating key twice, one in internal nodes and again in leaf nodes
+- Even if your search key is found in an internal node, you still have to go down to the leaf to fetch the actual value.
