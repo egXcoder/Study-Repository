@@ -97,17 +97,18 @@ Tip: if bloom filters are all filled with 1 bits, then its useless, for bloom fi
 Tip: bloom filters acts as cheap early exit instead of going and do the heavy work. its like.. does this value might exist? should i bother and dig more?
 
 
-## UUID as clustered index
+## UUID as index
 
 - Databases like ordered inserts.
-- Random UUIDs (v4) cause index fragmentation, page splits, and IO thrashing if used in clustered indexes
+- Random UUID is bad
+    - it is the worse if used as clustered index as it causes index fragmentation, page splits
+    - it perform bad as secondary index because every insert always have to restructure the tree
 
 - If you must use UUIDv4:
     - Don’t make it the clustered primary key.
     - Use an autoincrement surrogate key or timestamp-based UUID for clustering like uuidv7
     - Consider periodic REINDEX / OPTIMIZE TABLE to release fragmenation
 
-- Tip: UUIDv4 in okay as long as it’s not your clustered index (primary key).
 
 ### Q: why uuidv4 shouldn't be be used as clustered index?
 
