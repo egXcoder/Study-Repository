@@ -98,12 +98,6 @@ Tip: select for update .. can hurt the performance greatly. its transaction must
 
 - Undo log in mysql is filled with old record versions till its committed
 
-- Recovery is slower
-    - database has to replay or roll back all uncommitted changes.
-
-- Human/logical reasons
-    - Long transactions are harder to reason about.
-
 - In systems using locks like sql server (even MVCC systems have some locks):
     - Long transactions may hold row-level or table-level locks for a long time.
     - Other transactions waiting on those locks stall, creating bottlenecks.
