@@ -3,6 +3,8 @@
 
 ## The Problem MVCC Solves
 
+Read and writes shoudlnt block each others
+
 Imagine multiple users accessing a database simultaneously:
 - User A wants to read a row.
 - User B wants to update the same row at the same time.
@@ -23,37 +25,28 @@ We need to control the concurrent access to rows
 
 ### Q: What is bad in locking model?
 
-- Blocking & Reduced Concurrency
-    - locking is very restrictive and hurt the performance by forcing other queries to block and wait
-- Deadlocks
-    - locking causes deadlocks when transactions wait each other 
-    - doing many locking causes many deadlocks
-- Blocking Readers
-    - reads can be blocked if a writer holds an exclusive lock. 
-    - This is inefficient, especially for read-heavy workloads.
-- Performance Overhead
-    - Every lock must be tracked in memory, which consumes resources.
-    - Frequent locking and unlocking adds CPU overhead, especially for short transactions.
+- locking and blocking hurt the performance by forcing other queries to block and wait
+- doing many locking increases possibilities of deadlocks
+- reads can be blocked if a writer holds an exclusive lock. This is inefficient, especially for read-heavy workloads.
+- Every lock must be tracked in memory, which consumes resources.
 
 Tip: this locking model is used in SQL Server
 
-
 ## MVCC (Multi version Concurrency Control) (Optimistic Concurrency control)
 
-avoid locking and yet concurrency control
+avoid locking and yet concurrency control using row versions. 
 
 ### Core Concepts
 
-- Row Version
-    - Instead of updating a row in place, MVCC keeps multiple versions of the row.
-    - Each version represents the state of the row at a specific point in time.
+- every write add a new row version while keeping old version to be read by previous transactions
+- Each version represents the state of the row at a specific point in time.
+- Each row version stores:
+    - Created By Transaction ID (xmin in Postgres, stored in InnoDB undo log metadata)
+    - Deletion/expiry By transaction ID (xmax in Postgres, or end-trx in undo log)
+    - These IDs are used to determine row visibility for each transaction.
 
 - Transaction IDs (TrxID / XID)
-    - Every transaction gets a unique ID.
-    - Each row version stores:
-    - Creation transaction ID (xmin in Postgres, stored in InnoDB undo log metadata)
-    - Deletion/expiry transaction ID (xmax in Postgres, or end-trx in undo log)
-    - These IDs are used to determine row visibility for each transaction.
+    - Every transaction gets a unique incremental ID.
 
 - Visibility Rules
     - When a transaction reads a row, the database decides which version is visible:
@@ -81,14 +74,29 @@ avoid locking and yet concurrency control
 - No deadlocks for read-only queries (writes can still conflict).
 - Supports consistent snapshots for reporting and long-running queries.
 
+### Q: what are the locks done in mvcc model?
+- [1] Update a row do Exclusive Lock which prevent other updates/deletes but reading is fine
+- [2] Explicit Shared Lock `SELECT ... FOR SHARE` .. prevent others writting to row but can read with no issue
+- [3] Explicit Exclusive Lock `SELECT ... FOR Update` .. prevent any read or write to row till it finish
+
+Tip: typical exclusive lock on this model is to prevent two updating same row in same time.. but reading is okay
+
+Tip: select for update .. can hurt the performance greatly. its transaction must be very short. because as long as transaction still open. if we are doing select * it will block. it feels almost like table is locked.
+
+### Q: How to Avoid Deadlocks?
+- Always lock rows in a consistent order (e.g., always by ascending ID).
+- Keep transactions short — the longer they run, the higher the chance of overlap.
+- Avoid unnecessary SELECT … FOR UPDATE unless you truly need it.
 
 ### Q: Why Transactions shouldn't be long?
-- Higher chances of conflicts:
-    - Deadlocks if multiple long transactions touch overlapping rows.
 
-- MVCC cleanup issues (Vacuum / Purge Thread)
-    - Long transactions prevent cleanup because: The database must preserve the old row versions for any transaction that started before the long transaction. which reduce functionality of vacuum (postgres) / Purge Thread in mysql
-    - Undo log in mysql is filled with old record versions till its committed
+- Deadlocks if multiple long transactions touch overlapping rows.
+
+- if you used `select for update` in a long transaction that will damage the performance.because as long as transaction still open. if we are doing select * it will block. it feels almost like table is locked.
+
+- Long transactions prevent cleanup because: The database must preserve the old row versions for any transaction that started before the long transaction. which reduce functionality of vacuum (postgres) / Purge Thread in mysql
+
+- Undo log in mysql is filled with old record versions till its committed
 
 - Recovery is slower
     - database has to replay or roll back all uncommitted changes.
