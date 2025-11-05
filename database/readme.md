@@ -26,3 +26,9 @@ Pros over mysql:
 
 Cons:
 - it tends to increase disk space more. postgres auto vacuum try to solve this. 
+
+
+## Mysql
+Pros over postgres:
+- tends to use less disk space
+- if you ever want to do sharding, there is a mature tool called vitess which is the best tool out there to implement sharding
