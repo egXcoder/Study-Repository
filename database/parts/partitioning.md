@@ -16,7 +16,7 @@ select * from orders where created_at>'2025-01-01' and id > 20000
 
 ## Query
 
-Tip: you should in all your select query to filter `where partition_key >= 'xyz'` .. then you can benefit from partitioning
+Tip: you should use `where partition_key >= 'xyz'` in all your queries .. then you can benefit from partitioning
 
 Tip: `WHERE created_at >= '2024-01-01'` works.. while `WHERE YEAR(created_at) = 2024` Does NOT prune partitions
 
@@ -162,7 +162,7 @@ We end up with two records of same email. which violates the Unique constrain in
 
 ### Solution
 
-Mysql could have redesigned partitioning to allow global state. but they felt its too much work and we rather keep it simple.
+Mysql could have redesigned partitioning to allow global state. so on creating the index it would create the index on each partition and in same time it would create it globally but mysql felt its too much work and it will take more space and we rather keep it simple.
 
 Mysql has decided, lets force developers to include partition key in unique index like the below
 
@@ -185,3 +185,33 @@ PARTITION BY RANGE (YEAR(signup_date)) (
 in my opinion: its bad and restrictive approach and it points to shallow implementations of partitioning in mysql
 
 Tip: primary key are considered unique keys as well, so partition key has to be included in primary key
+
+Tip: you can create ordinary secondary index as long as not unique with no issue
+  - in mysql, it will create index on each partition
+  - in postgres, it will create index on each partition + globally
+
+
+## Q: when would i favour parition over composite key?
+
+Both partitioning and indexing improve query performance — but they solve different problems.
+
+### Composite Index
+✅ Best when:
+- Table size is moderate (hundreds of thousands or a few million rows).
+- You query within the same dataset repeatedly `SELECT ... FROM logs WHERE created_at >= '2025-01-01';`
+- You mostly care about query speed, not data management.
+
+### Partitioning
+
+✅ Best when:
+- Table is very large (multi-million → billions rows).
+- You frequently query using time ranges: `SELECT ... FROM logs WHERE created_at >= '2025-01-01';`
+- Only relevant partitions are scanned. Others are skipped completely. (Partition pruning)
+- You need to drop or archive old data quickly: `ALTER TABLE logs DROP PARTITION p2022;` This is instant, whereas DELETE on a huge table is slow and creates bloat. Helps with maintenance (REINDEX, VACUUM, ANALYZE per partition).
+
+## Q: do you think is it better to create partition from start if i feel table is going to be multi million like logs? or wait till its multi million row?
+
+If you know the table will grow continuously and indefinitely (like logs), partition it from the start.
+
+🛑 Why not wait until it becomes huge, Once you hit tens of millions of rows:
+- Migration requires creating a partitioned table and moving data. which will block writes for hours till you migrate
