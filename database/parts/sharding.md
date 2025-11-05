@@ -141,7 +141,7 @@ Vitess is a database clustering and sharding system built on top of MySQL. It wa
 version: '3.3'
 
 services:
-  vtctld:
+  vtctld: # Web UI + Control Panel for vitess
     image: vitess/vtctld:latest
     ports:
       - "15000:15000"
@@ -151,7 +151,7 @@ services:
       - --topo_global_server_address=etcd:2379
       - --topo_global_root=/vitess/global
 
-  etcd:
+  etcd: #Distributed metadata store (key/value store) .. what shards exist .. what tablets exist .. vtgate routing rules
     image: quay.io/coreos/etcd:v3.4.15
     environment:
       ETCD_LISTEN_CLIENT_URLS: "http://0.0.0.0:2379"
@@ -159,7 +159,8 @@ services:
     ports:
       - "2379:2379"
 
-  vtgate:
+  #vtgate receives SQL queries and forwards them to the correct shard based on the sharding key (user_id, tenant_id, etc.).
+  vtgate: # Laravel app will connect to vtgate instead of connecting to MySQL directly. 
     image: vitess/vtgate:latest
     ports:
       - "15306:15306"   # MySQL client port
@@ -172,6 +173,8 @@ services:
       - --cells_to_watch=zone1
       - --tablet_types_to_wait=PRIMARY,REPLICA,READ_ONLY
 
+  #A MySQL instance controlled by Vitess (called a "tablet")
+  #Real MySQL database instances that store data  
   mysql:
     image: vitess/mysql:latest
 
