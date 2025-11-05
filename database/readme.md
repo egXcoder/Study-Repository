@@ -13,6 +13,9 @@
 
 ## Indexes [Explained Here](./parts/indexes.md)
 
+## Partitioning [Explained Here](./parts/partitioning.md)
+
+## Sharding [Explained Here](./parts/sharding.md)
 
 
 ## Postgres
