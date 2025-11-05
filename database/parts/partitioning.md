@@ -5,14 +5,21 @@ Partitioning is when a single logical table is split into smaller physical piece
 
 
 ## Why Partitioning Exists
-- Partitioning exists to handle very large tables efficiently.
-- When a table grows into hundreds of millions or billions of rows, several problems appear:
+- Partitioning exists to handle very large tables efficiently (+100 millions)
+- When a table grows (+100 millions) several problems appear:
 - Indexes become huge and slow to maintain.
 - Scanning becomes expensive.
 - Vacuuming / statistics collection becomes heavy.
 - Backup or restore operations take forever.
 
-select * from orders where created_at>'2025-01-01' and id > 20000
+Table Sizes:
+- (+10 Million) .. consider partition
+- (+100 Million) .. partition is highly recommended
+
+so its better to split this very large table into small tables(partitons) so queries be quicker and maintaining can be faster
+
+Tip: that all your queries should include filteration by partition key. otherwise you will scan all partitions
+Tip: in your typical updates you should avoid moving records from partition to another by avoid updating row partition key.
 
 ## Query
 
@@ -115,12 +122,13 @@ Tip: `insert into `orders` values(1,'b',null)` wont work.. because parition key 
 
 ### No Global Indexes
 
-All indexes are per partition, not global across the entire table.
+in mysql All indexes are per partition, not global across the entire table.
 
 That’s why the unique key restriction exists.
 
+Tip: in postgres, each partition gets its own physical index, and the parent index simply references those indexes. so no duplicate data for index happens. but get the benefit of checking uniquness globally so this restriction doesnt exist for postgres.
 
-### Primary/Unique Indexes problem
+### Primary/Unique Restriction problem
 
 MySQL's partitioning architecture is "partition first → index second"
 
@@ -188,7 +196,7 @@ Tip: primary key are considered unique keys as well, so partition key has to be 
 
 Tip: you can create ordinary secondary index as long as not unique with no issue
   - in mysql, it will create index on each partition
-  - in postgres, it will create index on each partition + globally
+  - in postgres, it will create index on each partition + manage global state
 
 
 ## Q: when would i favour parition over composite key?
