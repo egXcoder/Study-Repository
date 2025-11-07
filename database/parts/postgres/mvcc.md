@@ -7,26 +7,19 @@
 
 In old databases: To ensure data consistency, a transaction would lock rows (Pessmistic Concurrency Control)
 - Readers issue a shared lock on rows
-- Writters blocked till shared lock is released
-- ...............
-- Writers issue an exclusive lock on rows
-- Readers can't read till lock is released
+- Writters issue exclusive lock on rows
 
 In MVCC — “readers don’t block writers, writers don’t block readers” (Optimistic Concurrency control)
 - Readers dont issue locks
-- Writters can write while other readers reading
-- ...............
-- Writters issue an exclusive lock but only for other updates
-- Readers can read the old version till this one is committed
-
+- Writters issue a tiny lock only for other writters on same row
 
 it has become the prevailing approach in the design of modern relational database systems. such as PostgreSQL, Oracle, and MySQL (InnoDB)
 
 | Database                           | MVCC Implementation                                         |
 | ---------------------------------- | ----------------------------------------------------------- |
-| **PostgreSQL**                     | Native MVCC built into the core (xmin/xmax)                 |
-| **MySQL (InnoDB)**                 | MVCC inside the InnoDB storage engine (undo logs)           |
-| **Oracle**                         | MVCC via undo segments since the 1980s (very mature)        |
+| **PostgreSQL**                     | Native MVCC                                                 |
+| **MySQL (InnoDB)**                 | MVCC inside the InnoDB (undo logs)                          |
+| **Oracle**                         | MVCC since the 1980s (very mature)                          |
 | **Microsoft SQL Server**           | Optional (via READ_COMMITTED_SNAPSHOT / SNAPSHOT isolation) |
 
 
@@ -127,15 +120,11 @@ Cleaning Up Old Commit Log Data:
 a checkpoint is the point up to which all changes have been safely written to the data files.
 
 #### Q: when WAL is cleaned because surely its not going to grow forever?
-
-When Wal entries flushed to disk and a checkpoint is set .. these WAL entries can be truncated or recycled.
-
-#### Q: how WAL enries are truncated?
 - WAL is split into segments (or log files).
 - Database writes WAL entries sequentially into the current segment.
 - When a segment fills up, the database moves to the next segment to continue writing.
-- All changes in that segment have been persisted to the main data files (i.e., a checkpoint has been performed).
-- Once this is true, the segment can be marked as reusable for future WAL entries.
+- After certain time → checkpoint flushes dirty pages to data files
+- When a WAL segment becomes older than the last checkpoint, and no replica needs it: WAL segment is recycled (reused)
 
 
 #### Q: where uncommitted data is stored?

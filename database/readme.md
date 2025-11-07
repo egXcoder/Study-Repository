@@ -19,6 +19,8 @@
 
 ## Pooling [Explained Here](./parts/pooling.md)
 
+## Replication [Explained Here](./parts/replication.md)
+
 
 ## Postgres
 Pros over mysql:
