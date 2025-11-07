@@ -15,22 +15,24 @@ This wastes CPU/memory for heavy apps.
 
 ## How Octane Works
 
-- Laravel is booted once at worker start.
-- Subsequent HTTP requests reuse the same Laravel instance in memory.
-- This removes a lot of bootstrap overhead (autoloading, config loading, container bootstrapping).
-- Requests are still isolated, but bootstrapping is skipped.
+- Octane Manager
+-    ├── Worker #1 (Laravel loaded + DB connection reused)
+-    ├── Worker #2 (Laravel loaded + DB connection reused)
+-    ├── Worker #3
+-    └── Worker #4
+
+`php artisan octane:start --server=swoole --workers=8 --max-requests=500`
+
+| Setting            | Meaning                                            |
+| ------------------ | -------------------------------------------------- |
+| `workers=8`        | Spawn 8 Laravel worker processes                   |
+| `max-requests=500` | Restart worker every 500 requests (prevents leaks) |
 
 
 ## Performance
-
-- Much faster response times (especially for APIs and apps with many requests per second).
-- Eliminates the constant “reboot Laravel” overhead.
-
-Extra features
-
-- Background tasks, task workers, WebSockets (with Swoole).
-- Serving static files directly.
-- Tick tasks (periodic scheduled code).
+- Faster response time (50–200% faster).
+- Less CPU usage.
+- DB connections are reused (per worker).
 
 
 ## Drawbacks / Things to Watch
@@ -43,7 +45,7 @@ Unsupported packages
 - Code that caches things globally may cause strange bugs.
 
 Different deployment setup
-- You run php artisan octane:start instead of relying on Apache/Nginx + PHP-FPM.
+- You run php artisan octane:start instead of relying on PHP-FPM.
 - Still need a reverse proxy (Nginx) in front, usually.
 
 
@@ -57,12 +59,9 @@ Different deployment setup
 `php artisan octane:start --server=swoole --host=127.0.0.1 --port=8000`
 
 
-👉 So, Octane isn’t required for every Laravel project — but if you’re building high-performance APIs, real-time apps, or handling thousands of requests/sec, Octane gives you a serious boost.
-
-
 ## Memory Leaks Examples
 
-### Example 1
+### Example 1 (Static Variables)
 ```php
 
 class SomeService
@@ -77,15 +76,11 @@ class SomeService
 
 ```
 
-In PHP-FPM:
-- Every request starts with a fresh process.
-- The $cache array resets on each request.
-
 In Octane:
-- The array lives in memory across requests.
+- The $cache array lives in memory across requests (per worker).
 - Every request adds more items → memory grows without limit → leak.
 
-### Example 2
+### Example 2 (File Streams)
 
 ```php
 
@@ -97,11 +92,10 @@ Route::get('/leak', function () {
 });
 
 ```
-
 - Without Octane → process ends after request → OS closes file handle.
 - With Octane → file handles remain open → can exhaust system resources.
 
-### Example 3
+### Example 3 (Singleton Objects)
 
 ```php
 
@@ -126,25 +120,6 @@ Each request creates a new app → $count resets to 0 every request.
 
 With Octane:
 Singleton stays in memory → $count keeps incrementing → unexpected behavior and possible memory bloat.
-
-
-### Example 4
-
-```php
-// config/cache.php  .. 'driver' => 'array',
-Route::get('/users', function () {
-    $users = User::all(); // loads thousands of users
-    Cache::put('users', $users); // using array cache driver (in-memory)
-    return $users->count();
-});
-
-```
-
-In PHP-FPM: memory freed after request.
-
-In Octane: cached users collection stays in memory permanently. If it grows or is refreshed often, memory usage balloons.
-
-
 
 ## How to Prevent Leaks in Octane
 - Don’t rely on static properties for request-specific state.
