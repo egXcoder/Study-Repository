@@ -122,6 +122,10 @@ Offset-based performance issues (large tables)
 - Alternative: use chunkById() to iterate using the primary key, which avoids this problem.
 - Also chunkById() Ensures newly inserted rows are not included, since it iterate using the primary key
 
+Tip: ETL Jobs means 
+- Extract data from source (db)
+- Transform data into new shape
+- Load data into target (another db/table/place)
 
 
 ```php
