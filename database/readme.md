@@ -23,6 +23,8 @@
 
 ## Cursor [Explained Here](./parts/cursor.md)
 
+## Data Migration [Explained Here](./parts/data_migration.php)
+
 
 ## Postgres
 Pros over mysql:
