@@ -21,6 +21,8 @@
 
 ## Replication [Explained Here](./parts/replication.md)
 
+## Cursor [Explained Here](./parts/cursor.md)
+
 
 ## Postgres
 Pros over mysql:
