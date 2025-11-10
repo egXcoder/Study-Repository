@@ -40,3 +40,4 @@ Pros over postgres:
 - tends to use less disk space while postgress tends to consume more disk space however auto vacuum try to solve this
 - if you ever want to do sharding, there is a mature tool called vitess which is the best tool out there to implement sharding
 - every connection is a thread which is more lightweight and memory efficient while in postgres every connection is a process which consume cpu + more memory, but notice there should be a pooling anyway on high traffic websites then we dont keep close and reopen connections so overall its not the bad.
+- range queries on a clustered index are fast because rows are stored physically together. In PostgreSQL, updates create new tuples, scattering rows across pages. This can make range queries slower, since sequential IDs may be on non-contiguous pages.
