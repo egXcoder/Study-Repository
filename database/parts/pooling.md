@@ -26,3 +26,7 @@ in php applications, user make a request so a connection will open a database co
 - Pooling can be with middleware PHP -> DB Pooling -> DB
     - for Mysql .. ProxySQL
     - for Postgres .. PgBouncer
+
+## Things to watch for
+
+- one connection shouldnt be used by multiple clients in same time as it will lead to unexpected behavior. 
