@@ -68,6 +68,8 @@ Full Isolation means that concurrent transactions behave as if they were execute
     - Transactions execute sequentially
     - Prevents all 4 (Dirty, Non-repeatable, Phantom, Lost Update)
 
+Tip: Serializable in postgres, the two transactions are working without lock but if one of them written data the other one read. one of them will fail. while in mysql read and write do locks (shared lock + exclusive lock)
+
 
 ### Read Phenomena
 - Dirty Read: T1 reads a price updated by T2 before T2 commits — if T2 rolls back, T1 read invalid data.
