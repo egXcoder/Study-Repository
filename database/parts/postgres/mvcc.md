@@ -154,7 +154,7 @@ WAL Tracks Both Uncommitted and Committed Changes
 
 ### What Happens on Create?
 
-T1 create a record .. T1 xid = 101..
+T1 create a record .. xid = 101..
 
 Row:
 - ctid(3,17)
@@ -215,6 +215,16 @@ then vacuum run ..
 - i can see there is old tuple with xmax = 100, hey commit log, what is status of xid=100. aborted!! okay .. lets wipe this xmax then from this tuple to back to null
 
 
+### Visibility Map:
+
+as you can see above queries, you have to query for xmin<=xid while xmin live in heap with the tuple, so now we end up even if its index only scan we have to fetch data from heap to check if transaction can see it or not. to solve this postgres invented this visibility map
+
+The visibility map is a bitmap (one bit per heap page) that tracks whether all tuples on a page are visible to all active transactions.
+
+when you run postgres vacuum, a logic is run to keep visibility map up to date If all tuples on a page are visible to all active transactions, PostgreSQL marks that page as “all-visible” in the visibility map.
+
+Later operations (like index-only scans or HOT updates) can skip reading the heap for pages marked all-visible.
+
 ### How primary key operates in postgres?
 
 In PostgreSQL, all indexes — even the primary key — are non-clustered by design.
@@ -236,6 +246,15 @@ so when you lookup for email, first it will find possible keys and gather their 
 Tip:if you have many indexes on a table, and you are doing updates even for not indexed column. you are going to touch all indexes which is bad and unncessary unless you enable (heap only update)
 
 Tip: because updating records is essentially adding data, postgres tends to always grow file size. vacuum try to oppose that by keeping size reusable as best as it can
+
+### Q: Update a row in postgres, does that touch all indexes?
+yes, Every index that includes a column affected by the update must also be updated. 
+
+Even indexes not affected by the updated columns still store pointers to the row, so PostgreSQL needs to add a new entry pointing to the new tuple.
+
+Old index entries pointing to the old tuple remain until vacuum cleans them up.
+
+Tip: PostgreSQL 13+ has HOT updates (Heap-Only Tuple updates): If an UPDATE does not change indexed columns, PostgreSQL can sometimes avoid touching the indexes, writing only a new tuple in the heap. This improves performance significantly for updates that modify non-indexed columns.
 
 
 
