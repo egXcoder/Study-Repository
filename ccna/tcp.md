@@ -3,14 +3,14 @@
 ## 3 way handshake to init Connection:
 - Client "SYN"
     - Seq = 26651213412
-    - Rwnd = 64240
     - MSS = 1460 bytes
+    - Rwnd = 64240
 
 - Server "ACK and SYN"
     - ACK Number = 26651213413
     - Seq = 1234145520
-    - Rwnd = 62136
     - MSS = 1452 bytes
+    - Rwnd = 62136
 
 - Client "ACK"
     - ACK Number = 1234145521
@@ -107,3 +107,7 @@ Tip: cwnd doesnt show on wireshark, because its internal thing to the sender. se
 - Sender always send segments in order according to the byte stream
 - Receiver may receive buffers out-of-order segments
 - Receiver will reassemble them to get them back in order
+
+
+
+//TODO: you say 4 way handshake, but i saw only two??
