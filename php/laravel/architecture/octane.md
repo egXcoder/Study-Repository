@@ -40,6 +40,10 @@ Memory leaks
 - Since the app lives in memory, objects aren’t automatically destroyed each request.
 - Code must be written carefully (e.g. no static state that “accumulates”).
 
+Single-threaded workers
+- If a request takes a long time (e.g., heavy DB query, API call, or sleep), the worker is busy, and any subsequent requests assigned to this worker will wait.
+- If you start a transaction and forget to commit/rollback, the next request in the same worker can inherit that transaction state. This is why Laravel Octane provides the Octane::tick() and Octane::flush() helpers, and why it’s recommended to reset the DB state between requests.
+
 Unsupported packages
 - Some PHP libraries assume “shared nothing” model.
 - Code that caches things globally may cause strange bugs.
@@ -48,6 +52,11 @@ Different deployment setup
 - You run php artisan octane:start instead of relying on PHP-FPM.
 - Still need a reverse proxy (Nginx) in front, usually.
 
+
+Tip: How to mitigate slow requests
+- Increase the number of workers to handle more concurrent requests.
+- Offload slow tasks to queues or async jobs instead of processing them in the HTTP request.
+- Use Swoole coroutines (if using Octane with Swoole) for certain async operations like HTTP requests or I/O — the worker can continue processing other coroutines while waiting.
 
 
 ## Usage
