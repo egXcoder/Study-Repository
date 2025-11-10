@@ -31,7 +31,8 @@ Pros over mysql:
 - it can use multiple indexes on your select query while mysql always use one index
 - it can use multiple worker threads to fetch the data and do operations which increase performance while mysql uses one thread
 - It offers hash index which is optimized index for single lookup rather than B-tree which do range queries
-- on replicas, it dont take more disk space as replicas rely on WAL which is being written anyway while mysql create another log called binary logs which tends to take more disk space
+- on replicas, it dont take more disk space as replicas as it rely on WAL which is being written anyway while mysql create another log called binary logs which tends to take more disk space
+- it has support for native cursor if you want to keep your memory minimum while iterate, mysql though using unbuffered query which database execute the query and hold result on its memory but send it to php piece by piece. however though i think server-side batching is better than using cursor
 
 
 ## Mysql
