@@ -52,7 +52,7 @@ Tip: Sender keeps sending data regardless receiver sent ack or not
 ### Q: when sender is forced to stop and wait for ack?
 
 if sender exceeds min(rwnd, cwnd) . then he has to wait for receiver to ack
-- rwnd: is number of bytes suggested by receiver device that this is the maximum window he can send before wait for ack
+- rwnd: is number of bytes suggested by receiver device that this is maximum data you can send to fill my not-ack buffer memory
 - cwnd: is number of bytes dynamically evaluated by sender that this is the maximum window i can send without disturbing the hops 
 
 Tip: this number of bytes called effective window
@@ -113,7 +113,6 @@ Tip: Sometimes it can be 2-way close if the server has no more data to send at t
 - Sender always send segments in order according to the byte stream
 - Receiver may receive buffers out-of-order segments
 - Receiver will reassemble them to get them back in order
-
 
 
 ## Chunking
