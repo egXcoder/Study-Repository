@@ -74,3 +74,7 @@ CAP theorem explains why this trade-off exists.
 MongoDB’s “scales better” reputation is mostly about default operational model and developer convenience, not that MySQL/Postgres cannot scale.
 
 MySQL/Postgres often scale just as well once you put in the extra configuration and infrastructure, but it’s not automatic.
+
+## Q: In cap theorem, lets assume i dont want to tolerate partition.. is now i can have consistency and availability in same time?
+
+Yes — if you assume that network partitions will never happen, then you can have both Consistency (C) and Availability (A) at the same time. however, In real-world distributed systems: You cannot realistically eliminate partitions. Networks fail, nodes crash, switches go down. That’s why distributed systems have to choose between CA (consistency-availability during partitions), CP (consistency + partition tolerance), or AP (availability + partition tolerance).
