@@ -1,6 +1,6 @@
 ## BitMap Index Scan
 
-A bitmap index scan is a PostgreSQL optimization technique that speeds up queries that use multiple conditions on indexed columns especially when those conditions match many rows (not just a few).
+A bitmap index scan is a PostgreSQL optimization technique that speeds up queries that use multiple indexes
 
 - Run: `EXPLAIN SELECT * FROM grades WHERE student_id = 1001 AND term = 'Fall 2024';`
 
@@ -10,6 +10,11 @@ A bitmap index scan is a PostgreSQL optimization technique that speeds up querie
     - Index Scan on term → fetches 300k rows then filters by student_id — worse.
     - ✅ Bitmap Index Scan (Best) → combines both indexes efficiently.
 
+- Comment:
+    - it will scan index term and get the pages which have rows in bitmap
+    - it will scan index student_id and get the pages which have rows in bitmap
+    - it will and these bits .. to get the page numbers which here and there
+    - then will go to heap and fetch these pages
 
 - Output:
 ```sql
@@ -22,12 +27,6 @@ Bitmap Heap Scan on grades  (cost=105.25..510.85 rows=200 width=40)
               Index Cond: (term = 'Fall 2024')
 ```
 
-- Comment:
-    - it will scan index term and get the pages which have rows in bitmap
-    - it will scan index student_id and get the pages which have rows in bitmap
-    - it will and these bits .. to get the page numbers which here and there
-    - then will go to heap and fetch these pages
-
 - Bitmap structure:
     - bits are per row and grouped by pages for quickly comparsion
     - if there are 1m record in database, potentially you will have 1m bits
@@ -36,6 +35,7 @@ Bitmap Heap Scan on grades  (cost=105.25..510.85 rows=200 width=40)
     - Page 2: bits for 200 rows → 100000010010...
     - Page 3: bits for 200 rows → ...
 
+Tip: bitmap is per row, while visibility map is same structure but per pages
 
 ### In MySQL’s optimizer:
 - No bitmap index scans. 
