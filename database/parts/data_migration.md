@@ -3,7 +3,6 @@
 ## Why?
 
 - You want to refactor your database:
-    - Split a huge table into smaller, more manageable tables.
     - Change the schema (column types, collation) without downtime.
 
 - Partitioning
@@ -15,6 +14,23 @@
 
 
 ## How?
+
+### Direct ALTER (only if downtime is acceptable)
+
+### Column Moving (minimum impact)
+- create a new column of the desired type
+- create a trigger on insert or update it update the new column
+- move data from the old column to the new column
+- swap columns
+- remove trigger
+- drop old column optional
+
+### Shadow Table Technique
+- you create a new table with same original table structure
+- you amend the new table structure
+- migrate data from old table to the new table
+
+
 
 ### if table is small and you can go down for few minutes
 - Down the software, then no more insert or update to the original table
@@ -37,6 +53,8 @@
     - enable a database trigger to mirror table changes into new table
     - do another delta migration
     - link your application with the new table
+
+Tip: Zero-downtime always require a database trigger
 
 Tip: Triggers add write overhead. For high-volume tables, this may slow down inserts/updates till you move to the new table
 
