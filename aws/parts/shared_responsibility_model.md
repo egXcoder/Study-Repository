@@ -27,3 +27,7 @@ defines who is responsible for what in terms of security and operations.
 #### Summary:
 - AWS:    Physical security, hardware, infrastructure, virtualization
 - You:    OS config, apps, data, IAM, network configs
+
+#### Memory Trick
+- AWS protects the cloud.
+- You protect what you do in the cloud.
