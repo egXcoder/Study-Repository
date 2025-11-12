@@ -10,6 +10,8 @@
 
 ### IAM Service [Explained Here](./parts/iam_service.md)
 
+### CLI [Explained Here](./parts/aws_cli.md)
+
 
 ### Resource
 - Any Thing you can create in aws is called resource such as (user, policy, ec2, s3, ...)
