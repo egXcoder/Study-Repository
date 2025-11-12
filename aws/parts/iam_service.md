@@ -10,6 +10,11 @@
     - username + password + a link + mfa(optional) (recommended as easier)
 - account settings allow you to change your password policy for your iam users like uppercase, lowercase, min characters etc...
 
+### Account
+
+aws account is the registered aws account and it can have one root user + multiple IAM users
+
+
 ### Resources In IAM:
 
 1. Users
