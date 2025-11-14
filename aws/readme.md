@@ -12,6 +12,9 @@
 
 #### CLI [Explained Here](./parts/aws_cli.md)
 
+#### S3 [Explained Here](./parts/s3.md)
+
+#### EC2 [Explained Here](./parts/ec2.md)
 
 #### Resource
 - Any Thing you can create in aws is called resource such as (user, policy, ec2, s3, ...)
