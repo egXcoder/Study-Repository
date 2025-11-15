@@ -16,6 +16,8 @@
 
 #### EC2 [Explained Here](./parts/ec2.md)
 
+#### Code Commit (Deprecated) [Explained Here](./parts/codecommit.md)
+
 #### Resource
 - Any Thing you can create in aws is called resource such as (user, policy, ec2, s3, ...)
 - ARN (Amazon Resource Number) is assigned for any created resource and this number is unique through all aws
