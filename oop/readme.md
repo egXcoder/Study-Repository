@@ -36,7 +36,6 @@ These are 5 guidelines for designing maintainable OOP systems:
 - Dependency Inversion
 
 ## Cohesion vs Coupling
-
 - [Cohesion](./cohesion/readme.md) → how focused a class is internally.
 - [Coupling](./coupling/readme.md) → how much modules rely on each other externally.
 - 👉 Good design aims for high cohesion (each class does one thing well) and low coupling (class don’t heavily depend on each other, they depend to contract/interface not concrete implementation or pass value as paramter instead of passing whole class).
@@ -48,15 +47,14 @@ Tip: high cohesion doesnt automatically lead to loose couple, they are two diffe
 
 oop encourage modularity. hence composition. unless inheritance is short then its fine but if to grow then have to refactor it to composition.
 
-## [Identity And State](./identity%20and%20state/readme.md)
 
+## [Identity And State](./identity%20and%20state/readme.md)
 - identity is who the object is (unique reference, doesn’t change)
 - state is what the object currently knows/contains (changes over time).
 - Behavior often depends on state
 
 
 ## [Furps](./furps/readme.md)
-
 classify software quality:
 - F .. functionality
 - U .. usability (user experience)
