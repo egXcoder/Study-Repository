@@ -1,6 +1,5 @@
 # Composite Over Inheritance
 
-
 Both of them are ways to reuse code
 
 ## Inheritance
@@ -22,11 +21,11 @@ class SupplierUser extends User {
     function sendInvoice() {}
 }
 
-// Combining issue: What if a Supplier is also a Customer? PHP doesn’t allow multiple inheritance??
-// Explosion issue: What if you add a new role like Manager, Employee, Auditor? You’ll explode into dozens of subclasses.
+// SRP issue: what if i want to add more logic to User.. would User become god object?
+// OCP issue: what if i want to change User parent.. would i break childs? would all childs still follow parent contract?
 // LSP issue: what if we have APIUser .. he is not really user but he needs some code from User Parent to work
-// Change issue: what if i want to change User parent.. would i break childs? would all childs still follow parent contract?
-// Add issue: what if i want to add more logic to User.. would User become god object?
+// Explosion issue: What if you add more types like Manager, Employee, Auditor? You’ll explode into dozens of subclasses.
+// Combining issue: What if a Supplier is also a Customer? PHP doesn’t allow multiple inheritance??
 ```
 
 Relying on inheritance:
@@ -82,9 +81,9 @@ class User {
 }
 ```
 
-Tip: Strategy design pattern is the clearest way to follow composition. but composition idea are used by other patterns as well to do intersting things... actually most of design patterns are about composition.. maybe one or two is about inheritance (template method, Abstract Factory)
+Tip: Most of design patterns are about composition.. maybe one or two is about inheritance (template method, Abstract Factory)
 
-Tip: it doesnt have to be this or that.. inheritance can work with composition.. inheritance is very good as long as you keep it short..
+Tip:above example is command pattern
 
 
 ## Question

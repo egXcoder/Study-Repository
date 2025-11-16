@@ -1,18 +1,19 @@
 # SOLID 
+
 is a set of five design principles in object-oriented programming that help you write cleaner, more maintainable, and scalable code.
 
 
 S — Single Responsibility Principle (SRP)
-A class should have only one reason to change. Each class should focus on one job.
+A class should have only one reason to change. Each class should focus on one job. Avoid God Objects
 
 
 O — Open/Closed Principle (OCP)
-Software entities should be open for extension but closed for modification. You should be able to add new behavior without changing tested code.
+Software entities should be open for extension but closed for modification. You should be able to add new behavior without changing tested code. (stable and scalable)
 
 
 L — Liskov Substitution Principle (LSP)
 Subclasses should be substitutable for their base classes without breaking the program.
-If class B extends A, you should be able to use B wherever A is expected.
+If class B extends A, you should be able to use B wherever A is expected without program crash
 
 
 I — Interface Segregation Principle (ISP)
@@ -26,14 +27,9 @@ High-level modules shouldn’t depend on low-level modules; both should depend o
 
 
 
-# When SOLID Feels Harder than a God Object
+## When I do SOLID, I feel like I’m adding more parts to the code makes it harder to understand the relations between classes Meanwhile God objects are pretty straightforward.
 
-When I do SOLID, I feel like I’m adding more parts to the code, which makes it harder to understand the relations between classes.  Meanwhile, with smaller classes — even if they violate SRP, LSP, ISP — I can still understand them more easily.  
-God objects are pretty straightforward.
-
----
-
-## 😅 Why Does SOLID Feel Harder?
+### 😅 Why Does SOLID Feel Harder?
 
 - More files, more indirection  
   - With a God object, you just open one file and see everything.  
@@ -47,7 +43,7 @@ God objects are pretty straightforward.
 
 ---
 
-## 🚀 Why Is SOLID Still Valuable?
+### 🚀 Why Is SOLID Still Valuable?
 
 SOLID shines not in small codebases, but in growing systems:
 
@@ -61,14 +57,3 @@ SOLID shines not in small codebases, but in growing systems:
 ## ⚖️ Balanced Approach
 - For small projects or prototypes → A slightly fat class is fine. Don’t over-engineer.  
 - For long-living systems (e.g., Laravel apps with multiple features, tenants, integrations) → Splitting code with SOLID pays off over time.  
-
----
-
-## 💡 Practical Trick
-
-Start with simple classes.  
-When you Tip:  
-- One class changes too often for different reasons, or  
-- You can’t unit test it without booting the whole system,  
-
-👉 Then refactor using SOLID principles.  
