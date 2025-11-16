@@ -105,3 +105,5 @@ Once you create the template, launching a new EC2 server becomes a one-click or 
 
 
 Tip: User Data is bash script that runs when the instance is being launched for first time used to prepare your ec2 for your usage like install specific webservers/ databases etc...
+
+Tip: User Data runs as root by default. if you want user to run the command you can write `sudo -u ubuntu echo "hello"`
