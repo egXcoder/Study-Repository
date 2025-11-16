@@ -34,3 +34,4 @@ Practice:
 - build ec2 instance
 - build launch templates for ec2
 - build s3
+- build elastic load balancer
