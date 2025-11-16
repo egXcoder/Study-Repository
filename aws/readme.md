@@ -18,8 +18,19 @@
 
 #### Code Commit (Deprecated) [Explained Here](./parts/codecommit.md)
 
-#### EBS [Explained Here](./parts/ebs.md)
+#### EBS (Elastic Block Storage) [Explained Here](./parts/ebs.md)
+
+#### ELB (Elastic Load Balancer) [Explained Here](./parts/elb.md)
 
 #### Resource
 - Any Thing you can create in aws is called resource such as (user, policy, ec2, s3, ...)
 - ARN (Amazon Resource Number) is assigned for any created resource and this number is unique through all aws
+
+
+
+
+Practice:
+- add iam users with groups and policies
+- build ec2 instance
+- build launch templates for ec2
+- build s3
