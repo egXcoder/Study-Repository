@@ -19,10 +19,10 @@ You control:
 | AMI            | The image used to create the OS (Ubuntu, Amazon Linux, Windows…) |
 | Instance Type  | CPU & RAM configuration (e.g., t2.micro, m5.large)               |
 | EBS Volume     | Disk attached to the instance                                    |
-| Key Pair       | SSH password alternative for login                               |
+| SSH Key Pair   | SSH password alternative for login                               |
 | Security Group | Firewall (controls inbound/outbound access)                      |
 | Elastic IP     | Static public IP that doesn’t change                             |
-| ENI            | Network interface                                                |
+| VPC            | Network interface                                                |
 
 
 Tip: You can stop an instance anytime to reduce cost. When stopped: CPU/RAM billing stops but EBS storage continues.
@@ -83,3 +83,25 @@ Tip: above pricing model is for the ec2 itself however there are other resources
         | Data **out to internet**         | **Charged** (main network cost) |
         | Data between AZs                 | Charged                         |
 - Elastic IP -> Free as long as its running, but charged if it attached to stopped ec2 or detached from ec2
+
+
+### Launch Templates
+
+A Launch Template is a reusable configuration that contains the settings needed to launch an EC2 instance, such as:
+
+| Setting         | Example        |
+| --------------- | -------------- |
+| AMI             | Ubuntu 22.04   |
+| Instance Type   | t3.medium      |
+| Storage         | GP3 50GB       |
+| Security Groups | sg-web-01      |
+| Key Pair        | prod-keypair   |
+| Network         | VPC + Subnet   |
+| User Data       | startup script |
+| IAM Role        | EC2-role-app   |
+
+
+Once you create the template, launching a new EC2 server becomes a one-click or automated process.
+
+
+Tip: User Data is bash script that runs when the instance is being launched for first time used to prepare your ec2 for your usage like install specific webservers/ databases etc...
