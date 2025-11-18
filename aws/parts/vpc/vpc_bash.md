@@ -162,7 +162,171 @@ create_internet_gateway
 
 ```
 
-Tip: TODO::to explain AWK
+Tip: this backslash is required when you are splitting a command in multiple lines as bash read command line by line
+- bad
+    ```bash
+    # bash is going to read `aws ec2 create-internet-gateway` as a command 
+    #--region us-east-1 is another command . which gives syntax error
+    
+    igw_id=$(
+        aws ec2 create-internet-gateway 
+            --region us-east-1
+            --query "InternetGateway.InternetGatewayId"  
+            --output text
+    )
+    ```
+- good
+    ```bash
+    # \ is interpreted by bash as line continuation
+    igw_id=$(
+        aws ec2 create-internet-gateway \
+            --region us-east-1 \
+            --query "InternetGateway.InternetGatewayId" \  
+            --output text
+    )
+    ```
+
+
+### Attach Intenet Gateway to VPC
+
+```bash
+
+attach_igw_to_vpc(){
+    local attached_vpc_id=$(aws ec2 describe-internet-gateways \
+        --region us-east-1 \
+        --internet-gateway-ids $igw_id \
+        --query "InternetGateways[*].Attachments[*].VpcId" \
+        --output text
+    )
+
+    attached_vpc_id=$(echo $attached_vpc_id | awk '{print $1}')
+
+    if [ "$attached_vpc_id" == "" ]; then
+        attach_response=$(aws ec2 attach-internet-gateway \
+            --region us-east-1 \
+            --internet-gateway-id $igw_id \
+            --vpc-id $vpc_id
+        )
+
+        if [ "$attach_response" == "" ]; then
+            echo "Internet gateway is attached successfully"
+        else
+            echo "couldnt attach internet gateway"
+        fi
+    else
+        echo "Internet gateway is already attached to $attached_vpc_id"
+    fi
+}
+
+attach_igw_to_vpc
+
+```
+
+Tip: using aws cli you should always declare region explicitly then you dont get unexpected results
+
+Tip: `echo "12 13 14 15" | awk '{print $2}'` will give 13 
+Tip: `echo "12,13,14,15" | awk -F, '{print $2}'` will give 13 
+
+
+### Create Public and private route tables
+
+```bash
+
+create_route_tables()
+{
+    local is_rtb_exist=$(aws ec2 describe-route-tables \
+        --region us-east-1 \
+        --filters Name=tag:Name,Values=$1-devops90-rtb \
+        --query "RouteTables[*].RouteTableId" \
+        --output text
+    )
+
+    is_rtb_exist=$(echo $is_rtb_exist | awk '{print $1}')
+
+    if [ "$is_rtb_exist" == "" ]; then
+        rtb_id=$(aws ec2 create-route-table \
+            --region us-east-1 \
+            --vpc-id $vpc_id \
+            --tag-specifications ResourceType=route-table,Tags="[{Key=Name,Value=$1-devops90-rtb}]"  \
+            --query "RouteTable.RouteTableId" \
+            --output text
+        )
+
+        if [ "$rtb_id" == "" ]; then
+            echo "couldnt create route table"
+        else
+            echo "route table is created with id $rtb_id"
+        fi
+    else
+        rtb_id=$is_rtb_exist
+        echo "$1 route table exist already"
+    fi
+
+    if [ "$1" == "public" ]; then
+        is_success=$(aws ec2 create-route \
+        --region us-east-1 \
+        --route-table-id $rtb_id \
+        --destination-cidr-block 0.0.0.0/0 \
+        --gateway-id $igw_id \
+        --query "Return" \
+        --output text
+        )
+
+        if [ "$is_success" == "True" ]; then
+            echo "$1 Route is created successfully against route table"
+        else
+            echo "Error While Creating the Route"
+        fi
+    fi
+}
+
+create_route_tables public
+public_rtb_id=$rtb_id
+
+create_route_tables private
+private_rtb_id=$rtb_id
+
+```
+Tip: to compare strings
+- `if [ "$name" == "Ahmed" ]; then`
+- `if [ "$name" != "Ahmed" ]; then`
+- `if [ "$name" == "" ]; then`
+
+Tip: to compare numbers in if you can do 
+- `if [ $score -eq 90 ]; then`
+- `if [ $score -ne 90 ]; then`
+- `if [ $score -gt 90 ]; then`
+- `if [ $score -ge 90 ]; then`
+
+Tip: to check if file exist
+- `if [ -f "/etc/passwd" ]; then`
+- `if [ -d "/etc" ]; then`
+- `if [ -r "/etc/passwd" ]; then`
+- `if [ -w "/etc/passwd" ]; then`
+- `if [ -x "/etc/passwd" ]; then`
+
+### Attach route tables to subnets
+
+```bash
+
+attach_route_table_to_subnet()
+{
+    local var=$(aws ec2 associate-route-table --region us-east-1 --route-table-id $1 --subnet-id $2 --query "AssociationId" --output text)
+    if [ "$var" == "" ]; then
+        echo "Coudn't attach route table $1 to subnet $2"
+    else
+        echo "route table $1 is attached to subnet $2"
+    fi
+}
+
+attach_route_table_to_subnet $public_rtb_id $public_sub1_id
+attach_route_table_to_subnet $public_rtb_id $public_sub2_id
+
+attach_route_table_to_subnet $private_rtb_id $private_sub3_id
+attach_route_table_to_subnet $private_rtb_id $private_sub4_id
+
+```
+
 
 ### Q: when i wrote the bash file in notepad++ and try to execute it in window, its giving strange errors?
 
