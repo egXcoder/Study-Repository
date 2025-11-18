@@ -116,3 +116,29 @@ there are multiple ways depending on how many bits you would reserve for subnets
     - etc...
     - you can have 2^8 ~= 256 subnets
     - you can have ~= 256 hosts
+
+
+### Bastion Host
+
+It acts as a gateway or jump server to reach internal servers that are not directly exposed to the internet.
+
+- Purpose:
+    - Provides controlled and monitored access to private instances.
+    - Reduces the attack surface by only exposing one hardened host to the public.
+
+- Typical Setup:
+    - Place your bastion host in a public subnet with a public IP.
+    - Internal servers stay in private subnets without public IPs.
+    - Users SSH (or RDP) into the bastion host, then from there access private servers.
+
+- Security Best Practices:
+    - Limit access to the bastion host using security groups or firewalls (allow only specific IPs).
+    - Use key-based authentication (SSH keys) instead of passwords.
+    - Enable logging and monitoring to track all access.
+    - Optionally, implement MFA or jump-host session recording for auditing.
+
+- Optional Enhancements:
+    - Can be used as a SOCKS5 proxy for secure tunneling.
+    - Can integrate with AWS SSM Session Manager to avoid exposing even the bastion host publicly.
+
+In short, a bastion host is like a secure gatekeeper into your private network.
