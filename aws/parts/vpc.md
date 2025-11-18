@@ -19,8 +19,9 @@ A VPC is your own private network inside a cloud provider (AWS, Azure, GCP, etc.
 ### Flow
 - create a vpc and give it a cidr
 - create subnets for this vpc and give each a cidr
-- create route table and assign it to relevant subnets
-- create internet gateway and add a route to route table to direct traffic to igw
+- create route table to tell subnets how they can route traffics (default route table make subnets visible to each other) 
+- create internet gateway and attach it to vpc (its like adding a router to your vpc)
+- for subnets to send traffic to public, make a route in subnet routes table to traffic 0.0.0.0 to igw
 
 
 ## VPC
@@ -36,50 +37,52 @@ A VPC is your own private network inside a cloud provider (AWS, Azure, GCP, etc.
 
 ## Subnets
 
-- Each Subnet need to have a CIDR to represent the structure of ips inside the subnet
+Each Subnet need to have a CIDR to represent the structure of ips inside the subnet
+- Recommended Subnet CIDR
     - `10.0.1.0/24`
     - `10.0.2.0/24`
 
-- Each Subnet must be associated with a route table.
+- Each Subnet must be associated with a route table to tell subnet how it can route traffic
 
 Tip: when you add a subnet, it auto attach subnet with the default route tables in vpc
 
+Tip: for a subnet to access internet, you need to add a route in its route tables to say 0.0.0.0 traffic to igw
+
 ## Route Tables
 
-A route table in AWS controls how traffic moves inside a Subnet and outside it.
+A route table in AWS controls how traffic moves for a Subnet
 
 #### Public Route Table:
 
-| Destination | Target               |
-| ----------- | -------------------- |
-| 10.0.0.0/16 | local                |
-| 0.0.0.0/0   | igw-12345 → Internet |
+| Destination | Target                              |
+| ----------- | --------------------                |
+| 10.0.0.0/16 | local (subnet can see its vpc cidr) |
+| 0.0.0.0/0   | igw-12345 → Internet                |
 
+Tip: 0.0.0.0/0 means all ip addresses
+
+Tip: routes are matched in order
 
 #### Private Route Table:
 
-| Destination | Target                             |
-| ----------- | ---------------------------------- |
-| 10.0.0.0/16 | local                              |
-
-Tip: any one trying to reach device from network 10.0.0.0/16 then send traffic locally in vpc
-
-Tip: subnet with route table 10.0.0.0/16 this means, subnet can communicate with other subnets
+| Destination | Target                              |
+| ----------- | ----------------------------------  |
+| 10.0.1.0/24 | local (subnet can see only it self) |
 
 Tip: any one want to reach internet 0.0.0.0/0 then send traffic to internet gateway which is like router
 
 
 ## Internet Gateway
 
-is a VPC component that allows resources inside the VPC to access the Internet and be accessed from the Internet.
+is a VPC component that allow access to Internet, its like a router
 
 Each VPC can have one Internet Gateway by creating igw and attach it to vpc
-
 
 
 ### CIDR [Explained Here](./vpc/vpc_cidr.md)
 
 ### Bash [Explained Here](./vpc/vpc_bash.md)
+
 
 ### Subnetting
 
