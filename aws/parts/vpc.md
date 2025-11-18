@@ -77,7 +77,9 @@ Each VPC can have one Internet Gateway by creating igw and attach it to vpc
 
 
 
-### CIDR [Explained Here](./vpc_cidr.md)
+### CIDR [Explained Here](./vpc/vpc_cidr.md)
+
+### Bash [Explained Here](./vpc/vpc_bash.md)
 
 ### Subnetting
 
