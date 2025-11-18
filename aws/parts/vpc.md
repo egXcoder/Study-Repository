@@ -72,12 +72,19 @@ Tip: routes are matched in order
 Tip: any one want to reach internet 0.0.0.0/0 then send traffic to internet gateway which is like router
 
 
-## Internet Gateway
+### Internet Gateway
 
 is a VPC component that allow access to Internet, its like a router
 
 Each VPC can have one Internet Gateway by creating igw and attach it to vpc
 
+### NAT Gateway
+
+A NAT Gateway is a vpc component that allows instances in a private subnet to access the internet for updates, downloads, etc.. while keeping them unreachable from the internet.
+
+Tip: you still can request and response, but public world can't reach you
+
+Tip: almost all vpc components is free except NAT gateway costs money 
 
 ### CIDR [Explained Here](./vpc/vpc_cidr.md)
 
