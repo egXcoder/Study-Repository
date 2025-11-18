@@ -90,6 +90,7 @@ Tip: almost all vpc components is free except NAT gateway costs money
 
 ### Bash [Explained Here](./vpc/vpc_bash.md)
 
+### Firewall [Explained Here](./vpc/vpc_firewall.md)
 
 ### Subnetting
 
