@@ -26,6 +26,8 @@
 
 ### Route 53 [Explained Here](./parts/route53.md)
 
+### Cloud Watch [Explained Here](./parts/cloud_watch.md)
+
 
 #### Resource
 - Any Thing you can create in aws is called resource such as (user, policy, ec2, s3, ...)
