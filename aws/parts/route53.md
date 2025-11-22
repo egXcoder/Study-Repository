@@ -127,3 +127,21 @@ ahmedibrahim94.com.     300     IN      AAAA    2001:db8::8a2e:370:bab5
 ;; WHEN: Wed Nov 19 22:19:42 EET 2025
 ;; MSG SIZE  rcvd: 338
 ```
+
+
+### Pricing Model
+
+- Hosted Zones
+    - first 25 hosted zones: $0.50 per zone per month
+    - then $0.10 per zone per month
+
+    Tip: Delete unused hosted zones (especially before end of month) to avoid monthly fee. If deleted within 12 hours of creation you won’t be charged for the zone fee.
+
+- DNS Queries
+    - $0.40 per million queries
+
+    Tip: Alias records pointing to certain AWS services are free for the query itself.
+
+- Health Checks
+    - “basic” health checks $0.50 per health check per month
+    - Optional features (HTTPS, string matching, fast intervals) may add ~$1.00–2.00 per month per health check.
