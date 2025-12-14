@@ -53,6 +53,11 @@ oop encourage modularity. hence composition. unless inheritance is short then it
 - state is what the object currently knows/contains (changes over time).
 - Behavior often depends on state
 
+## [Value Object](./identity%20and%20state/value_object.md)
+- value object is defined by its value
+- its used to have more control on meanining, rules and gurantees
+- value object should be immutable to avoid bugs
+ 
 
 ## [Furps](./furps/readme.md)
 classify software quality:
