@@ -171,3 +171,98 @@ class Solution {
 ```
 
 --- 
+
+### in-place index marking (Flip Sign To Mark Presence)
+
+Example: Given an array of integers from 1->n, find all elements that appear twice.
+
+- Input:  [4,3,2,7,8,2,3,1]
+- Output: [2,3]
+
+```java
+
+for (int i=0;i<n;i++):
+    val = abs(arr[i])
+    if arr[val - 1] < 0:
+        # already negative → duplicate found
+        output.append(val)
+    else:
+        # flip sign to mark presence
+        arr[val - 1] = -arr[val - 1]
+
+```
+
+---
+
+### Character Counting Signature
+
+Given String = "eat" .. you can represent this word as character counting signature so that "eat","ate","eta","tae" has same signature
+
+```java
+String s = "eat";
+
+int[] ascii = new int[26];
+for(char c:s.toCharArray()){
+    ascii[c - 'a']++;
+}
+
+StringBuilder sb = new StringBuilder();
+for(int v:ascii){
+    sb.append(v + '_');
+}
+
+String signature = sb.toString(); //signature here
+
+
+
+//Another Way Faster but limited
+// Faster:
+//  as no object creation is needed
+//  no need to convert from integer to character as ascii is char[] already so converting it to string is straight forward
+// Limited:
+    // hard to debug if you try to print signature as it will show non-human readable characters rather than counting frequency
+    // can't have count of duplicate characters more than 65k as one chacater is maximum of 65,535 as of 16 bit 
+    // If somehow a single letter occurred > 65535 times: char would overflow modulo 65536, causing two different counts to map to the same char which can cause collision
+char[] ascii = new char[26];
+
+for(char c:s.toCharArray()){
+    ascii[c - 'a']++;
+}
+
+String signature = String.valueOf(ascii);
+
+```
+
+Example: Given an array of strings strs, group the anagrams together. You can return the answer in any order.
+
+- Input: strs = ["eat","tea","tan","ate","nat","bat"]
+- Output: [["bat"],["nat","tan"],["ate","eat","tea"]]
+
+Solution
+```java
+
+class Solution {
+    public List<List<String>> groupAnagrams(String[] strs) {
+        if(strs == null || strs.length == 0){
+            return new ArrayList<>();
+        }
+
+        HashMap<String,ArrayList<String>> map = new HashMap<>();
+        
+        for(String s : strs){
+            char[] ascii = new char[26];
+
+            for(char c:s.toCharArray()){
+                ascii[c - 'a']++;
+            }
+            
+            String key = String.valueOf(ascii);
+            
+            map.computeIfAbsent(key, k -> new ArrayList<>()).add(s);
+        }
+        
+        return new ArrayList<>(map.values());
+    }
+}
+
+```
