@@ -320,7 +320,7 @@ class Solution {
 
 ```
 
-### State Maintenance while looping
+### Keep Track of Smallest and Second Smallest
 
 Example: Given an integer array nums, return true if there exists a triple of indices (i, j, k) such that i < j < k and nums[i] < nums[j] < nums[k]. If no such indices exists, return false.
 
@@ -333,6 +333,18 @@ Example: Given an integer array nums, return true if there exists a triple of in
 // [6,7,5] 8 ..
 // if [6,7,5] have middle .. this means there was a smallest whatever it is
 // if 8 is bigger than middle then we found a solution
+
+// [1,7,5,4] .. minimum Middle = 4 because of 1,4 pair
+    // int smallest = Integer.MAX_VALUE;
+    // int middle = Integer.MAX_VALUE;
+    // for(int x : nums){
+    //     if(x <= smallest){
+    //         smallest = x ;
+    //     }
+    //     else if(x <= middle){
+    //         middle = x ;
+    //     }
+    // }
 
 class Solution {
     public boolean increasingTriplet(int[] nums) {
