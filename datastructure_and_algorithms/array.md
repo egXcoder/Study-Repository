@@ -319,3 +319,43 @@ class Solution {
 }
 
 ```
+
+### State Maintenance while looping
+
+Example: Given an integer array nums, return true if there exists a triple of indices (i, j, k) such that i < j < k and nums[i] < nums[j] < nums[k]. If no such indices exists, return false.
+
+
+- Input: nums = [6,7,5,8]
+- Output: true .. as of [6,7,8]
+
+```java
+
+// [6,7,5] 8 ..
+// if [6,7,5] have middle .. this means there was a smallest whatever it is
+// if 8 is bigger than middle then we found a solution
+
+class Solution {
+    public boolean increasingTriplet(int[] nums) {
+        int smallest = Integer.MAX_VALUE;
+        int middle = Integer.MAX_VALUE;
+
+        for(int x : nums){
+            //if number more than middle, then we found a solution
+            if(x > middle){
+                return true;
+            }
+
+            //maintain middle value and always try to minimize it
+            if(x <= smallest){
+                smallest = x ;
+            }
+            else if(x <= middle){
+                middle = x ;
+            }
+        }
+
+        return false;
+    }
+}
+
+```
