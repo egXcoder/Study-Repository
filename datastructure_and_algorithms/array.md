@@ -447,3 +447,77 @@ class Solution {
 }
 
 ```
+
+
+### Iterative with Boundary Tracking of 2d matrix
+
+You maintain four variables: top, bottom, left, right .. and shrink them as you traverse each side.
+
+You think of the matrix as concentric rectangles (“layers”) and traverse each layer in order: right → down → left → up.
+
+```java
+
+int left = 0, right = n-1, top = 0, bottom = m-1;
+while(left <= right && top <= bottom){
+    // Right
+    for(int j=left; j<=right; j++) result.add(matrix[top][j]);
+    top++;
+    // Down
+    for(int i=top; i<=bottom; i++) result.add(matrix[i][right]);
+    right--;
+    // Left
+    for(int j=right; j>=left; j--) result.add(matrix[bottom][j]);
+    bottom--;
+    // Up
+    for(int i=bottom; i>=top; i--) result.add(matrix[i][left]);
+    left++;
+}
+```
+
+
+Example: Given an m x n matrix, return all elements of the matrix in spiral order.
+
+- Input: matrix = [
+                   [1,2,3],
+                   [4,5,6],
+                   [7,8,9]
+                ]
+- Output: [1,2,3,6,9,8,7,4,5]
+
+```java
+
+public List<Integer> spiralOrder(int[][] matrix) {
+    List<Integer> result = new ArrayList<>();
+    if (matrix == null || matrix.length == 0) return result;
+
+    int left = 0, right = matrix[0].length - 1;
+    int top = 0, bottom = matrix.length - 1;
+
+    while (left <= right && top <= bottom) {
+        // Go Right
+        for (int j = left; j <= right; j++) result.add(matrix[top][j]);
+        top++;
+
+        // Go Down
+        for (int i = top; i <= bottom; i++) result.add(matrix[i][right]);
+        right--;
+
+        // Go Left
+        if (top <= bottom) {
+            for (int j = right; j >= left; j--) result.add(matrix[bottom][j]);
+            bottom--;
+        }
+
+        // Go Up
+        if (left <= right) {
+            for (int i = bottom; i >= top; i--) result.add(matrix[i][left]);
+            left++;
+        }
+    }
+
+    return result;
+}
+
+```
+
+---
