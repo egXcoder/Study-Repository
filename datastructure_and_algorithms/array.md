@@ -371,3 +371,79 @@ class Solution {
 }
 
 ```
+
+
+### Prefix Product
+
+```java
+
+//build
+long[] prefix =  new long[n.length+1];
+prefix[0] = 1
+for i from 1 to n:
+    prefix[i] = prefix[i - 1] + arr[i - 1]
+
+
+// get product of sub array between left,right including
+product(left, right) = prefix[right + 1] / prefix[left]
+
+```
+
+---
+
+### Suffix Product (less common since in most cases prefix would do)
+
+in suffix product: suffix[i] = nums[i] × nums[i+1] × ... × nums[n-1]
+
+```java
+// [1,2,3,4]
+// [24,24,12,4,1] .. suffix
+//build
+long[] suffix =  new long[n.length+1];
+suffix[n] = 1
+for i from n-1 to 0:
+    suffix[i] = suffix[i + 1] * arr[i]
+
+
+// get product of sub array between left,right including
+product(left, right) = suffix[left] / suffix[right + 1]
+
+```
+
+Example: Given an integer array nums, return an array answer such that answer[i] is equal to the product of all the elements of nums except nums[i].
+
+- Input: nums = [1,2,3,4]
+- Output: [24,12,8,6]
+- You must write an algorithm that runs in O(n) time and without using the division operation.
+
+
+```java
+
+class Solution {
+    public int[] productExceptSelf(int[] nums) {
+        //build prefix product O(n)
+        int[] prefix = new int[nums.length+1];
+        prefix[0] = 1;
+        for(int i=1;i<nums.length;i++){
+            prefix[i] = prefix[i-1] * nums[i-1];
+        }
+        
+        //build suffix product O(n)
+        int[] suffix = new int[nums.length+1];
+        suffix[nums.length] = 1;
+        for(int i=nums.length-1;i>=0;i--){
+            suffix[i] = suffix[i+1] * nums[i];
+        }
+        
+        int[] output = new int[nums.length];
+        for(int i=0;i<nums.length;i++){
+            int productBefore = prefix[i];
+            int productAfter = suffix[i+1];
+            output[i] = productBefore * productAfter; 
+        }
+        
+        return output;
+    }
+}
+
+```
