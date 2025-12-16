@@ -582,20 +582,37 @@ Example: Array represent vertical lines height, take two lines to form a contain
 - Output: 49
 - Explanation: max area of water falls between i=1 and i=8 = (8-1) * min(8,7) = 7 * 7 = 49
 
-
 Solution:
-- Area = (right-left) * minimum height
-- if we put two pointers one at start of array and one at the end. we have guranteed term (right-left) is the maximum.
-- if we move any or both pointers toward each other. term (right-left) will reduce which mean area will be reduced
-- the only potential for area to increase is that minimum height to increase
+- Goal: Maximize the area.
+    - Area = (right - left) * min(height[left], height[right])
+
+- Challenge: Area depends on two dimensions:
+    - Width = (right - left)
+    - Height = min(height[left], height[right])
+    - Considering both together directly is hard.
+
+- Strategy: Fix one dimension first.
+    - Place left and right pointers at the start and end of the array.
+    - This guarantees the width (right-left) is maximal.
+    - Now the problem reduces to finding the maximum possible height for this width.
+
+- Iteration:
+    - Compute the area with current left and right.
+    - Move the pointer corresponding to the shorter line, shrinking the width by one.
+    - Recompute the maximum height for the new width.
+
+- Repeat:
+    - Continue shrinking the width while always trying to increase the height.
+    - Track the largest area found along the way.
 
 Steps:
 - if we put left and right at begining and end... Area = (8-0) * min(1,7) = 8 * 1 = 8
 - current minimum height is 1, more area means bigger minimum height
 - keep right at 7 and see if we moved left pointer is that can increase the minimum height and hence bigger area?
 
-```java
 
+
+```java
 class Solution {
     public int maxArea(int[] height) {
         int left = 0;
