@@ -539,6 +539,7 @@ Solution:
 - For nums3 + nums4, look for complement
 - Uses 2 nested loops instead of 4
 - Complexity is O(n^2) instead of O(n^4)
+- if its 5 arrays, you would split it for 2 arrays and 3 arrays so it would be O(n^2) and O(n^3)
 
 
 ```java
