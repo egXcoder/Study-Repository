@@ -639,3 +639,151 @@ class Solution {
 
 ```
 ---
+
+
+### In-place update using encoded states
+Example: Game of Life .. Given the current state of the board, update the board to reflect its next state. that you do not need to return anything. 
+
+The board is made up of an m x n grid of cells, where each cell live = 1 or dead = 0. Each cell interacts with its eight neighbors (horizontal, vertical, diagonal) using the following four rules:
+- Any live cell with fewer than two live neighbors dies as if caused by under-population.
+- Any live cell with two or three live neighbors lives on to the next generation.
+- Any live cell with more than three live neighbors dies, as if by over-population.
+- Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction.
+
+- Input: board = [[0,1,0],
+                [0,0,1],
+                [1,1,1],
+                [0,0,0]]
+- Output:  [[0,0,0],
+            [1,0,1],
+            [0,1,1],
+            [0,1,0]]
+
+
+- Below Solution is using Space of O(m * n) because we need to capture new state for output and in same time keep copy of old state for checking...
+
+- to reduce space usage we can store old state and new state in same cell using two bits instead of one bit 
+    - x x = new_state old_state
+    - board[ni][nj] & 1 .. comparing last bit .. LSB (least significant bit) .. for example 4 & 1 .. 10(0) & 00(1) = 0
+    - board[i][j] >>= 1 .. shifting one bit to right .. 4>>1 .. 100 >> 1 = 010 = 2
+    - (board[i][j] & 1) << 1; .. extract first bit and shift it to left
+    - board[i][j] |= (board[i][j] & 1) << 1; write second bit on left given original second bit was 0
+    - board[i][j] |= 2 (10); .. explicit write second bit with 1
+    - board[i][j] &= 1 (01); .. explicit write second bit with 0
+    - board[i][j] &= ~2 is anding with 2 complement .. 2 is 000010 while ~2 is 111101
+
+```java
+class Solution {
+    public void gameOfLife(int[][] board) {
+        int[][] output = new int[board.length][board[0].length];
+        
+        int[][] dirs = {
+            {1,0},
+            {-1,0},
+            {0,1},
+            {0,-1},
+            {1,1},
+            {1,-1},
+            {-1,1},
+            {-1,-1}
+        };
+        
+        for(int i=0;i<board.length;i++){
+            for(int j=0;j<board[0].length;j++){
+                int neighbourLiveCount = 0;
+            
+                for(int[] dir : dirs){
+                    int ni = i + dir[0];
+                    int nj = j + dir[1];
+                    
+                    if(ni>=0 && nj>=0 && ni<board.length&&nj<board[0].length){
+                        if(board[ni][nj] == 1){
+                            neighbourLiveCount++;
+                        }
+                    }
+                }
+                
+                output[i][j] = board[i][j];
+                
+                if(output[i][j] == 1 && neighbourLiveCount<2){
+                    output[i][j] = 0;
+                }
+                else if(output[i][j] == 1 && neighbourLiveCount>3){
+                    output[i][j] = 0;
+                }
+                else if(output[i][j] == 0 && neighbourLiveCount==3){
+                    output[i][j] = 1;
+                }
+            }
+        }
+        
+        
+        //copy output into board
+        for(int i=0;i<board.length;i++){
+            for(int j=0;j<board[0].length;j++){
+                board[i][j] = output[i][j];
+            }
+        }
+    }
+}
+
+```
+
+
+```java
+class Solution {
+    public void gameOfLife(int[][] board) {
+        int[][] dirs = {
+            {1,0},
+            {-1,0},
+            {0,1},
+            {0,-1},
+            {1,1},
+            {1,-1},
+            {-1,1},
+            {-1,-1}
+        };
+        
+        for(int i=0;i<board.length;i++){
+            for(int j=0;j<board[0].length;j++){
+                int neighbourLiveCount = 0;
+            
+                for(int[] dir : dirs){
+                    int ni = i + dir[0];
+                    int nj = j + dir[1];
+                    
+                    if(ni>=0 && nj>=0 && ni<board.length&&nj<board[0].length){
+                        if((board[ni][nj] & 1) == 1){
+                            neighbourLiveCount++;
+                        }
+                    }
+                }
+                
+                //board[i][j] & 1 .. get old state
+                //shift old state to bit to left
+                //or second bit with board cell to write new state bit
+                board[i][j] |= (board[i][j] & 1) << 1;
+                
+                if((board[i][j] & 1) == 1 && neighbourLiveCount<2){
+                    board[i][j] &= 1; //write new state bit with 0
+                }
+                else if((board[i][j] & 1) == 1 && neighbourLiveCount>3){
+                    board[i][j] &= 1; //write new state bit with 0
+                }
+                else if((board[i][j] & 1) == 0 && neighbourLiveCount==3){
+                    board[i][j] |= 2; //write new state bit with 1
+                }
+            }
+        }
+        
+        
+        //prepare board to be finalized
+        for(int i=0;i<board.length;i++){
+            for(int j=0;j<board[0].length;j++){
+                board[i][j] >>= 1; //shift one bit to right
+            }
+        }
+    }
+}
+
+```
