@@ -573,3 +573,53 @@ class Solution {
 ```
 
 --- 
+
+### Greedy + Monotonic Reasoning (Two Pointers)
+
+Example: Array represent vertical lines height, take two lines to form a container, such that the container contains the most water.
+
+- Input: height = [1,8,6,2,5,4,8,3,7]
+- Output: 49
+- Explanation: max area of water falls between i=1 and i=8 = (8-1) * min(8,7) = 7 * 7 = 49
+
+
+Solution:
+- Area = (right-left) * minimum height
+- if we put two pointers one at start of array and one at the end. we have guranteed term (right-left) is the maximum.
+- if we move any or both pointers toward each other. term (right-left) will reduce which mean area will be reduced
+- the only potential for area to increase is that minimum height to increase
+
+Steps:
+- if we put left and right at begining and end... Area = (8-0) * min(1,7) = 8 * 1 = 8
+- current minimum height is 1, more area means bigger minimum height
+- keep right at 7 and see if we moved left pointer is that can increase the minimum height and hence bigger area?
+
+```java
+
+class Solution {
+    public int maxArea(int[] height) {
+        int left = 0;
+        int right = height.length -1;
+        int maxArea = 0;
+        while(left<right){
+            int area = (right - left) * Math.min(height[left],height[right]);
+            
+            if(area>maxArea){
+                maxArea = area;
+            }
+            
+            
+            //potential to find bigger area only exist if we could find bigger minimum height
+            if(height[left]<height[right]){
+                left++;
+            }else{
+                right--;
+            }
+        }
+        
+        return maxArea;
+    }
+}
+
+```
+---
