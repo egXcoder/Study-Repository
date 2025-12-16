@@ -521,3 +521,54 @@ public List<Integer> spiralOrder(int[][] matrix) {
 ```
 
 ---
+
+### Hash map + pair-sum reduction (meet-in-the-middle)
+
+Example: Given four integer arrays nums1, nums2, nums3, and nums4 all of length n, return the number of tuples (i, j, k, l) such that: 0 <= i, j, k, l < n and nums1[i] + nums2[j] + nums3[k] + nums4[l] == 0
+
+- Input: nums1 = [1,2], nums2 = [-2,-1], nums3 = [-1,2], nums4 = [0,2]
+- Output: 2
+-Explanation:
+    The two tuples are:
+    1. (0, 0, 0, 1) -> nums1[0] + nums2[0] + nums3[0] + nums4[1] = 1 + (-2) + (-1) + 2 = 0
+    2. (1, 1, 0, 0) -> nums1[1] + nums2[1] + nums3[0] + nums4[0] = 2 + (-1) + (-1) + 0 = 0
+
+
+Solution:
+- Compute sums of nums1 + nums2
+- For nums3 + nums4, look for complement
+- Uses 2 nested loops instead of 4
+- Complexity is O(n^2) instead of O(n^4)
+
+
+```java
+class Solution {
+    public int fourSumCount(int[] nums1, int[] nums2, int[] nums3, int[] nums4) {
+        // Map to store sum of pairs from nums1 and nums2 -> frequency
+        Map<Integer, Integer> sumCount = new HashMap<>();
+
+        // Step 1: Compute all sums of nums1 and nums2
+        for (int a : nums1) {
+            for (int b : nums2) {
+                int sum = a + b;
+                sumCount.put(sum, sumCount.getOrDefault(sum, 0) + 1);
+            }
+        }
+
+        int count = 0;
+
+        // Step 2: For each sum of nums3 and nums4, find complement
+        for (int c : nums3) {
+            for (int d : nums4) {
+                int target = -(c + d);
+                count += sumCount.getOrDefault(target, 0);
+            }
+        }
+
+        return count;
+    }
+}
+
+```
+
+--- 
