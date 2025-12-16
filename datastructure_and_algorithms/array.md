@@ -611,7 +611,6 @@ Steps:
 - keep right at 7 and see if we moved left pointer is that can increase the minimum height and hence bigger area?
 
 
-
 ```java
 class Solution {
     public int maxArea(int[] height) {
