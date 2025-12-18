@@ -787,3 +787,43 @@ class Solution {
 }
 
 ```
+
+---
+
+### Sequence Start Detection
+
+Example: Given an unsorted array of integers nums, return the length of the longest consecutive elements sequence.
+
+- Input: nums = [100,4,200,1,3,2]
+- Output: 4
+- Explanation: The longest consecutive elements sequence is [1, 2, 3, 4]. Therefore its length is 4.
+
+
+```java
+
+public int longestConsecutive(int[] nums) {
+    Set<Integer> set = new HashSet<>();
+    for (int num : nums) {
+        set.add(num);
+    }
+
+    int longest = 0;
+
+    for (int x : set) {
+        // only start counting if this is the beginning
+        if (!set.contains(num - 1)) {
+            int count = 1;
+
+            while (set.contains(x + 1)) {
+                x++;
+                count++;
+            }
+
+            longest = Math.max(longest, count);
+        }
+    }
+
+    return longest;
+}
+
+```
