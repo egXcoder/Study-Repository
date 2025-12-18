@@ -827,3 +827,70 @@ public int longestConsecutive(int[] nums) {
 }
 
 ```
+
+---
+
+### Detect Cycle (Floyd’s Tortoise and Hare (Cycle Detection))
+
+Floyd’s cycle detection:
+    - slow = tortoise (1 step)
+    - fast = hare (2 steps)
+    - if there is a cycle, its guranteed tortoise will catch hare at some point in the cycle
+    - if no cycle..hare will beat the slow in the contest and it will end being slow!=fast
+    - it can work for linkedlist and array to detect cycle
+
+```java
+
+do {
+    slow = nums[slow]; //Tortoise (1 step)
+    fast = nums[nums[fast]]; //hare (2 steps)
+} while (slow != fast);
+
+```
+
+Find Beginning of cycle (part of floyd logic)
+- if we reset slow at head and move tortoise and hare each one step we will reach cycle entry
+- its logic is mathemtically proved by floyd
+
+```java
+
+// Phase 2: find cycle entry
+slow = nums[0];
+while (slow != fast) {
+    slow = nums[slow];
+    fast = nums[fast];
+}
+
+```
+
+
+Example: Given an array of integers nums containing n + 1 integers where each integer is in the range [1, n] inclusive. There is only one repeated number in nums, return this repeated number.
+
+- Input: nums = [1,3,4,2,2]
+- Output: 2
+
+
+```java
+class Solution {
+    public int findDuplicate(int[] nums) {
+        int slow = nums[0];
+        int fast = nums[0];
+
+        // Phase 1: detect cycle
+        do {
+            slow = nums[slow];
+            fast = nums[nums[fast]];
+        } while (slow != fast);
+
+        // Phase 2: find cycle entry
+        slow = nums[0];
+        while (slow != fast) {
+            slow = nums[slow];
+            fast = nums[fast];
+        }
+
+        return slow;
+    }
+}
+
+```
