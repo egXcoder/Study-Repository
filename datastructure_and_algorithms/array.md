@@ -833,11 +833,11 @@ public int longestConsecutive(int[] nums) {
 ### Detect Cycle (Floyd’s Tortoise and Hare (Cycle Detection))
 
 Floyd’s cycle detection:
-    - slow = tortoise (1 step)
-    - fast = hare (2 steps)
-    - if there is a cycle, its guranteed tortoise will catch hare at some point in the cycle
-    - if no cycle..hare will beat the slow in the contest and it will end being slow!=fast
-    - it can work for linkedlist and array to detect cycle
+- slow = tortoise (1 step)
+- fast = hare (2 steps)
+- if there is a cycle, its guranteed tortoise will catch hare at some point in the cycle
+- if no cycle..hare will beat the slow in the contest and it will end being slow!=fast
+- it can work for linkedlist and array to detect cycle
 
 ```java
 
@@ -866,9 +866,20 @@ while (slow != fast) {
 
 Example: Given an array of integers nums containing n + 1 integers where each integer is in the range [1, n] inclusive. There is only one repeated number in nums, return this repeated number.
 
+You must solve the problem without modifying the array nums and using only constant extra space.
+
 - Input: nums = [1,3,4,2,2]
 - Output: 2
 
+Solution:
+- you have array of length 5 with indexes 0,1,2,3,4 .. 5 nodes
+- each node can have only one outgoing edge
+- since array numbers are 1->4.. then we know each number can point to an index
+- since its guranteed that there is one duplicate, so we know there is one index will have two ingoing edges to it
+- hence, 5 nodes.. each has one outgoing edge.. one has two ingoing edge ... MUST BE A CYCLE
+- so cycle detection can solve it
+
+Tip: in-place flip sign would work but since problem dont want to modify the array nums. so you have to work it using detect cycle approach
 
 ```java
 class Solution {
@@ -890,6 +901,121 @@ class Solution {
         }
 
         return slow;
+    }
+}
+
+```
+
+### One-Pass Calculation
+
+Example: Given a string s which represents an expression, evaluate this expression and return its value
+
+- Input: s = " 3+5 / 2 * (1/2) - 1 "
+- Output: 5
+
+```java
+// simple version, input dont have parenthesis
+public int calculate(String s) {
+    if (s == null || s.length() == 0) return 0;
+
+    Stack<Integer> stack = new Stack<>();
+    int num = 0;
+    char sign = '+'; // default operator before first number
+
+    for (int i = 0; i < s.length(); i++) {
+        char c = s.charAt(i);
+
+        if (Character.isDigit(c)) {
+            num = num * 10 + (c - '0'); // build number
+        }
+
+        // if operator or last char
+        if ((!Character.isDigit(c) && c != ' ') || i == s.length() - 1) {
+            if (sign == '+') {
+                stack.push(num);
+            } else if (sign == '-') {
+                stack.push(-num);
+            } else if (sign == '*') {
+                stack.push(stack.pop() * num);
+            } else if (sign == '/') {
+                stack.push(stack.pop() / num); // integer division truncates toward 0
+            }
+            sign = c;
+            num = 0;
+        }
+    }
+
+    // sum all numbers in the stack
+    int result = 0;
+    for (int n : stack) result += n;
+    return result;
+}
+
+```
+
+
+```java
+// input has parentheses
+class Solution {
+    public int calculate(String s) {
+        s = s.replaceAll("\\s+","");
+        
+        return calculate(s.toCharArray(),0,s.length()-1);
+    }
+
+    protected int calculate(char[] s,int start, int end){
+        int num = 0;
+        char sign = '+';
+        Stack<Integer> stack = new Stack();
+        
+        for(int i=start;i<=end;i++){
+            char c = s[i];
+            
+            if(Character.isDigit(c)){
+                num = num * 10 + (c-'0');
+            }
+
+            if (c == '(') {
+                // find the matching ')'
+                int j = i, count = 0;
+                for (; i < s.length; i++) {
+                    if (s[i] == '(') count++;
+                    if (s[i] == ')') count--;
+                    if (count == 0) break;
+                }
+
+                // evaluate the sub-expression inside parentheses recursively
+                num = calculate(s,j + 1, i-1);
+            }
+            
+            if((!Character.isDigit(c) && c!=')') || i == end){
+                switch(sign){
+                    case '+':
+                        stack.push(num);
+                        break;
+                    case '-':
+                        stack.push(-num);
+                        break;
+                    case '*':
+                        stack.push(stack.pop() * num);
+                        break;
+                    case '/':
+                        stack.push(stack.pop()/num);
+                        break;
+                }
+                
+                sign = c;
+                num = 0;
+            }
+        }
+        
+        //sum stack values
+        int output = 0;
+        for(int x: stack){
+            output += x;
+        }
+        
+        return output;
     }
 }
 
