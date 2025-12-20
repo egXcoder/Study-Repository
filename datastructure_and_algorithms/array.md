@@ -930,7 +930,7 @@ public int calculate(String s) {
         }
 
         // if operator or last char
-        if ((!Character.isDigit(c) && c != ' ') || i == s.length() - 1) {
+        if (!Character.isDigit(c) || i == s.length() - 1) {
             if (sign == '+') {
                 stack.push(num);
             } else if (sign == '-') {

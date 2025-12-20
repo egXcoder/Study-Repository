@@ -75,7 +75,7 @@ public ListNode oddEvenList(ListNode head) {
 
 ###  Intersection of Two Linked Lists
 
-Example: Find Intersection
+Example: Find Intersection (meeting point either value if intersection or null if no intersection)
 
 - Input: listA = [4,1,8,4,5], listB = [5,6,1,8,4,5]
 - Output: Intersected at '8'
@@ -91,12 +91,10 @@ Idea:
     - x1 represents a1,a2
     - x2 represents b1,b2,b3
     - x3 represents c1,c2,c3
-    - a/b pointer moves respectively x1 + x3 + x2 = x2 + x3 + x1
-    - they will meet at intersection when a and b equal each other
+    - they will meet at intersection as a/b pointer moves respectively x1 + x3 + x2 = x2 + x3 + x1
 
 - suppose no intersection
-    - a/b pointer moves respectively x1 + x2 = x2 + x1
-    - they will meet when a/b both = null
+    - they will meet when a/b both = null as x1 + x2 = x2 + x1 
 
 ```java
 
