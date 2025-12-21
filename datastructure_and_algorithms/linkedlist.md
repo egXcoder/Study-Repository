@@ -113,3 +113,85 @@ public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
 }
 
 ```
+
+--- 
+
+### Merge k Sorted Lists
+
+Example: You are given an array of k linked-lists lists, each linked-list is sorted in ascending order. Merge all the linked-lists into one sorted linked-list and return it.
+
+- Input: lists = [[1,4,5],[1,3,4],[2,6]]
+- Output: [1,1,2,3,4,4,5,6]
+
+Solution:
+
+Using Divide and Conquer technique
+- Merge list 0 & 1
+- Merge list 2 & 3
+- Merge results
+- Repeat until one list remains
+
+
+Tip: we use formula int mid = (right - left)/2 + left; instead of mid = (left+right)/2 to be safe if left + right exceeds int byte size 
+
+Tip: complexity below is O(k * log(n)) 
+- given n is the list length
+- give k is the count of all nodes
+- we traverse it recursively having log(n) level and each level have work of k
+
+```java
+class Solution {
+    public ListNode mergeKLists(ListNode[] lists) {
+        //early exit
+        if(lists == null || lists.length == 0){
+            return null;
+        }
+
+        //early exit
+        if(lists.length == 1){
+            return lists[0];
+        }
+
+        return mergeK(lists,0,lists.length-1);
+    }
+
+    protected ListNode mergeK(ListNode[] lists,int left, int right){
+        if(left == right){
+            return lists[left];
+        }
+
+        int mid = (right - left)/2 + left;
+
+        return mergeBoth(mergeK(lists,left,mid),mergeK(lists,mid+1,right));
+    }
+
+    protected ListNode mergeBoth(ListNode node1, ListNode node2){
+        ListNode dummy = new ListNode(0);
+        ListNode curr = dummy;
+        
+        while(node1!=null && node2!=null){
+            if(node1.val<node2.val){
+                curr.next = node1;
+                node1 = node1.next;
+            }else{
+                curr.next = node2;
+                node2 = node2.next;
+            }
+
+            curr = curr.next;
+        }
+
+        //if node1 and node2 were different in lengths
+        if(node1!=null){
+            curr.next = node1;
+        }
+        
+        if(node2 !=null){
+            curr.next = node2;
+        }
+
+        return dummy.next;
+    }
+}
+
+```
