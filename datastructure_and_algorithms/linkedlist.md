@@ -195,3 +195,98 @@ class Solution {
 }
 
 ```
+
+---
+
+### Find Middle Of LinkedList
+
+```java
+
+private ListNode getMid(ListNode head) {
+    ListNode slow = head;
+    ListNode fast = head.next;
+
+    while (fast != null && fast.next != null) {
+        slow = slow.next;
+        fast = fast.next.next;
+    }
+    return slow;
+}
+
+```
+
+---
+
+### Sort LinkedList
+
+Example: Given the head of a linked list, return the list after sorting it in ascending order.
+
+- Input: head = [4,2,1,3]
+- Output: [1,2,3,4]
+
+Solution: merge Sort O(nlog(n))
+
+```java
+
+class Solution {
+    public ListNode sortList(ListNode head) {
+        if(head == null || head.next == null){
+            return head;
+        }
+        
+        ListNode mid = getMid(head);
+    
+        //right half
+        ListNode rightHalf = mid.next;
+    
+        //left half
+        mid.next = null;
+        ListNode leftHalf = head;
+        
+        
+        leftHalf = sortList(head);
+        rightHalf = sortList(rightHalf);
+        
+        return merge(leftHalf,rightHalf);
+    }
+    
+    protected ListNode getMid(ListNode node){
+        ListNode slow = node;
+        ListNode fast = node.next;
+        
+        while(fast!=null && fast.next!=null){
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        
+        return slow;
+    }
+    
+    protected ListNode merge(ListNode left, ListNode right){
+        ListNode dummy= new ListNode(0);
+        ListNode curr = dummy;
+        
+        while(left!=null && right!=null){
+            if(left.val<right.val){
+                curr.next = left;
+                left = left.next;
+            }else{
+                curr.next = right;
+                right = right.next;
+            }
+            
+            curr = curr.next;
+        }
+        
+        if(left!=null){
+            curr.next = left;
+        }
+        
+        if(right!=null){
+            curr.next = right;
+        }
+        
+        return dummy.next;
+    }
+}
+```
