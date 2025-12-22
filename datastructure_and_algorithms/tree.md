@@ -21,6 +21,32 @@ queue.peek();
 
 ---
 
+### BFS Template (level by level)
+
+```java
+Deque<TreeNode> queue = new ArrayDeque<>();
+queue.offer(root);
+
+while(!queue.isEmpty()){
+    int size = queue.size();
+    for(int i=0;i<size;i++){
+        TreeNode node = queue.poll();        
+        
+        //do some logic with node
+
+        if(node.left!=null){
+            queue.offer(node.left);
+        }
+        
+        if(node.right!=null){
+            queue.offer(node.right);
+        }
+    }
+}
+```
+
+---
+
 ### Symmetric Tree
 
 Given the root of a binary tree, check whether it is a mirror of itself (i.e., symmetric around its center).
@@ -56,32 +82,6 @@ class Solution {
     }
 }
 
-```
-
----
-
-### BFS Template (level by level)
-
-```java
-Deque<TreeNode> queue = new ArrayDeque<>();
-queue.offer(root);
-
-while(!queue.isEmpty()){
-    int size = queue.size();
-    for(int i=0;i<size;i++){
-        TreeNode node = queue.poll();        
-        
-        //do some logic with node
-
-        if(node.left!=null){
-            queue.offer(node.left);
-        }
-        
-        if(node.right!=null){
-            queue.offer(node.right);
-        }
-    }
-}
 ```
 
 --- 
