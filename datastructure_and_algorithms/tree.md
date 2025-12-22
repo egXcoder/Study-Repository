@@ -21,6 +21,83 @@ queue.peek();
 
 ---
 
+### DFS
+
+Tip: In many problems, the type of DFS used doesn't even matter, it's just important that all nodes are visited. Knowing the differences between the three types of DFS is mostly good for trivia.
+
+Tip: if we traverse a valid binary search tree in-order, it should give sorted nums asc 
+
+```text
+      A
+     / \
+    B   C
+   / \
+  D   E
+
+pre-order: A → B → D → E → C
+in-order: D → B → E → A → C
+post-order: D → E → B → C → A
+```
+
+```java
+
+public void preorderDfs(Node node) {
+    if (node == null) {
+        return;
+    }
+
+    //logic in node is here
+    System.out.println(node.val);
+
+    preorderDfs(node.left);
+    preorderDfs(node.right);
+}
+
+// D → B → E → A → C
+public void inorderDfs(Node node) {
+    if (node == null) {
+        return;
+    }
+
+    preorderDfs(node.left);
+
+    //logic in node is here
+    System.out.println(node.val);
+
+    preorderDfs(node.right);
+}
+
+public void postorderDfs(Node node) {
+    if (node == null) {
+        return;
+    }
+
+
+    preorderDfs(node.left);
+    preorderDfs(node.right);
+    
+    //logic in node is here
+    System.out.println(node.val);
+}
+
+//Iterative Approach
+Deque<TreeNode> stack = new ArrayDeque<>();
+stack.push(root);
+
+while (!stack.empty()) {
+    TreeNode node = stack.pop();
+
+    if (node.left != null) {
+        stack.push(node.left);
+    }
+    if (node.right != null) {
+        stack.push(node.right);
+    }
+}
+```
+
+---
+
 ### BFS Template (level by level)
 
 ```java
