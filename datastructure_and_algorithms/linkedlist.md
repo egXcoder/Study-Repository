@@ -290,3 +290,39 @@ class Solution {
     }
 }
 ```
+
+---
+
+### Floyd Detect Cycle
+
+- slow is turtoise and fast is hare
+- turtoise and hare start from same position as they are racing
+- iterate till hare reaches the end of race
+- if turtoise can catch hare then there is a cycle
+- you can find cycle start by making another turtoise start from beginning and existing turtoise move as well.. position where they meet is the cycle start
+
+
+```java
+ListNode slow = head;
+ListNode fast = head;
+
+while (fast != null && fast.next != null) {
+    slow = slow.next;
+    fast = fast.next.next;
+
+    if (slow == fast) {
+        // cycle detected
+        // Step 2: find cycle start
+        ListNode p1 = head;
+        ListNode p2 = slow;
+
+        while (p1 != p2) {
+            p1 = p1.next;
+            p2 = p2.next;
+        }
+        return p1;
+    }
+}
+
+return null; //no cycle detected
+```
