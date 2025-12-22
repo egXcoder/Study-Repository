@@ -202,3 +202,54 @@ class Solution {
 }
 ```
 ---
+
+### Construct Binary Tree from Preorder and Inorder Traversal
+- Input: preorder = [3,9,20,15,7], inorder = [9,3,15,20,7]
+- Output: [3,9,20,null,null,15,7]
+
+Solution:
+[pre order array]
+- take pre-order array [3,9,20,15,7] .. node -> left -> right
+- 3 is always going to be root
+- one possibility of left/right can be [9],[20,15,7]
+- if we can know length of left branch and length of right branch. then we can solve it using divide and conquer
+
+[in-order array]
+- [9,3,15,20,7] its always left -> node -> right 
+- you can see node is always in the middle between left and right. 
+- so if we locate index of 3 for example. we would know left length is [9] and right length is [15,20,7]
+
+```java
+class Solution {
+    private Map<Integer, Integer> inMap = new HashMap<>();
+
+    public TreeNode buildTree(int[] preorder, int[] inorder) {
+        for (int i = 0; i < inorder.length; i++) {
+            inMap.put(inorder[i], i);
+        }
+
+        return build(preorder, 0, preorder.length - 1, 0, inorder.length-1);
+    }
+
+    private TreeNode build(int[] preorder, int p_left, int p_right, int i_left, int i_right) {
+        if(p_left>p_right || i_left>i_right){
+            return null;
+        }
+        
+        //first from pre_order array is the root
+        TreeNode root = new TreeNode(preorder[p_left]);
+        
+        int index = inMap.get(root.val);
+        
+        int leftSize = index - i_left;
+        
+        root.left = build(preorder , p_left+1 , p_left+leftSize , i_left, i_left+leftSize);
+        
+        root.right = build(preorder , p_left+leftSize+1 , p_right , index+1 , i_right);
+        
+        return root;
+    }
+}
+
+```
+
