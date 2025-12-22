@@ -200,6 +200,9 @@ class Solution {
 
 ### Find Middle Of LinkedList
 
+Tip: slow and fast start from same position this would get the right middle given even array length
+Tip: typically you would need left middle on most of your alogirthms
+
 ```java
 
 private ListNode getMid(ListNode head) {
@@ -210,6 +213,7 @@ private ListNode getMid(ListNode head) {
         slow = slow.next;
         fast = fast.next.next;
     }
+
     return slow;
 }
 
