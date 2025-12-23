@@ -252,4 +252,44 @@ class Solution {
 }
 
 ```
+---
 
+### Kth Smallest Element in a BST
+
+Example: Given the root of a binary search tree, and an integer k, return the kth smallest value (1-indexed) of all the values of the nodes in the tree.
+
+
+- Input: root = [3,1,4,null,2], k = 1
+- Output: 1
+
+Solution:
+- idea is traversing bst in-order would lead to sorted list
+- so traverse it (kth steps) would give you the node
+
+```java
+
+class Solution {
+    int steps = 0;
+    int result = -1;
+
+    public int kthSmallest(Node root, int k) {
+        traverse(root, k);
+        return result;
+    }
+
+    private void traverse(Node root, int k) {
+        if (root == null || steps >= k) return;
+
+        traverse(root.left, k);
+
+        steps++;
+        if (steps == k) {
+            result = root.val;
+            return;
+        }
+
+        traverse(root.right, k);
+    }
+}
+
+```
