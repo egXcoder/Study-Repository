@@ -7,7 +7,7 @@
 - In a closed interval, both left and right are valid positions that could contain the answer.
 So when left == right, there’s still one element to check — you must enter the loop. while(left<=right)
 
-- after we check mid, we can go left or go right. since we already have checked mid we shouldnt try to check it again and because we are using [left,right] inclusive .. so if we put the mid in the left or the right this means we are going to check it again. and this even can lead to when left = right, mid will be left and again we try to check mid again etc.. and you will have infinite loop .. so typically picking left or right should exclude middle
+- after we check mid, we can go left or go right. since we already have checked mid we shouldnt try to check it again and because we are using [left,right] inclusive .. so if we put the mid in the left or the right this means we are going to check it again. which we dont want and this even can lead to when left = right, mid will be left and again we try to check mid again etc.. and you will have infinite loop .. so typically picking left or right should exclude middle
     - right = mid-1; //pick left side
     - left = mid + 1; //pick right side
 

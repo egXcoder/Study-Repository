@@ -24,10 +24,10 @@ public class CountingSort {
         }
 
         // 4. Reconstruct the sorted array
-        int index = 0;
-        for (int i = 0; i <= max; i++) {
+        int k = 0;
+        for (int i = 0; i < count.length; i++) {
             while (count[i] > 0) {
-                arr[index++] = i;
+                arr[k++] = i;
                 count[i]--;
             }
         }
