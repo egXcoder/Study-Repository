@@ -22,6 +22,9 @@ smallest element is always at the root.
     / \
    5   4
 
+you can visualize it as 
+1 3 2 5 4
+when you want to peek() .. you would get 1 which is the minimum value
 ```
 
 ```java
@@ -49,6 +52,9 @@ Property: largest element is always at the root.
     / \
    5   6
 
+you can visualize it as 
+10 7 9 5 6
+when you want to peek() .. you would get 10 which is the maximum value
 ```
 
 ```java
@@ -62,6 +68,34 @@ System.out.println(maxHeap.poll()); // 5 (largest)
 System.out.println(maxHeap.peek()); // 3 (next largest)
 
 ```
+---
+
+### Custom Heap 
+
+```java
+
+PriorityQueue<Integer> minHeap = new PriorityQueue<>(
+    (a, b) -> freqMap.get(a) - freqMap.get(b)
+);
+
+
+PriorityQueue<Integer> maxHeap = new PriorityQueue<>(
+    (a, b) -> freqMap.get(b) - freqMap.get(a)
+);
+
+```
+
+Tip: Universally callback return 
+- -ve if a comes before b
+- +ve if a comes after b
+- 0 if a and b are equal
+
+```php
+usort($arr, function ($a, $b) {
+    return $a - $b;    // $a<$b .. then it would return -ve .. ascending
+});
+```
+
 ---
 
 ### Complexity
