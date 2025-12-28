@@ -91,6 +91,7 @@ Tip: Universally callback return
 - 0 if a and b are equal
 
 ```php
+// php
 usort($arr, function ($a, $b) {
     return $a - $b;    // $a<$b .. then it would return -ve .. ascending
 });
