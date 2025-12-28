@@ -1115,3 +1115,45 @@ class Solution {
 }
 
 ```
+
+--- 
+
+### Dutch National Flag
+
+Example: sort the array to have continugeous regions of 0 then 1 then 2
+
+- Input: nums = [2,0,2,1,1,0]
+- Output: [0,0,1,1,2,2]
+
+
+Solution:
+- since its three regions, we can use dutch national flag to sort it in place. its called like that because dutch flag consist of three colors and the person invented this way was using the dutch flag to demonostrate his solution
+- The classic Dutch National Flag algorithm is for three regions.
+- For more than three regions, you can generalize using:
+    - Multiple pointers (multi-way partitioning)
+    - Or counting sort
+- The Dutch National Flag pattern is most elegant and efficient exactly for three partitions.
+
+```java
+// p0 is the parition which will hold all 0
+// p2 is the partition which will hold all 2
+
+int p0 = 0;           // next position to place 0
+int p2 = nums.length-1; // next position to place 2
+int i = 0;             // current index
+
+while (i <= p2) {
+    if (nums[i] == 0) {
+        swap(nums, i, p0);
+        p0++;
+        i++;
+    } else if (nums[i] == 2) {
+        swap(nums, i, p2);
+        p2--;
+        // do NOT increment i here because swapped element at i needs to be checked
+    } else { 
+        // nums[i] == 1
+        i++;
+    }
+}
+```
