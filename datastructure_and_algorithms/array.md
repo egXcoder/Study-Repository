@@ -33,37 +33,132 @@ Example: is a string is a palindrome? such as "ahmha" or "ahha"
 ---
 
 
-### Two Pointers [on two different arrays in same time arr1, arr2]
-
-```java
-
-function fn(arr1, arr2):
-    i = j = 0
-    while i < arr1.length AND j < arr2.length:
-        Do some logic here depending on the problem
-        Do some more logic here to decide on one of the following:
-            1. i++
-            2. j++
-            3. Both i++ and j++
-
-    // Step 4: make sure both iterables are exhausted
-    // Note that only one of these loops would run
-    while i < arr1.length:
-        Do some logic here depending on the problem
-        i++
-
-    while j < arr2.length:
-        Do some logic here depending on the problem
-        j++
-
-```
+### Two Pointers [at two different arrays arr1, arr2]
 
 Example: Given two sorted integer arrays arr1 and arr2, return a new array that combines both of them and is also sorted.
 
+```java
+// typical approach of having two pointers at start
+public int[] mergeSorted(int[] arr1, int[] arr2) {
+    int i = 0;
+    int j = 0;
+    int k = 0;
+    int[] output = new int[arr1.length + arr2.length];
+
+    while (i < arr1.length && j < arr2.length) {
+        if (arr1[i] < arr2[j]) {
+            output[k++] = arr1[i++];
+        } else {
+            output[k++] = arr2[j++];
+        }
+    }
+
+    while (i < arr1.length) {
+        output[k++] = arr1[i++];
+    }
+
+    while (j < arr2.length) {
+        output[k++] = arr2[j++];
+    }
+
+    return output;
+}
+```
+
+
+```java
+//we can achieve same thing by using two pointers at the end
+public int[] mergeSorted(int[] arr1, int[] arr2) {
+    int i = arr1.length-1;
+    int j = arr2.length-1;
+    int k = arr1.length + arr2.length - 1;
+    int[] output = new int[arr1.length + arr2.length];
+
+    while (i>=0 && j>=0) {
+        if (arr1[i] > arr2[j]) {
+            output[k--] = arr1[i--];
+        } else {
+            output[k--] = arr2[j--];
+        }
+    }
+
+    while (i >= 0) {
+        output[k--] = arr1[i--];
+    }
+
+    while (j >= 0) {
+        output[k--] = arr2[j--];
+    }
+
+    return output;
+}
+```
+
 ---
+### Two Pointers at the end
+
+You are given nums1 and nums2 sorted asc. m and n represents no of elements. nums1 is already prepared with size to hold the merge. we want nums1 to hold the merge between nums1 and nums2
+
+- Input: nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3
+- Output: [1,2,2,3,5,6]
+
+Solution:
+
+```java
+class Solution {
+    // i can use the normal two pointers and merge but this would require O(m+n) extra space to have output array
+    public void merge(int[] nums1, int m, int[] nums2, int n) {
+        int i = 0;
+        int j = 0;
+        int k = 0;
+        int[] output = new int[nums1.length];
+        
+        while(i<m && j<n){
+            if(nums1[i]<nums2[j]){
+                output[k++] = nums1[i++];
+            }else{
+                output[k++] = nums2[j++];
+            }
+        }
+        
+        while(i<m){
+            output[k++] = nums1[i++];
+        }
+        
+        while(j<n){
+            output[k++] = nums2[j++];
+        }
+        
+        for(int a=0;a<output.length;a++){
+            nums1[a] = output[a];
+        }
+    }
+}
+```
+
+```java
+// this would save us from having another output array
+public void merge(int[] nums1, int m, int[] nums2, int n) {
+    int i = m - 1;
+    int j = n - 1;
+    int k = m + n - 1;
+
+    while (i >= 0 && j >= 0) {
+        if (nums1[i] > nums2[j]) {
+            nums1[k--] = nums1[i--];
+        } else {
+            nums1[k--] = nums2[j--];
+        }
+    }
+
+    // copy remaining nums2 elements (if any)
+    while (j >= 0) {
+        nums1[k--] = nums2[j--];
+    }
+}
+```
 
 ### Sliding Window (Variable Window)
-
 
 ```java
 
