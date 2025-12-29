@@ -114,7 +114,7 @@ class Solution {
         int left = 0;
         int right = nums.length-1;
 
-        //if left == right then terminate
+        //if left == right then terminate, i.e reached one element then terminate
         while(left<right){
             int mid = (right-left)/2 + left;
 
@@ -135,7 +135,7 @@ class Solution {
         int left = 0;
         int right = nums.length-1;
 
-        //if left == right then terminate
+        //if left == right then terminate, i.e reached one element then terminate 
         while(left<right){
             //upper middle is critical to avoid infinite loop and always try to get the mid as second element
             int mid = left + (right - left + 1) / 2; // upper mid
