@@ -1,5 +1,163 @@
 # Binary Search
 
+
+Example: Find First Bad Version. given all the versions after a bad version are also bad.
+
+- Input: n = 5, bad = 4
+- Output: 4
+
+
+Solution
+- I will use Closed Interval [left,right] inclusive.. since its easier for me to understand
+- if we reached left == right means we have one element to check [element] .. this should be the desired element
+- At any point in the range [left, right]:
+    - If isBadVersion(mid) is true, the first bad version is at mid or to the left
+    - If isBadVersion(mid) is false, the first bad version is to the right
+
+```java
+public class Solution extends VersionControl {
+    public int firstBadVersion(int n) {
+        //closed interval
+        int left = 1;
+        int right = n;
+
+        //if left == right dont loop again.
+        while(left<right){
+            int mid = (right-left) / 2 + left;
+
+            if(this.isBadVersion(mid)){
+                right = mid; //pick left side which contains [left,mid] so mid is potential solution
+            }else{
+                left = mid+1; // pick right side [mid+1,right] so discard mid
+            }
+        }
+
+        //reaching here means left == right = the desired bad version
+        return left;
+    }
+}
+
+```
+---
+
+
+Example: Find Any Peak Element
+
+- Input: nums = [1,2,1,3,5,6,4]
+- Output: 5
+- Explanation: Your function can return either index number 1 where the peak element is 2, or index number 5 where the peak element is 6.
+- nums[i] != nums[i + 1] for all valid i.
+
+
+Solution
+- i will choose closed interval [left,right]
+- when checking elements is only two elements [left,right] .. either pick left or pick right and terminate
+- if left == right, then dont loop again as we have found the peek element
+- if slope is increasing.. mid < mid+1 .. then peek on the right side [mid+1,right]
+- if slope is decreasing.. mid < mid+1 .. then peek on left side as mid potentially can be the peek [left,mid] 
+
+
+```java
+
+class Solution {
+    public int findPeakElement(int[] nums) {
+        if(nums.length == 1){
+            return 0;
+        }
+
+        //closed interval
+        int left = 0;
+        int right = nums.length -1;
+    
+        while(left<right){
+            int mid = (right-left)/2 + left;
+
+            if(nums[mid]<nums[mid+1]){
+                //slope increasing
+                left = mid + 1; //go left and discard mid
+            }else{
+                right = mid; //go right and keep mid to check
+            }
+        }
+
+        //when left == right then we have found a solution
+        return left;
+    }
+}
+
+```
+
+---
+
+Example: Find First and Last Position of Element in Sorted Array
+
+- Input: nums = [5,7,7,8,8,10], target = 8
+- Output: [3,4]
+
+
+```java
+
+class Solution {
+    public int[] searchRange(int[] nums, int target) {
+        if(nums.length == 0){
+            return new int[]{-1,-1};
+        }
+
+        int[] ans = new int[2];
+        ans[0] = findLeftMost(nums,target);
+        ans[1] = findRightMost(nums,target);
+        return ans;
+    }
+
+    protected int findLeftMost(int[] nums,int target){
+        //closed interval
+        int left = 0;
+        int right = nums.length-1;
+
+        //if left == right then terminate
+        while(left<right){
+            int mid = (right-left)/2 + left;
+
+            //since its left most, then if target=nums[mid] then go left
+            if(target<=nums[mid]){
+                right = mid; //go left and keep mid
+            }else{
+                left = mid+1; //go right and discard mid
+            }
+        }
+
+        //if left == right, make sure its valid answer
+        return nums[left] == target ? left : -1;
+    }
+
+    protected int findRightMost(int[] nums,int target){
+        //closed interval
+        int left = 0;
+        int right = nums.length-1;
+
+        //if left == right then terminate
+        while(left<right){
+            //upper middle is critical to avoid infinite loop and always try to get the mid as second element
+            int mid = left + (right - left + 1) / 2; // upper mid
+
+            //since its rightmost, then if target=nums[mid] then go right and keep level
+            if(target>=nums[mid]){
+                left = mid; //go right and keep mid
+            }else{
+                right = mid-1; //go left and discard mid
+            }
+        }
+
+        //if left == right, make sure its valid answer
+        return nums[left] == target ? left : -1;
+    }
+}
+
+```
+---
+
+
+
 ### Closed interval [left, right]
 
 - Both ends are included in the search space.
@@ -15,18 +173,17 @@ So when left == right, there’s still one element to check — you must enter t
 int left = 0;
 int right = arr.length-1;
 
-while(left<=right){
+while(left<right){
     int mid = (right-left)/2 + left;
 
     if (target <= arr[mid]) { 
-        right = mid - 1; //pick left side
+        right = mid; //pick left side
     } else {
         left = mid + 1; //pick right side
     }
 }
 
 return left;
-
 ```
 
 
@@ -66,46 +223,3 @@ return left;
 Personally i would pick closed interval [left,right] as i understand it clearer
 
 ---
-
-### Find Left-Most Position vs Right-Most Position
-
-```java
-//find first position
-public int binarySearch(int[] arr, int target) {
-    int left = 0;
-    int right = arr.length -1;
-    while (left <= right) {
-        int mid = (right-left)/2 + left;
-
-        //we want first position, so if we found element then pick left side and finally return left;
-        if (target <= arr[mid]) { 
-            right = mid - 1; //pick left side
-        } else {
-            left = mid + 1;
-        }
-    }
-
-    //left is first element or the left-most insertion point
-    return left;
-}
-
-//find last position
-public int binarySearch(int[] arr, int target) {
-    int left = 0;
-    int right = arr.length -1;
-    while (left <= right) {
-        int mid = (right-left)/2 + left;
-
-        //we want last position, then if we found element then pick right side and finally return right
-        if (target >= arr[mid]) { 
-            left = mid + 1; //pick right side
-        } else {
-            right = mid - 1;
-        }
-    }
-
-    //right is last element or the right-most insertion point
-    return right;
-}
-
-```
