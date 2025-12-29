@@ -107,7 +107,6 @@ usort($arr, function ($a, $b) {
 | Remove                | O(log n)                |
 | Peek                  | O(1)                    |
 | Build heap One By One | O(nlogn)                |
-| Build heap From Array | O(n)                    |
 
 ---
 
