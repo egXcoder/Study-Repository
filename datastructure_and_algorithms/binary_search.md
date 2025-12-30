@@ -1,7 +1,7 @@
 # Binary Search
 
 
-### Exact Match
+### Finding Exact Match
 
 ```java
 public int binarySearch(int[] arr, int target) {
