@@ -379,3 +379,75 @@ class Solution {
 
 ```
 ---
+
+Example:
+
+Minimum Time to Complete Trips
+
+You are given an array time where time[i] denotes the time taken by the ith bus to complete one trip.
+
+Each bus can make multiple trips successively; that is, the next trip can start immediately after completing the current trip. Also, each bus operates independently; that is, the trips of one bus do not influence the trips of any other bus.
+
+You are also given an integer totalTrips, which denotes the number of trips all buses should make in total. Return the minimum time required for all buses to complete at least totalTrips trips.
+
+- Input: time = [1,2,3], totalTrips = 5
+- Output: 3
+Explanation:
+```text
+- At time t = 1, the number of trips completed by each bus are [1,0,0]. 
+  The total number of trips completed is 1 + 0 + 0 = 1.
+- At time t = 2, the number of trips completed by each bus are [2,1,0]. 
+  The total number of trips completed is 2 + 1 + 0 = 3.
+- At time t = 3, the number of trips completed by each bus are [3,1,1]. 
+  The total number of trips completed is 3 + 1 + 1 = 5.
+So the minimum time needed for all buses to complete at least 5 trips is 3.
+```
+
+```java
+
+class Solution {
+    public long minimumTime(int[] time, int totalTrips) {
+      //get fastest bus
+      int min = Integer.MAX_VALUE;
+      for(int x : time){
+        if(x<min){
+            min = x;
+        }
+      }
+
+      //if fastest bus would do all trips
+      //this (long) casting is critical otherwise there will be overflow problem because of int * int 
+      //because java will multiply int * int and result is int and after that it will cast to long
+      // but doing (long) will convert totalTrips to long then it will be long * int which gives long as long bigger in memory
+      long maxTimeTaken = (long) totalTrips * min; 
+
+        //test times between time = 1 and maxTimeTaken
+        long left = 1;
+        long right = maxTimeTaken;
+
+        while(left<right){
+            long mid = (right-left)/2 + left;
+
+            long noOfTrips = this.calculateTripsCount(time,mid);
+
+            if(noOfTrips >= totalTrips){
+                right = mid; //go left
+            }else{
+                left = mid + 1; //go right
+            }
+        }
+
+        return left;
+    }
+
+    protected long calculateTripsCount(int[] array, long time){
+        long count = 0;
+        for(long timeTakenByOneBusToDoOneTrip : array){
+            long busTripsCount = time/timeTakenByOneBusToDoOneTrip;
+            count += busTripsCount;
+        }
+
+        return count;
+    }
+}
+```
