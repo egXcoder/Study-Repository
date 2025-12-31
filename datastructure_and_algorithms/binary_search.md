@@ -1,15 +1,16 @@
 # Binary Search
 
+is searching for a value existence within sorted array by discarding left and right at each step which gives O(log(n))
 
-### Finding Exact Match
+---
+
+### Standard Finding Exact Match Or Insertion Point
 
 ```java
 public int binarySearch(int[] arr, int target) {
-    //search inclusive
-    int left = 0;
+    int left = 0; 
     int right = arr.length - 1;
  
-    //if left==right .. one element to be checked .. then loop again and check it
     while (left <= right) {
         int mid = left + (right - left) / 2;
 
@@ -18,68 +19,181 @@ public int binarySearch(int[] arr, int target) {
             return mid;
         }
 
-        if (arr[mid] > target) {
+        if (target<arr[mid]) {
             right = mid - 1; //go left and discard mid .. shrink
         } else {
             left = mid + 1; //go right and discard mid .. shrink
         }
     }
 
-    // target is not in arr, but left is at the insertion point
-    return left;
+    return left; //insertion point
 }
 ```
 
+Tip: insertion point refer to the index where you put the target into then shift indexes to right ... such as nums = [1,3,5]
+- target = 1  .. insertion point = 0 .. new Array = [1,1,3,5]
+- target = -1 .. insertion point = 0 .. new Array = [-1,1,3,5]
+- target = 2  .. insertion point = 1 .. new Array = [1,2,3,5]
+- target = 7  .. insertion point = 3 .. new Array = [1,3,5,7]
+
+Tip: Above Implementation have the last insepcted interval will be one element since left<=right,so even if left==right it will still check such as nums = [3]
+- target = 1 ... left = 0 valid insertion point
+- target = 3 ... left = 0 exact match point
+- target = 4 ... left = 1 valid insertion point
+
 ---
 
-Example: Given a sorted array of distinct integers and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.
+
+### Left-Most and Right-most match without considering insertion point if not exist
+
+```java
+
+protected int findIndex(int[] nums,int target,String dir){
+    int left = 0;
+    int right = nums.length -1;
+    int ans = -1;
+
+    while(left<=right){
+        int mid = (right-left)/2 + left;
+
+        if(target == nums[mid]){
+            ans = mid;
+
+            if(dir.equals("leftMost")){
+                right = mid - 1;
+            }else{
+                left = mid + 1;
+            }
+        }
+        else if(target>nums[mid]){
+            left = mid + 1;
+        }else{
+            right = mid - 1;
+        }
+    }
+
+    return ans;
+}
+```
+---
+
+### Find Left-Most Index
+
+```java
+
+public int binarySearch(int[] arr, int target) {
+    int left = 0;
+    int right = arr.length - 1;
+
+    while (left < right) {
+        int mid = left + (right - left) / 2;
+        if (target <= arr[mid]) {
+            right = mid; //go left and keep middle
+        } else {
+            left = mid + 1; //go right and discard mid
+        }
+    }
+
+    //left is either the matched index or the insertion point
+    return left;
+}
+
+```
+
+Tip: i always like to use left=0, right= arr.length-1,i.e [left,right] as i can comprehend it better than right = arr.length i.e [left,right) exclusive
+
+Tip: its preferable on this approach to use while(left < right) instead of <= .. and it means the last inspected interval will be only two elements such as [3,5].. and you either pick its left index or its right index whatever target is and terminate
+
+Tip: since we want left-most, then always pick left side if (target==arr[mid])
+
+Tip: normal middle always tends to be the left side [3,5] .. because of that its safe that 
+- when picking left side you would set right = mid, which gives [3]
+- when picking right side you would set left = mid+1, which gives [5]
+- if you reversed them, this can lead to infinite loop
+
+Tip: if target not the in array [3,5] .. it will give you insertion point
+- target = 1 ... then left = 0
+- target = 10 .. then left = 1
+- target = 4 ... then left = 1
+
+---
+
+### Find Right-Most Index
+
+```java
+
+public int binarySearch(int[] arr, int target) {
+    int left = 0;
+    int right = arr.length - 1;
+
+    while (left < right) {
+        int mid = left + (right - left + 1) / 2; //upper middle .. critical otherwise infinite loop
+        if (target >= arr[mid]) {
+            left = mid; //go right and keep middle
+        } else {
+            right = mid - 1; //go left and discard mid
+        }
+    }
+
+    //left is either the matched index or the insertion point
+    return left;
+}
+
+```
+
+Tip: since we want right-most, then always pick right side if (target==arr[mid])
+
+Tip: if we didnt use upper middle, this will lead to infinite loop.. array [3,5]
+- target = 1 .. infinite loop
+
+---
+
+
+
+Example: 
+
+Given a sorted array of distinct integers and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.
 
 - Input: nums = [1,3,5,6], target = 5
 - Output: 2
 
 ```java
-
 class Solution {
     public int searchInsert(int[] nums, int target) {
         int left = 0;
-        int right = nums.length -1;
+        int right = nums.length - 1;
+
         while(left<=right){
-            int mid = (left + right) / 2;
-      
+            int mid = (right-left)/2 + left;
+
             if(target==nums[mid]){
                 return mid;
             }
-            
+
             if(target>nums[mid]){
                 left = mid + 1;
             }else{
                 right = mid - 1;
             }
         }
-        
+
         return left;
     }
 }
 ```
 ---
 
-Example: Find First Bad Version. given all the versions after a bad version are also bad.
+Example: 
+
+Find First Bad Version. given all the versions after a bad version are also bad.
 
 - Input: n = 5, bad = 4
 - Output: 4
 
 
-Solution
-- I will use Closed Interval [left,right] inclusive.. since its easier for me to understand
-- if we reached left == right means we have one element to check [element] .. this should be the desired element
-- At any point in the range [left, right]:
-    - If isBadVersion(mid) is true, the first bad version is at mid or to the left
-    - If isBadVersion(mid) is false, the first bad version is to the right
-
 ```java
 public class Solution extends VersionControl {
     public int firstBadVersion(int n) {
-        //closed interval
         int left = 1;
         int right = n;
 
@@ -102,56 +216,9 @@ public class Solution extends VersionControl {
 ```
 ---
 
+Example: 
 
-Example: Find Any Peak Element
-
-- Input: nums = [1,2,1,3,5,6,4]
-- Output: 5
-- Explanation: Your function can return either index number 1 where the peak element is 2, or index number 5 where the peak element is 6.
-- nums[i] != nums[i + 1] for all valid i.
-
-
-Solution
-- i will choose closed interval [left,right]
-- when checking elements is only two elements [left,right] .. either pick left or pick right and terminate
-- if left == right, then dont loop again as we have found the peek element
-- if slope is increasing.. mid < mid+1 .. then peek on the right side [mid+1,right]
-- if slope is decreasing.. mid < mid+1 .. then peek on left side as mid potentially can be the peek [left,mid] 
-
-
-```java
-
-class Solution {
-    public int findPeakElement(int[] nums) {
-        if(nums.length == 1){
-            return 0;
-        }
-
-        //closed interval
-        int left = 0;
-        int right = nums.length -1;
-    
-        while(left<right){
-            int mid = (right-left)/2 + left;
-
-            if(nums[mid]<nums[mid+1]){
-                //slope increasing
-                left = mid + 1; //go left and discard mid
-            }else{
-                right = mid; //go right and keep mid to check
-            }
-        }
-
-        //when left == right then we have found a solution
-        return left;
-    }
-}
-
-```
-
----
-
-Example: Find First and Last Position of Element in Sorted Array
+Find First and Last Position of Element in Sorted Array
 
 - Input: nums = [5,7,7,8,8,10], target = 8
 - Output: [3,4]
@@ -199,8 +266,7 @@ class Solution {
 
         //if left == right then terminate, i.e reached one element then terminate 
         while(left<right){
-            //upper middle is critical to avoid infinite loop and always try to get the mid as second element
-            int mid = left + (right - left + 1) / 2; // upper mid
+            int mid = left + (right - left + 1) / 2; //upper middle is critical to avoid infinite loop
 
             //since its rightmost, then if target=nums[mid] then go right and keep level
             if(target>=nums[mid]){
@@ -216,72 +282,100 @@ class Solution {
 }
 
 ```
+
 ---
 
+Example: 
+
+Find Any Peak Element
+
+- Input: nums = [1,2,1,3,5,6,4]
+- Output: 5
+- Explanation: Your function can return either index number 1 where the peak element is 2, or index number 5 where the peak element is 6.
+- nums[i] != nums[i + 1] for all valid i.
 
 
-### Closed interval [left, right]
+Solution
+- if left == right, then dont loop again as we have found the peek element
+- if slope is increasing.. mid < mid+1 .. then peek on the right side [mid+1,right]
+- if slope is decreasing.. mid < mid+1 .. then peek on left side as mid potentially can be the peek [left,mid] 
 
-- Both ends are included in the search space.
-
-- In a closed interval, both left and right are valid positions that could contain the answer.
-So when left == right, there’s still one element to check — you must enter the loop. while(left<=right)
-
-- after we check mid, we can go left or go right. since we already have checked mid we shouldnt try to check it again and because we are using [left,right] inclusive .. so if we put the mid in the left or the right this means we are going to check it again. which we dont want and this even can lead to when left = right, mid will be left and again we try to check mid again etc.. and you will have infinite loop .. so typically picking left or right should exclude middle
-    - right = mid-1; //pick left side
-    - left = mid + 1; //pick right side
 
 ```java
-int left = 0;
-int right = arr.length-1;
 
-while(left<right){
-    int mid = (right-left)/2 + left;
+class Solution {
+    public int findPeakElement(int[] nums) {
+        if(nums.length == 1){
+            return 0;
+        }
 
-    if (target <= arr[mid]) { 
-        right = mid; //pick left side
-    } else {
-        left = mid + 1; //pick right side
+        //closed interval
+        int left = 0;
+        int right = nums.length -1;
+    
+        while(left<right){
+            int mid = (right-left)/2 + left;
+
+            if(nums[mid+1]>nums[mid]){
+                //slope increasing
+                left = mid + 1; //go right and discard mid
+            }else{
+                right = mid; //go left and keep mid to check
+            }
+        }
+
+        //when left == right then we have found a solution
+        return left;
     }
 }
 
-return left;
 ```
 
+Example: 
 
-### Half-open (or half-closed) interval [left, right)
-
-Left end included, right end excluded.
+Search in Rotated Sorted Array .. There is an integer array nums sorted in ascending order (with distinct values).nums is possibly left rotated at an unknown index k such that the resulting array is [nums[k], nums[k+1], ..., nums[n-1], nums[0], nums[1], ..., nums[k-1]] .. nums [0,1,2,4,5,6,7] might be left rotated by 3 indices and become [4,5,6,7,0,1,2].
 
 
-- In a half-open interval, the right end is exclusive. Meaning arr[right] is not part of the search space. so When left == right, the loop stops → search space is empty. while(left<right)
-
-- after we check mid, we can go left or go right. since we already have checked mid we shouldnt try to check it again and because we are using [left,right) right exclusive .. so we should make left [left,mid] .. this means check elements left -> mid-1
-    - right = mid; //pick left side
-    - left = mid + 1; //pick right side
+- Input: nums = [4,5,6,7,0,1,2], target = 0
+- Output: 4
 
 ```java
-int left = 0;
-int right = arr.length;
 
-while(left<right){
-    //do your logic
-    int mid = (right-left)/2 + left;
-
-    if (target <= arr[mid]) { 
-        right = mid; //pick left side
-    } else {
-        left = mid + 1; //pick right side
+class Solution {
+    public int search(int[] nums, int target) {
+        int left = 0;
+        int right = nums.length -1;
+        
+        while(left<=right){
+            int mid = (right-left)/2 +left;
+            
+            //found 
+            if(nums[mid] == target){
+                return mid;        
+            }
+            
+            //if left half is ascending
+            if(nums[mid]>=nums[left]){
+                if(target>=nums[left] && target<nums[mid]){
+                    //if target exist on the left
+                    right = mid - 1;
+                }else{
+                    left = mid + 1;
+                }
+            }else{
+                if(target>nums[mid] && target<=nums[right]){
+                    //if target exist on the right
+                    left = mid + 1;
+                }else{
+                    right = mid -1;
+                }
+            }
+        }
+        
+        //couldnt find answer
+        return -1;
     }
 }
 
-return left;
-
 ```
----
-
-### My Picking
-
-Personally i would pick closed interval [left,right] as i understand it clearer
-
 ---
