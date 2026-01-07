@@ -349,6 +349,40 @@ class Solution {
 
 Tip: this is a variation of unbounded knapsack.. and its compleixty cant be better than O(amount * coins.length)
 
+
+
+Tip: if coins is US coins, US Coins is structured in away that would help the problem be solved greedy
+
+
+```java
+
+```java
+public class USCoinChangeGreedy {
+    // US coins in cents, descending order
+    private static final int[] US_COINS = {25, 10, 5, 1};
+
+    public int minCoins(int amount) {
+        int count = 0;
+
+        for (int coin : US_COINS) {
+            if (amount == 0){
+                break;
+            }
+
+            int take = amount / coin; // number of this coin
+            count += take;
+            amount -= take * coin;
+        }
+
+        return count;
+    }
+}
+
+```
+
+```
+
+
 ---
 
 ### Knapsack Problem 
@@ -373,13 +407,16 @@ every item is taken only once
 #### unbounded knapsack
 every item can be taken multiple times
 
-#### Optional: greedy variant / fractional //TODO::
+#### Optional: greedy variant / fractional
 
-Problem 1710
+You can take fractions of items
+
+greedy may sometimes work if elements are well structured in a way that greedy can solve it.. 
 
 
 
 
+---
 
 ### Knapsack 0/1
 
@@ -436,6 +473,18 @@ public class KnapsackTopDown {
 
 Tip: since there are two dynamic input parameters for the recursion function, then this is 2 dimention problem and memoization have to be 2D array
 
+Tip: space optimization doesnt work for knapsack 0/1 for Top-Bottom Approach
+
+```swift
+<!-- Top-Down Approach state -->
+dfs(i, capacity) = max(
+    dfs(i + 1, capacity),                // skip item i
+    value[i] + dfs(i + 1, capacity - w[i])  // take item i
+)
+```
+- State depends on both i and capacity
+- If you try to memoize only by capacity, you lose the information of which items have already been used
+- That would allow taking an item multiple times → becomes unbounded knapsack
 
 
 ---
@@ -528,3 +577,49 @@ public class UnboundedKnapsack {
 }
 
 ```
+
+
+---
+
+### Knapsack greedy
+
+You can take fractions of items
+
+```java
+public class FractionalKnapsack {
+
+    public double fractionalKnapsack(int[] weight, int[] value, int capacity) {
+
+        // Create array of indices to sort by value/weight ratio
+        int[] idxs = new int[weight.length];
+        for (int i = 0; i < weight.length; i++){
+            idxs[i] = i;
+        }
+
+        Arrays.sort(idxs, (a, b) -> Double.compare(
+                (double) value[b] / weight[b],
+                (double) value[a] / weight[a]
+        ));
+
+        double totalValue = 0;
+
+        for (int idx : idxs) {
+            if (capacity == 0){
+                break;
+            }
+
+            if (weight[idx] <= capacity) {
+                totalValue += value[idx];
+                capacity -= weight[idx];
+            } else {
+                totalValue += value[idx] * ((double) capacity / weight[idx]);
+                capacity = 0;
+            }
+        }
+
+        return totalValue;
+    }
+}
+```
+
+Tip: above is a greedy solution to consider high value/weight ratio first then it would try with lower etc...
