@@ -145,3 +145,36 @@ A value object must be immutable because its identity is defined entirely by its
 Bugs: 
 
 if you left value object mutable .. bugs will happens and its very hard to debug because it doesnt happen frequently they happens far away from each other and its hard to debug or to fix because now system rely on value object is mutable and its hard to make it otherwise
+
+
+### Why java left arrays as mutable?
+
+immutable arrays would be safer — but they would break Java’s performance model, memory model, and core use cases.
+
+Java chose:
+- mutable arrays for speed and simplicity
+- immutable String only where safety is critical
+
+Why String is immutable but arrays are not?
+
+String exists for trust boundaries.. Strings are used for:
+- class names
+- file paths
+- URLs
+- environment variables
+- security checks
+- class loaders
+- network protocols
+
+If String were mutable, it is security concern to all the language
+
+
+Arrays are data containers, not identifiers ... Arrays are used for:
+
+- buffers
+- images
+- matrices
+- network packets
+- algorithmic data (like your heap)
+- performance-critical workloads
+- Immutability here would be catastrophic for performance.
