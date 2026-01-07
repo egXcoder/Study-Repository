@@ -183,7 +183,7 @@ boolean dfs(int i, int[] nums) {
 Complexity is O(n^2). because in the worst case scenario we will have every element of array can jump to every other element such as this array [5,4,3,2,1,0]. so we have n elements and for each element it can jump n times.
 
 ```text
-Jump Game Decision Tree (nums = [2,3,1,1,4]) without dp
+Jump Game Decision Tree (nums = [2,3,1,1,4])
 
                           index0
                    /                 \
@@ -222,3 +222,58 @@ boolean canJump(int[] nums) {
 
 ---
 
+### example: Unique Paths
+
+There is a robot on an m x n grid. The robot is initially located at the top-left corner (i.e., grid[0][0]). The robot tries to move to the bottom-right corner (i.e., grid[m - 1][n - 1]). The robot can only move either down or right at any point in time.
+
+Given the two integers m and n, return the number of possible unique paths that the robot can take to reach the bottom-right corner.
+
+- Input: m = 3, n = 7
+- Output: 28
+
+```java
+
+class Solution {
+    int m;
+    int n;
+    int[][] memo;
+    
+    public int uniquePaths(int m, int n) {
+        this.m = m;
+        this.n = n;
+        memo = new int[m][n];
+        for(int i=0;i<m;i++){
+            Arrays.fill(memo[i],-1);
+        }
+        
+        return this.dfs(0,0);
+    }
+    
+    private int dfs(int i, int j){
+        if(i == m-1 && j==n-1){
+            //if reached
+            return 1;
+        }
+        
+        if(i>m-1 || j>n-1){
+            //if out of board
+            return 0;
+        }
+        
+        if(memo[i][j] != -1){
+            return memo[i][j];
+        }
+        
+        int count = 0;
+        
+        //count of unique paths if we go right
+        count += this.dfs(i,j+1);
+        
+        
+        //count of unique paths if we go bottom
+        count += this.dfs(i+1,j);
+        
+        return memo[i][j] = count;
+    }
+}
+```
