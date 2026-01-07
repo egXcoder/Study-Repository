@@ -277,3 +277,254 @@ class Solution {
     }
 }
 ```
+
+---
+
+### example: Coin Change
+
+You are given an integer array coins representing coins of different denominations and an integer amount representing a total amount of money.
+
+Return the fewest number of coins that you need to make up that amount. If that amount of money cannot be made up by any combination of the coins, return -1.
+
+You may assume that you have an infinite number of each kind of coin.
+
+- Input: coins = [1,2,5], amount = 11
+- Output: 3
+- Explanation: 11 = 5 + 5 + 1
+
+
+```java
+// time is O(amount * coins.length)
+// space is O(amount)
+class Solution {
+    int[] memo;
+    
+    public int coinChange(int[] coins, int amount) {
+        //memo will hold how many min steps required for amount to reach the goal
+        // memo[amount] = 10 .. took 10 min steps to reach the goal
+        // memo[amount] = -2 .. not computed yet
+        // memo[amount] = -1 .. couldnt reach the goal using this amount 
+        memo = new int[amount+1];
+        Arrays.fill(memo,-2);
+        return this.dfs(coins,amount);
+    }
+    
+    private int dfs(int[] coins,int amount){
+        if(amount == 0){
+            //reached goal
+            return 0;
+        }
+        
+        if(amount<0){
+            //couldnt reach a value
+            return -1;
+        }
+        
+        if(memo[amount]!=-2){
+            return memo[amount];
+        }
+        
+        int minSteps = Integer.MAX_VALUE;
+        for(int coin : coins){
+            int nextSteps = dfs(coins,amount - coin);
+            
+            if(nextSteps == -1){
+                continue;
+            }
+            
+            minSteps = Math.min(minSteps,1 + nextSteps);
+        }
+        
+        if(minSteps == Integer.MAX_VALUE){
+            //couldnt reach a solution
+            memo[amount] = -1;
+            return -1;
+        }
+        
+        return memo[amount] = minSteps;
+    }
+}
+
+```
+
+Tip: this is a variation of unbounded knapsack.. and its compleixty cant be better than O(amount * coins.length)
+
+---
+
+### Knapsack Problem 
+
+Imagine:
+
+- You have a knapsack that can carry at most W weight
+
+- You have items .. Each item has:
+    - a weight
+    - a value
+
+👉 Goal: maximize total value without exceeding the weight limit.
+
+
+Tip: for such problems, you have to keep trying and the best you can do with it is dynamic programming with O(weightCapacity * items.length)
+
+
+#### 0/1 knapsack
+every item is taken only once
+
+#### unbounded knapsack
+every item can be taken multiple times
+
+#### Optional: greedy variant / fractional //TODO::
+
+Problem 1710
+
+
+
+
+
+### Knapsack 0/1
+
+every item is taken only once
+
+Given n items where each item has some weight and profit associated with it and also given a bag with capacity, [i.e., the bag can hold at most W weight in it]. The task is to put the items into the bag such that the sum of profits associated with them is the maximum possible.
+
+Note: The constraint here is we can either put an item completely into the bag or cannot put it at all [It is not possible to put a part of an item into the bag].
+
+```java
+// Top-Down Approach O(capacity * n) and time is O(capacity * n)
+public class KnapsackTopDown {
+    private int[][] memo;
+
+    public int knapsack(int[] weight, int[] value, int capacity) {
+        memo = new int[weight.length][capacity + 1];
+
+        for(int i=0;i<memo.length;i++){
+            Arrays.fill(memo[i], -1); // uncomputed
+        }
+
+        return dfs(weight, value, 0, capacity);
+    }
+
+    private int dfs(int[] weight, int[] value, int i, int capacity) {
+        if(capacity == 0){
+            // no capcity left
+            return 0;
+        }
+
+        if (i == weight.length) {
+            //no more items left to check
+            return 0;
+        }
+
+        if (memo[i][capacity] != -1) {
+            // already computed
+            return memo[i][capacity]; 
+        }
+
+        //skip element
+        int notTake = dfs(weight,value, i + 1, capacity);
+
+        //take it
+        int take = 0;
+        if (weight[i] <= capacity) {
+            take = value[i] + dfs(weight,value, i + 1, capacity - weight[i]);
+        }
+
+        return memo[i][capacity] = Math.max(take,notTake);
+    }
+}
+```
+
+Tip: since there are two dynamic input parameters for the recursion function, then this is 2 dimention problem and memoization have to be 2D array
+
+
+
+---
+
+### Unbounded Knapsack
+
+every item can be taken multiple times
+
+Given n items where each item has some weight and profit associated with it and also given a bag with capacity, [i.e., the bag can hold at most W weight in it]. The task is to put the items into the bag such that the sum of profits associated with them is the maximum possible.
+
+you can take infinite numbers of each item
+
+```java
+// space O(capacity * n) and time is O(capacity * n)
+public class UnboundedKnapsack {
+    private int[][] memo;
+
+    public int knapsack(int[] weight, int[] value, int capacity) {
+        memo = new int[weight.length][capacity + 1];
+
+        for (int i = 0; i < memo.length; i++) {
+            Arrays.fill(memo[i], -1);
+        }
+
+        return dfs(weight, value, 0, capacity);
+    }
+
+    private int dfs(int[] weight, int[] value, int i, int capacity) {
+        if(capacity == 0){
+            // no capcity left
+            return 0;
+        }
+
+        if (i == weight.length) {
+            //no more items left to check
+            return 0;
+        }
+
+        if (memo[i][capacity] != -1) {
+            return memo[i][capacity];
+        }
+
+        // skip current item
+        int notTake = dfs(weight, value, i + 1, capacity);
+
+        // take current item (stay on same i)
+        int take = 0;
+        if (weight[i] <= capacity) {
+            take = value[i] + dfs(weight, value, i, capacity - weight[i]);
+        }
+
+        return memo[i][capacity] = Math.max(take, notTake);
+    }
+}
+
+```
+
+```java
+// space optimized
+public class UnboundedKnapsack {
+    private int[] memo;
+
+    public int knapsack(int[] weight, int[] value, int capacity) {
+        memo = new int[capacity + 1];
+
+        Arrays.fill(memo, -1);
+
+        return dfs(weight, value, capacity);
+    }
+
+    private int dfs(int[] weight, int[] value, int capacity) {
+        if(capacity == 0){
+            // no capcity left
+            return 0;
+        }
+
+        if (memo[capacity] != -1) {
+            return memo[capacity];
+        }
+
+        int maxVal = 0;
+        for (int i = 0; i < weight.length; i++) {
+            if (weight[i] <= capacity) {
+                maxVal = Math.max(maxVal, value[i] + dfs(capacity - weight[i]));
+            }
+        }
+
+        return memo[capacity] = maxVal;
+    }
+}
+
+```
