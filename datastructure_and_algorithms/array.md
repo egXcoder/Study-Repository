@@ -415,7 +415,60 @@ class Solution {
 
 ```
 
-### Keep Track of Smallest and Second Smallest
+### Keep Track of Smallest and Second Smallest globally in array
+
+```java
+
+int[] arr = new int[]{9,5,2,4,1};
+
+//find smallest and second smallest in general
+int smallest = Integer.MAX_VALUE;
+int secondSmallest = Integer.MAX_VALUE; 
+for(int i=0;i<arr.length;i++){
+    //if found smallest, then update smallest and second smallest
+    if(arr[i]<smallest){
+        secondSmallest = smallest;
+        smallest = arr[i];
+        continue;
+    }
+
+    //if found second smallest, then update only it
+    if(arr[i]>smallest && arr[i]<secondSmallest){
+        secondSmallest = arr[i];
+        continue;
+    }
+}
+```
+
+--- 
+
+### Keep Track of Smallest and Second Smallest seen after smallest
+
+```java
+
+int[] arr = new int[]{9,5,2,4,1};
+
+//find smallest and second smallest in general
+int smallest = Integer.MAX_VALUE;
+int secondSmallest = Integer.MAX_VALUE; 
+for(int i=0;i<arr.length;i++){
+    //if found smallest, then update smallest
+    if(arr[i]<smallest){
+        smallest = arr[i];
+        continue;
+    }
+
+    //if found second smallest, then update it
+    if(arr[i]>smallest && arr[i]<secondSmallest){
+        secondSmallest = arr[i];
+        continue;
+    }
+}
+```
+
+---
+
+### Example of Keep Track of Smallest and Second Smallest seen after smallest
 
 Example: Given an integer array nums, return true if there exists a triple of indices (i, j, k) such that i < j < k and nums[i] < nums[j] < nums[k]. If no such indices exists, return false.
 
@@ -428,18 +481,6 @@ Example: Given an integer array nums, return true if there exists a triple of in
 // [6,7,5] 8 ..
 // if [6,7,5] have middle .. this means there was a smallest whatever it is
 // if 8 is bigger than middle then we found a solution
-
-// [1,7,5,4] .. minimum Middle = 4 because of 1,4 pair
-    // int smallest = Integer.MAX_VALUE;
-    // int middle = Integer.MAX_VALUE;
-    // for(int x : nums){
-    //     if(x <= smallest){
-    //         smallest = x ;
-    //     }
-    //     else if(x <= middle){
-    //         middle = x ;
-    //     }
-    // }
 
 class Solution {
     public boolean increasingTriplet(int[] nums) {
