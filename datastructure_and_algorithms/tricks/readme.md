@@ -9,6 +9,15 @@
 - you can know if number is even by bitwise operation num & 1
 
 
+- Average 
+[5,6,7,8,9,10] ... = (sigma(el)/count) .. assume each element weight = 1
+
+- Weighted Average .. 
+[5,6,7,8,9,10] .. values
+[1,1.5,.6,.7,2,3] .. weight
+
+weighted avg = sigma(el*weight) / sigma(weight)
+
 
 
 
