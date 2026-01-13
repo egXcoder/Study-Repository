@@ -10,98 +10,112 @@ InnoDB tables have hidden system columns for every row:
 | Column        | Description                                                               |
 | ------------- | ------------------------------------------------------------------------- |
 | `DB_TRX_ID`   | The ID of the transaction that last modified this row                     |
-| `DB_ROLL_PTR` | A pointer to the **undo log record** for the previous version of this row |
+| `DB_ROLL_PTR` | A pointer to the undo log record for the previous version of this row |
 | `DB_ROW_ID`   | A unique row ID (used internally if there’s no primary key)               |
 
 
-### Transaction Ids
-- InnoDB transaction IDs are sequential, monotonically increasing numbers.
-- Modern MySQL uses 64-bit trx IDs
-- wraparound is essentially impossible in normal use because its 64bit so possible max value of xid is enormous
+### Undo Log (this is the heart)
 
-### Commit Log
+When a row is updated or deleted:
+- Old version is written to the undo log
+- New version is written to the data page
+- New Version keeps a pointer to the old Version
 
-there is no separate commit log which track transactions (in progress, committed, rolledback, etc..) like postgres
-
-
-### Redo Logs (Similar to WAL of postgres)
-
-redo log is same idea of postgres WAL
+This creates a version chain:
+current row → undo → undo → undo → ...
 
 
-### Undo Logs
+### Read View (transaction snapshot)
 
-store the previous versions of rows that are modified by transactions.
+When a transaction starts:
+- InnoDB creates a Read View
+- It contains:
 
-- it Provide older versions of rows for consistent reads. So other transactions can see a snapshot of the database as it was before your update.
-
-- If a transaction rolls back, InnoDB uses the undo log to restore the row to its previous state.
-
-- Cleaning: When no active transaction needs an old version, the purge thread removes it.
-
-
-### What Happens on Create?
-
-T1 creates a record … T1 trx_id = 101
-
-Row (in buffer pool):
-- trx_id = 101 … created by T1
-- DB_ROLL_PTR → points to undo log (for rollback)
-- row data = { user_id=1, post_id=42 }
+| Field            | Meaning                                      |
+| ---------------- | -------------------------------------------- |
+| `creator_trx_id` | Transaction that owns the Read View          |
+| `trx_ids`        | List of transactions active at snapshot time |
+| `low_limit_id`   | Smallest active transaction ID               |
+| `up_limit_id`    | Next transaction ID to be assigned           |
 
 
-Suppose T1 did not commit yet
-- T1 runs: SELECT * FROM likes
-    - Visibility check: row trx_id = 101 → created by T1 itself → show it
-- T2 runs: SELECT * FROM likes
-    - Visibility check: row trx_id = 101 → check in-memory transaction list → T1 still active / not committed → do not show it
-
-Suppose T1 commit
-- T2 runs: SELECT * FROM likes
-    - Visibility check: row trx_id = 101 → check in-memory transaction list → T1 committed → show it
+This assist on querying rows visibility dynamically 
 
 
-### What Happens on UPDATE?
-- Old row is copied to undo log to
-    - ability to rollback the heap to this version if transaction rollback
-    - other transactions can see this record
-- New row behavior:
-    - if it can fill within page it will be updated in place
-    - if it cant, then put it into another page, and put a pointer in the original location to point to the new location
+### How InnoDB uses Read View (step-by-step)
 
-Tip: InnoDB uses a clustered index, meaning rows are physically stored in primary key order, which helps maintain sequential organization even when row versions move between pages.
+When reading a row:
+- Look at row’s DB_TRX_ID
+- Compare it with current transaction Read View
 
-T2 updates a record … T2 trx_id = 102
+Decide:
 
-Old Row:
-- trx_id = 101 … created by T1
-- DB_ROLL_PTR → points to undo log for old version
-- row data = { user_id=1, post_id=42 }
-
-New Row:
-- trx_id = 102 … created by T2
-- DB_ROLL_PTR → points to undo log for rollback if T2 aborts
-- row data = { user_id=1, post_id=43 }
-
-Suppose T2 is not committed yet
-- T2 runs: `SELECT * FROM likes`
-    - Visibility check: latest row with trx_id = 102 → created by T2 → show it
-
-- T3 runs: `SELECT * FROM likes`
-    - Finds two rows (trx_id 101 and 102)
-    - Visibility check: latest row trx_id = 102 → T2 not committed → ignore
-    - Fallback to older row trx_id = 101 → committed → show this row
-
-lets suppose T2 committed
-- T3 runs: `SELECT * FROM likes`
-    - Latest row trx_id = 102 → committed → show this row
-
-When purge purge thread runs
-- delete old row versions by marking as reusable space
-- Any old row with trx_id = aborted → undo log cleaned → trx_id reset or row discarded
+Visibility Rules
+| Row trx id       | Visible? | Why                                 |
+| ---------------- | -------- | -------------------------           |
+| Own transaction  | ✅ Yes    | “Read your own writes”             |
+| `< low_limit_id` | ✅ Yes    | Committed before snapshot          |
+| `>= up_limit_id` | ❌ No     | Created after snapshot             |
+| In `trx_ids`     | ❌ No     | Still active                       |
+| Not In `trx_ids` | ✅ Yes    | Committed while transaction working|
 
 
-## Q: it feels like mysql and postgres both are doing almost same thing in terms of mvcc
+### Q: is above table is for read committed or repeatable read??
+
+its for both, but with tiny different
+
+- [-] READ COMMITTED: whenever you do a select it will create a read view
+
+    - T1: do a select .. it will create a read view
+    ```js
+    {
+        creator_trx_id:1000,
+        low_limit_id:999,
+        up_limit_id:1002,
+        active_trx_ids:{999,1000,1001,1002}
+    }
+    ```
+
+    - T2,T3 which are 999 and 1001 update data and commit
+
+    - now when T1: do another select .. it will create a new read view
+    ```js
+    {
+        creator_trx_id:1000,
+        low_limit_id:1002,
+        up_limit_id:1005,
+        active_trx_ids:{1002,1003,1004,1005}
+    }
+    ```
+
+    - T1 will read data amended by T2 and T3 since T2,T3 are < low_limit_id
+
+
+- [-] REPEATABLE READ: one read view per transaction
+
+    - T1: do a select .. it will create a read view
+    ```js 
+    {
+        creator_trx_id:1000,
+        low_limit_id:999,
+        up_limit_id:1002,
+        active_trx_ids:{999,1000,1001,1002}
+    }
+    ```
+
+    - T2,T3 which are 999 and 1001 update data and commit
+
+    - now when T1: do another select .. it will use same read view
+
+    - T1 will not read data amended by T2,T3 as they are inside active_trx_ids
+
+<br>
+
+Tip: Transaction Ids are sequential, monotonically increasing numbers. wraparound is impossible in normal use because its 64bit so possible max value of xid is enormous
+
+---
+
+### Q: it feels like mysql and postgres both are doing almost same thing in terms of mvcc
 yes, they are the same in core idea.. The main differences are where versions are stored
 
 Mysql
@@ -111,3 +125,35 @@ Mysql
 Postgres
 - old version kept in its location
 - new version is inserted into heap appending
+
+---
+
+### Undo Log Vs Redo Logs
+
+- Undo log = (rollback & MVCC)
+- Redo log = (crash recovery & durability)
+
+
+Undo Log — detailed:
+- Logical record of old row versions
+- Stored in undo tablespace
+- Linked via DB_ROLL_PTR
+- Used for
+    - ROLLBACK
+    - MVCC consistent reads
+    - DELETE/UPDATE visibility
+
+Redo Log — detailed
+
+- Physical log of page changes
+- Sequential, append-only
+- Very fast to write
+- Used for
+    - Crash recovery
+    - Durability (ACID D)
+
+```text
+Change page 42:
+offset 128 → write value 200
+```
+
