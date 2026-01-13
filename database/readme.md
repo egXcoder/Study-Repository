@@ -10,8 +10,8 @@
 - Mysql [Explained Here](./parts/mysql/mvcc.md)
 
 ## Schema Amending
-- Postgres [Explained Here](./parts/postgres/ddl.md)
 - Mysql [Explained Here](./parts/mysql/ddl.md)
+- Postgres [Explained Here](./parts/postgres/ddl.md)
 
 
 ## Explain and Explain Analysis [Explained Here](./parts/explain.md)

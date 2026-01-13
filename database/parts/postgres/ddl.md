@@ -1,8 +1,8 @@
 # DDL (Data Definition Language)
 
-Schema amending
+Postgres ddl is either blocking or unblocking
 
-PostgreSQL prioritizes data correctness, so most DDL operations take strong locks (ACCESS EXCLUSIVE). Some operations can be partially non-blocking using CONCURRENTLY.
+its similar to mysql, but they dont have explicit algorithm. its auto figured out by postgres engine 
 
 | Non-Blocking                              |
 | ----------------------------------------- |
