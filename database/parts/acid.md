@@ -1,7 +1,20 @@
 # ACID
 
+| Property        | Meaning                                    |
+| --------------- | ------------------------------------------ |
+| **Atomicity**   | All-or-nothing                             |
+| **Consistency** | Data always in good shape                  |
+| **Isolation**   | Transactions don’t interfer                |
+| **Durability**  | if db says committed, its better be there even if db crashed at this moment          |
 
-## What is a Transaction?
+
+<br> 
+
+## Atomicity = “All or nothing.”
+
+Even if 100 queries in a transaction succeed, if one fails → rollback everything. if database went down prior to commit a transaction. all successful queries should rollback
+
+#### Q:What is a Transaction?
 
 A transaction is a collection of one or more SQL statements treated as one logical unit of work. It begins with BEGIN and ends with either:
 - COMMIT → persist all changes permanently to disk.
@@ -9,43 +22,34 @@ A transaction is a collection of one or more SQL statements treated as one logic
 
 Tip: you dont have to explicitly say rollback, crashing before commit will rollback automatically
 
-## Atomicity = “All or nothing.”
-
-Even if 100 queries in a transaction succeed, if one fails → rollback everything. if database went down prior to commit a transaction. all successful queries should rollback
-
+<br>
 
 ## Consistency
 
-### Consistency in Data (User Level Fault)
+#### [-] Consistency in Data (User Level Fault)
 - If invoices.no_of_lines = 5, there must be 5 rows in lines table [Consistent]
 - If invoices.no_of_lines = 5, and there are 3 rows in lines table, [that’s an inconsistent state]
 - If invoice doesnt exist, and there are some lines referencing it,[that’s an inconsistent state]
 
-### Consistency in Read (System-Level Consistency)
-
-If a transaction commits a change, then all subsequent reads should reflect that change
-
-You update a user’s balance from $100 to $50 on the primary database. If a replica still returns $100 for some time because replication is delayed, that’s read inconsistency.
+#### [-] Consistency in Read (System-Level Consistency)
 
 Types:
 - Strong consistency: Reads always see the latest committed value (often via synchronous replication).
 - Eventual consistency: Reads may see stale data temporarily, but replicas will eventually converge to the same state.
 
-Achieving strong consistency usually means slower writes or reads, because replication must synchronize before acknowledging success. Eventual consistency gives you speed and scalability but allows short-term inconsistency.
+If a transaction commits a change, then all subsequent reads should reflect that change
 
 Tip: whenever you add a caching layer like redis in memory, you will become inconsistent till you update the cache
 
 Tip: whenever you have the data in two places, you will become inconsistent till all database nodes take the updated data
 
-Q: as a software engineer, can you tolerate eventual consistency?
+#### Q: as a software engineer, can you tolerate eventual consistency?
 - if not critical: such as how many likes this post have, it doesnt matter if i see 1000 likes or 1005 likes. its okay to be the correct value in few seconds so eventual consistent is okay here.
 - if critical: such as financial value like i have done a transaction with 1k usd, when i do a select again its better be there. i can't tolerate eventual consistentcy.. it has to be consistent now
 
+<br>
 
 ## Isolation:
-
-Full Isolation means that concurrent transactions behave as if they were executed sequentially. Full Isolation though is slow, so we have to do trade-off and reduce isolation level restrictions for better performance
-
 
 ### Isolation Levels:
 - Read Uncommitted: Sees all data, even uncommitted
@@ -91,6 +95,8 @@ Tip: Serializable in postgres, the two transactions are working without lock but
 - Each transaction sees a snapshot version of the data as of its start time.
 - Old versions are stored until they’re no longer visible to any transaction.
 
+
+<br>
 
 ## Durability
 
@@ -146,13 +152,3 @@ Use the fsync() (or fdatasync()) system call, which forces the OS to flush data 
 Tradeoff:
 - ✔️ Guaranteed durability
 - ❌ Slower commits (because you’re waiting for disk I/O)
-
-
-## Summary
-
-| Property        | Meaning                                    |
-| --------------- | ------------------------------------------ |
-| **Atomicity**   | All-or-nothing                             |
-| **Consistency** | Data always in good shape                  |
-| **Isolation**   | Transactions don’t interfer                |
-| **Durability**  | if db says committed, its better be there even if db crashed at this moment          |
