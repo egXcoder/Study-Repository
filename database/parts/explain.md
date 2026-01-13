@@ -4,19 +4,25 @@
 - Explain Analyzie: do the actual work, then tell you how it actually done it
 
 
+### Mysql vs Postgres
+
+- Mysql: `Explain Format=TREE select * from sme_users where id > 20 order by id asc`
+- Postgres: `Explain select * from sme_users where id > 20 order by id asc`
+
+
 ### Scans Methods
-- Seq Scan: reads every row in the table. Happens when there’s no useful index or you select everything.
+- Seq Scan/Table Scan: reads every row in the table. Happens when there’s no useful index or you select everything.
 - Index Scan: uses an index to find rows, then goes to the heap (the table) to fetch data
 - Index Only Scan: uses only the index — no need to go to heap — when all required columns are covered by the index.
-- Parallel Seq Scan: PostgreSQL splits the work of scanning a large table across multiple processes.
-- Bitmap index scan: is a PostgreSQL optimization technique that speeds up queries that use multiple conditions on indexed columns
+- Parallel Seq Scan: `PostgreSQL` splits the work of scanning a large table across multiple processes.
+- Bitmap index scan: is a `PostgreSQL` optimization technique that speeds up queries that use multiple conditions on indexed columns
 
 ### Examples:
 - Ex 
     - Run: `EXPLAIN SELECT * FROM grades;`
     - Output: `Seq Scan on grades  (cost=0.00..289025.15 rows=12141215 width=31)`
     - Key Concepts:
-        - Startup Cost 0.00: The estimated cost (in arbitrary units) before the first row can be returned
+        - Startup Cost 0.00: The estimated cost (in arbitrary units) to get first row
         - Total Cost: The estimated total cost to process the entire 
         - Rows: Estimated number of rows db expects to fetch.
         - Width: Estimated average size (in bytes) of each row.
@@ -28,11 +34,11 @@
     - Run: `EXPLAIN SELECT * FROM grades ORDER BY name;`
     - Output: 
     ```sql 
-    Gather Merge  (cost=1000.00..999999.00 rows=200000000 width=31)
-    Workers Planned: 4
-    -> Sort  (cost=500.00..520.00 rows=50000000 width=31)
-        Sort Key: name
-        -> Parallel Seq Scan on grades  (cost=0.00..400.00 rows=50000000 width=31)
+        Gather Merge  (cost=1000.00..999999.00 rows=200000000 width=31)
+        Workers Planned: 4
+        -> Sort  (cost=500.00..520.00 rows=50000000 width=31)
+            Sort Key: name
+            -> Parallel Seq Scan on grades  (cost=0.00..400.00 rows=50000000 width=31)
     ```
     - Comment:
         - Read from inner to top
@@ -48,3 +54,15 @@
 - Ex
     - Run: `EXPLAIN SELECT g FROM grades WHERE g > 90;`
     - Output: `Index Only Scan using idx_g on grades  (cost=0.43..15.00 rows=500 width=8) Index Cond: (g > 90)`
+
+
+- Ex
+    - Run: `EXPLAIN SELECT * FROM orders WHERE status = 'OPEN' AND customer_id = 123;`
+    - Output: 
+    ```sql
+    Bitmap Heap Scan on orders
+    Recheck Cond: (status = 'OPEN' AND customer_id = 123)
+    -> BitmapAnd
+        -> Bitmap Index Scan on idx_orders_status
+        -> Bitmap Index Scan on idx_orders_customer
+    ```

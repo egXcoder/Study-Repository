@@ -15,23 +15,22 @@ So when a database needs to read a single row, it actually loads the entire page
 
 
 ## I/O (Input/Output)
-
 - An I/O is one read/write operation between disk and memory. 
 - Disk I/O is expensive, so databases aim to: Minimize how many pages they read and Reuse pages already in memory (via caching). 
 - A single I/O usually fetches multiple pages at once. thats why clustering table where data is stored physically sequential is favoured
 
-## Clustered Table
+## Clustered Table (mysql)
 - table’s data itself is physically stored in the order of the index. (usually the primary key). 
 - MySQL, SQL Server
 
-## The Heap (Non-Clustered)
+## The Heap (Non-Clustered) (postgres)
 
 - data stored un-ordered. A full table scan means scanning all heap pages — which is slow. Hence the need for indexes to avoid scanning the entire heap. 
 - PostgreSQL
 
 ## Indexes
 
-An index is a separate data structure (stored on disk) that helps locate rows in the heap more efficiently. Most relational databases use B-trees as the underlying structure. Each index entry contains:
+An index is a separate data structure (stored on disk) that helps locate rows in the heap more efficiently. Most relational databases use B+trees as the underlying structure. Each index entry contains:
 - The indexed value (e.g., employee_id = 40)
 - A pointer (page + row ID) to the actual data in the heap
 

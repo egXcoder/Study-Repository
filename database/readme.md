@@ -13,7 +13,6 @@
 - Mysql [Explained Here](./parts/mysql/ddl.md)
 - Postgres [Explained Here](./parts/postgres/ddl.md)
 
-
 ## Explain and Explain Analysis [Explained Here](./parts/explain.md)
 
 ## Indexes [Explained Here](./parts/indexes.md)
@@ -27,7 +26,6 @@
 ## Replication [Explained Here](./parts/replication.md)
 
 ## Cursor [Explained Here](./parts/cursor.md)
-
 
 ## Data Migration [Explained Here](./parts/data_migration.php)
 
