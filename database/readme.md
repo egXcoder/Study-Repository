@@ -29,6 +29,7 @@
 
 ## Data Migration [Explained Here](./parts/data_migration.php)
 
+## GIS [Explained Here](./parts/gis.md)
 
 ## Postgres
 Pros over mysql:

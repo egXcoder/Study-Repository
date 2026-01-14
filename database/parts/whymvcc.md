@@ -67,36 +67,6 @@ Tip: typical exclusive lock on this model is to prevent two updating same row in
 
 Tip: select for update .. can hurt the performance greatly. its transaction must be very short. because as long as transaction still open. if we are doing select * it will block. it feels almost like table is locked.
 
-### Q: How to Avoid Deadlocks?
-- Always lock rows in a consistent order (e.g., always by ascending ID).
-- Keep transactions short — the longer they run, the higher the chance of overlap.
-- Avoid unnecessary SELECT … FOR UPDATE unless you truly need it.
-
-### Q: Why Transactions shouldn't be long?
-
-- Deadlocks if multiple long transactions touch overlapping rows.
-
-- if you used `select for update` in a long transaction that will damage the performance.because as long as transaction still open. if we are doing select * it will block. it feels almost like table is locked.
-
-- Long transactions prevent cleanup because: The database must preserve the old row versions for any transaction that started before the long transaction. which reduce functionality of vacuum (postgres) / Purge Thread in mysql
-
-- Undo log in mysql is filled with old record versions till its committed
-
-- In systems using locks like sql server (even MVCC systems have some locks):
-    - Long transactions may hold row-level or table-level locks for a long time.
-    - Other transactions waiting on those locks stall, creating bottlenecks.
-
-### Core idea is to prevent locking 
-
-In old databases: To ensure data consistency, a transaction would lock rows (Pessmistic Concurrency Control)
-- Readers issue a shared lock on rows
-- Writters issue exclusive lock on rows
-
-In MVCC — “readers don’t block writers, writers don’t block readers” (Optimistic Concurrency control)
-- Readers dont issue locks
-- Writters issue a tiny lock only for other writters on same row
-
-it has become the prevailing approach in the design of modern relational database systems. such as PostgreSQL, Oracle, and MySQL (InnoDB)
 
 | Database                           | MVCC Implementation                                         |
 | ---------------------------------- | ----------------------------------------------------------- |
