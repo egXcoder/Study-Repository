@@ -6,8 +6,8 @@
 
 ## MVCC
 - Why MVCC [Explained Here](./parts/whymvcc.md)
-- Postgres [Explained Here](./parts/postgres/mvcc.md)
 - Mysql [Explained Here](./parts/mysql/mvcc.md)
+- Postgres [Explained Here](./parts/postgres/mvcc.md)
 
 ## Schema Amending
 - Mysql [Explained Here](./parts/mysql/ddl.md)
