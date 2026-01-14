@@ -101,3 +101,22 @@ Tip: select for update .. can hurt the performance greatly. its transaction must
 - In systems using locks like sql server (even MVCC systems have some locks):
     - Long transactions may hold row-level or table-level locks for a long time.
     - Other transactions waiting on those locks stall, creating bottlenecks.
+
+### Core idea is to prevent locking 
+
+In old databases: To ensure data consistency, a transaction would lock rows (Pessmistic Concurrency Control)
+- Readers issue a shared lock on rows
+- Writters issue exclusive lock on rows
+
+In MVCC — “readers don’t block writers, writers don’t block readers” (Optimistic Concurrency control)
+- Readers dont issue locks
+- Writters issue a tiny lock only for other writters on same row
+
+it has become the prevailing approach in the design of modern relational database systems. such as PostgreSQL, Oracle, and MySQL (InnoDB)
+
+| Database                           | MVCC Implementation                                         |
+| ---------------------------------- | ----------------------------------------------------------- |
+| **PostgreSQL**                     | Native MVCC                                                 |
+| **MySQL (InnoDB)**                 | MVCC inside the InnoDB (undo logs)                          |
+| **Oracle**                         | MVCC since the 1980s (very mature)                          |
+| **Microsoft SQL Server**           | Optional (via READ_COMMITTED_SNAPSHOT / SNAPSHOT isolation) |

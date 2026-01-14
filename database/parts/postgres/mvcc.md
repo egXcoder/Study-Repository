@@ -1,27 +1,102 @@
-## POSTGRES 
-
-## MVCC (Multi Version Concurrent Control)
+## POSTGRES
 
 
-### Core idea is to prevent locking 
+### MVCC
 
-In old databases: To ensure data consistency, a transaction would lock rows (Pessmistic Concurrency Control)
-- Readers issue a shared lock on rows
-- Writters issue exclusive lock on rows
+The main goal of MVCC is to allow: Concurrent reads and writes without locking.
 
-In MVCC — “readers don’t block writers, writers don’t block readers” (Optimistic Concurrency control)
-- Readers dont issue locks
-- Writters issue a tiny lock only for other writters on same row
+POSTGRES tables have hidden system columns for every row:
 
-it has become the prevailing approach in the design of modern relational database systems. such as PostgreSQL, Oracle, and MySQL (InnoDB)
+| Column | Meaning                                                 |
+| ------ | ------------------------------------------------------- |
+| `xmin` | Transaction ID that created the row version             |
+| `xmax` | Transaction ID that deleted/updated the row version     |
+| `ctid` | Physical location of the row version                    |
 
-| Database                           | MVCC Implementation                                         |
-| ---------------------------------- | ----------------------------------------------------------- |
-| **PostgreSQL**                     | Native MVCC                                                 |
-| **MySQL (InnoDB)**                 | MVCC inside the InnoDB (undo logs)                          |
-| **Oracle**                         | MVCC since the 1980s (very mature)                          |
-| **Microsoft SQL Server**           | Optional (via READ_COMMITTED_SNAPSHOT / SNAPSHOT isolation) |
 
+
+### (this is the heart)
+
+When a row is updated or deleted:
+- Old version is kept in its location and just update its xmax
+- New version is appended to the heap
+
+- T1: insert a row:
+
+    | Rows                                                    |
+    | ------------------------------------------------------- |
+    | ctid=(1,1), xmin = T1, xmax = null                      |
+
+
+- T2: update the row:
+
+    | Rows                                                    |
+    | ------------------------------------------------------- |
+    | ctid=(1,1), xmin = T1, xmax = T2                        |
+    | ctid=(1,2), xmin = T2, xmax = null                      |
+
+
+Tip: ctid is in form ctid(page_number, row_offset)
+
+
+---
+
+
+### Read View (transaction snapshot)
+
+When a transaction starts:
+- Postgres creates a Read View
+- It contains:
+
+| Field            | Meaning                                      |
+| ---------------- | -------------------------------------------- |
+| `creator_trx_id` | Transaction that owns the Read View          |
+| `xip`            | List of transactions active at snapshot time |
+| `xmin`           | Smallest active transaction ID               |
+| `xmax`           | Next transaction ID to be assigned           |
+
+
+This assist on querying rows visibility dynamically 
+
+
+---
+
+### How POSTGRES uses Read View (step-by-step)
+
+When reading a row:
+- Look at row’s xmin,xmax
+- Compare it with current transaction Read View both xmin and xmax
+
+Visibility Rules:
+
+Checking xmin
+| Row `xmin`              | Visible? | Why                       |
+| ----------------------- | -------- | ------------------------- |
+| Own transaction XID     | ✅ Yes    | Read your own writes      |
+| `< snapshot.xmin`       | ✅ Yes    | Committed before snapshot |
+| `>= snapshot.xmax`      | ❌ No     | Created after snapshot    |
+| In `snapshot.xip[]`     | ❌ No     | Still active              |
+| Not in `snapshot.xip[]` | ✅ Yes    | Committed before snapshot |
+
+
+Checking xmax
+| Row `xmax`              | Visible? | Why                     |
+| ----------------------- | -------- | ----------------------- |
+| `NULL`                  | ✅ Yes    | Not deleted             |
+| Own transaction XID     | ❌ No     | You deleted it          |
+| In `snapshot.xip[]`     | ✅ Yes    | Delete not committed    |
+| `< snapshot.xmin`       | ❌ No     | Deleted before snapshot |
+| Not in `snapshot.xip[]` | ❌ No     | Delete committed        |
+
+
+### Q: is above table is for read committed or repeatable read??
+
+same as mysql..
+
+- READ COMMITTED: Snapshot created per statement
+- REPEATABLE READ / SERIALIZABLE: Snapshot created once per transaction
+
+--- 
 
 ### Tuples
 
@@ -66,35 +141,12 @@ This happens during:
 - Or explicitly via `VACUUM FREEZE`
 So freezing old tuples is essential maintenance for long-lived databases.
 
-### CLOG (Commit Log)
 
-PostgreSQL keeps a separate data structure called the commit log. stored in $PGDATA/pg_xact/
+Tip: wrap around of transaction id doesnt happen in mysql, since mysql choose its id to be 64 bit which is enormous
+---
 
-Each transaction ID (XID) has an entry there corresponds to 2 bits in pg_xact. Because of this, the commit log is tiny:
+# Below Content to be reviewed later since its out of scope of mvcc
 
-| Bits | Meaning                                            |
-| ---- | -------------------------------------------------- |
-| 00   | Transaction in progress                            |
-| 01   | Committed                                          |
-| 10   | Aborted                                            |
-| 11   | Subcommitted (used internally for subtransactions) |
-
-How It’s Used During Visibility Checks: when you do a select query
-- Read the tuple’s xmin and xmax.
-- Look up their commit status in pg_xact.
-- Use that status to dynamically decide if the tuple is visible.
-
-| Tuple | xmin | xmax | pg_xact[xmin] | pg_xact[xmax] | Visible?              |
-| ----- | ---- | ---- | ------------- | ------------- | --------------------- |
-| v1    | 100  | NULL | committed     | —             | ✅ visible             |
-| v2    | 101  | NULL | in progress   | —             | ❌ invisible           |
-| v3    | 102  | NULL | aborted       | —             | ❌ invisible           |
-| v4    | 100  | 103  | committed     | committed     | ❌ deleted (invisible) |
-
-
-Cleaning Up Old Commit Log Data:
-- as part of vaccum freezing cleaning happens when transaction ids become old. 
-- committed tuples which are very old will take xmin = 2 and xid entries will be removed from the commit log
 
 
 ### WAL (Write Ahead Log) in postgres / Redo Log in mysql
@@ -151,79 +203,6 @@ WAL Tracks Both Uncommitted and Committed Changes
     - Writing pages to disk in batches is faster than writing every page immediately.
     - This may include uncommitted changes.
 
-
-### What Happens on Create?
-
-T1 create a record .. xid = 101..
-
-Row:
-- ctid(3,17)
-- xmin = 101 .. created by 
-- xmax = null
-- row data here
-
-lets suppose T1 didnt commit yet.. 
-- T1 run a query `select * from likes`
-    - query is converted to `select * from likes where xmin<=101`
-    - it will find one tuple, and do visibility check .. xmin = 101 which is my transaction id .. so show it
-
-- T2 run a query `select * from likes`
-    - query is converted to `select * from likes where xmin<=102`
-    - it will find one tuple, and visibility check .. xmin = 101 .. hey commit log what is the status of xid=101? still in progress!! okay .. don't show it
-
-lets support T1 commit now..
-- T2 run a query `select * from likes`
-    - query is converted to `select * from likes where xmin<=102`
-    - it will find the new tuple, and visibility check .. xmin = 101 .. hey commit log what is the status of xid=101? committed!! okay .. show it
-
-
-### What Happens on UPDATE?
-- It doesn’t modify the row in place. just marks the old one as expired (xmax)
-- It creates a new tuple (new CTID)
-- it add entry in all indexes and mark old index as dead till vacuum later on which mark it as reusable
-
-T2 update record .. T2 xid = 102.. even before commit it will write to heap the below
-
-old Row:
-- ctid (3,17)
-- xmin = 101
-- xmax = 102
-- row data here
-
-New Row:
-- ctid (8,2)
-- xmin = 102
-- xmax = null
-- new row data
-
-lets suppose T2 not committed yet
-- T2 run a query `select * from likes`
-    - query is converted to `select * from likes where xmin<=102`
-    - it will find two tuples, and visibility check .. get me the latest tuple with xmin value .. xmin=102 thats me.. then show it
-
-- T3 run a query `select * from likes`
-    - query is converted to `select * from likes where xmin<=103`
-    - it will find two tuples, and visibility check .. get me the latest tuple with xmin value .. xmin=102 .. hey commit log, what is the status with xid = 102? still in progress!! okay read the other one .. xmin=101 committed!! then show this tuple
-
-lets suppose T2 committed
-- T3 run a query `select * from likes`
-    - query is converted to `select * from likes where xmin<=103`
-    - it will find two tuples, and visibility check .. get me the latest tuple with xmin value .. xmin=102 .. hey commit log, what is the status with xid = 102? committed then show this tuple
-
-then vacuum run .. 
-- i can see there is old tuple with xmax = 102, hey commit log, what is status of xid=102. committed!! okay .. lets delete this tuple then from heap
-- i can see there is old tuple with xmax = 100, hey commit log, what is status of xid=100. aborted!! okay .. lets wipe this xmax then from this tuple to back to null
-
-
-### Visibility Map:
-
-as you can see above queries, you have to query for xmin<=xid while xmin live in heap with the tuple, so now we end up even if its index only scan we have to fetch data from heap to check if transaction can see it or not. to solve this postgres invented this visibility map
-
-The visibility map is a bitmap (one bit per heap page) that tracks whether all tuples on a page are visible to all active transactions.
-
-when you run postgres vacuum, a logic is run to keep visibility map up to date If all tuples on a page are visible to all active transactions, PostgreSQL marks that page as “all-visible” in the visibility map.
-
-Later operations (like index-only scans or HOT updates) can skip reading the heap for pages marked all-visible.
 
 ### How primary key operates in postgres?
 

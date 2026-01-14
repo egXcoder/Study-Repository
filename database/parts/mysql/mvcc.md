@@ -119,12 +119,14 @@ Tip: Transaction Ids are sequential, monotonically increasing numbers. wraparoun
 yes, they are the same in core idea.. The main differences are where versions are stored
 
 Mysql
+- new version updated in place
 - old version stored in undo log
-- new version try to be in-place if row can fit in page otherwise be in different location and original location point to it 
 
 Postgres
-- old version kept in its location
-- new version is inserted into heap appending
+- new version appended in the heap 
+- old version kept in place but updated its xmax
+
+Postgres tends to take more space, but vaccuum is critical to reuse the deleted rows from heap space
 
 ---
 
