@@ -38,7 +38,6 @@ PostGIS has two spatial worlds:
 - geometry (flat / projected)
     - Uses planar math
     - Fast
-    - Requires map projection (UTM, Web Mercator, etc.)
     - Used for cities, zones, engineering
     - If SRID is 4326 (WGS84) → coordinates are `degrees`
 
