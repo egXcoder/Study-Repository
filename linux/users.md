@@ -42,7 +42,7 @@ uid=1000(toor) gid=1001(toor) groups=1001(toor),4(adm),20(dialout),24(cdrom),25(
     - Human users
     - UID ≥ 1000
     - Can log in
-    - `adduser ahmed`
+    - `useradd ahmed`
 
 ---
 
@@ -162,9 +162,9 @@ chown -R postgres:docker /path/to/directory
 
 
 # Change Permission 1
-# read = 4
-# write = 2
-# execute = 1
+# read = 4 100
+# write = 2 010
+# execute = 1 001
 chmod 666 conf.config # rw-rw-rw-
 chmod 765 conf.config # rwx-rw-r-x
 
@@ -242,32 +242,30 @@ when user creates new file, the default permission given is (max_available_permi
 - umask for root user is 0022.. then default file permission 0644
 - you can set `umask 0000` per process or per terminal ~/.bashrc or globally  
 
+---
 
+### Create User/Group
+
+- `sudo useradd -m -s /bin/bash ahmed` .. add user with his home .. '-m' for home, '-s /bin/bash' for shell
+- `sudo passwd ahmed` .. set password for user ahmed
+- `cat /etc/passwd | awk -F: '{print $1}'` .. show list of users
+- `sudo cat /etc/passwd | grep ahmed` .. show ahmed user
+- `sudo userdel -r ahmed` .. delete user with his home .. '-r' is for remove home
+
+<br>
+
+- `sudo groupadd developers` .. add group
+- `sudo usermod -aG developers ahmed` .. add user to group -aG is critical without it, existing groups are removed (append group)
+- `cat /etc/group | awk -F: '{print $1}'` .. show list of groups
+- `cat /etc/group | grep developers` .. show single group
+- `sudo groupdel developers` .. delete group
+
+
+Tip: `awk '{print $1}'` this gives first column as column 1 is separated by space
+Tip: `awk -F: '{print $1}'` .. -F is for field separator and : means this is separator
 
 ---
 
-### TODO::Switching Between Users
-TODO:: to explain the laravel linux problem and how i solved it
-
-
-
-
-
-Groups: 
-- `groups` .. set my groups
-- `groups www-data` .. see groups for user www-data
-- `groupadd webdev` create a group
-- `usermod -aG webdev ahmed` add group to user
-
-
-File/Dir Owners:
-
-- By default file/Dir when new file/dir is added .. logged user as owner and as group
-
-- `sudo chown -R :webdev /var/www/html/laravel_project` .. change group
-
-
-- `sudo chown -R ahmed:webdev /var/www/html/news_fetcher` .. change owner + group
-
-
-- `sudo -u www-data touch /var/www/html/news_fetcher/storage/testfile` .. do something on behalf of other user
+### Switching User
+- `sudo -u ahmed -i` .. login as another user
+- `sudo -u ahmed whoami` .. run command as another user
