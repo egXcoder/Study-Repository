@@ -1,7 +1,7 @@
 # Linux
 
 ### Users [Explained here](./users.md)
-
+### Sudoers [Explained here](./sudo.md)
 
 
 # JournalCTL
