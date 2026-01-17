@@ -183,7 +183,7 @@ chmod o-x conf.config # take out execute permission from filename
 
 ---
 
-### G Bit:
+### SGID:
 By default, when user creates new file, the default group is the user primary group. however if gid bit is set to directory, then any new file/directory created within directory would inherit group from directory
 
 ```bash
@@ -263,9 +263,74 @@ when user creates new file, the default permission given is (max_available_permi
 
 Tip: `awk '{print $1}'` this gives first column as column 1 is separated by space
 Tip: `awk -F: '{print $1}'` .. -F is for field separator and : means this is separator
+Tip: To add/edit users/groups.. you need the sudo as normal user can't amend linux user system unless root or sudoer
 
 ---
 
 ### Switching User
 - `sudo -u ahmed -i` .. login as another user
 - `sudo -u ahmed whoami` .. run command as another user
+
+
+### install Laravel Project
+
+- Main idea is to install laravel project using a particular linux user 'ubuntu' for example 
+- 'ubuntu' user will be used when you login to linux and also on cronjobs
+- apache user 'www-data' and 'ubuntu' user will be on same group
+
+
+- Add ubuntu user if not exists
+    - `useradd -m ubuntu`
+
+- Add group between ubuntu and www-data
+    - `groupadd laravel_group`
+    - `usermod -aG laravel_group ubuntu`
+    - `usermod -aG laravel_group www-data`
+
+- Add Project Directory
+    - `sudo mkdir /var/www/html/myapp` .. this will create myapp folder as owner:group root:root
+    - `sudo chown ubuntu:laravel_project myapp` .. change owner:group
+    - `sudo chmod 755 myapp` .. owner can rwx , group can r-x, others can r-x
+
+    Tip: execute permission to directory, means you can cd into it
+    
+    Tip: apache user or other services shouldn't have write permission to the typical project files like .env .. they may need permission to write into cache or storage which i am going to give its permission explicitly later on 
+
+- Install Project
+    - `sudo -u ubuntu -i` .. login as ubuntu user if not logged in already
+    - `cd /var/www/myapp`
+    - `git clone https://repo.git`
+    - `composer install`
+    - `sudo chown -R ubuntu:laravel_project /var/www/myapp` .. apply owner:group recursively to all files/directories within proj
+    - `sudo chmod -R 755 /var/www/myapp` .. apply permission to all files/directories
+
+- Handle Cache And Storage
+    - `sudo chmod -R 2775 storage bootstrap/cache` .. add rwx for the group.. then apache user can write into cache and storage
+
+    Tip: Critical: this number 2 is adding SGID bit flag into cache/storage directory. so that any new files/directories added inside them would inherit the group 
+
+- Make sure Both Users UMask are 0002
+    - Why?
+        - if you didnt do this step, ubuntu user umask maybe 0022 so now if you run php artisan while using ubutnu, you may create a log or cache file with permission 0644
+        - so now if apache user tries to write log or cache it will get permission denied because he only have read permission
+    - What?
+        - when any user creates file it takes default permission of (max available permission - umask)
+        - max available permission for directory 0777 while files 0666
+        - when umask is 0002 .. then new files take permission = 0666 - 0002 = 0664
+    - How?
+        - apache www-data user
+            - check: `sudo -u www-data sh -c 'umask'` if this gives other than 0002
+            - `sudo nano /etc/apache2/envvars`
+            - then add umask 0002 then save file and restart `sudo systemctl restart apache2`
+
+        - php-fpm user
+            - check: `sudo -u php-fpm sh -c 'umask'` if this gives other than 0002
+            - `sudo nano /etc/php/*/fpm/pool.d/www.conf`
+            - then add php_admin_value[umask] = 0002 and restart `sudo systemctl restart php*-fpm`
+
+        - ubuntu user which i use to login
+            - check `sudo -u ubuntu sh -c 'umask'`
+            - `sudo nano /home/laravel/.bashrc`
+            - add umask 0002 then save then check again
+
+    Tip: to check umask. you would think why not just `sudo -u ubuntu umask`.. this is invalid beause umask is not external binary.. its more of environment variable so you need to get it from shell so you need to run shell `sudo -u ubuntu sh -c 'umask'` -c is for command
