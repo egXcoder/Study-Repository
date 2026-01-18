@@ -2,7 +2,7 @@
 
 ### Users [Explained here](./users.md)
 ### Sudoers [Explained here](./sudo.md)
-### Systemd/SystemCtl [Explained Here](./systemd.md)
+### SystemCtl [Explained Here](./systemctl.md)
 
 # JournalCTL
 

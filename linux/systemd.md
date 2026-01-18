@@ -1,6 +1,4 @@
-# Systemd/Systemctl
-
-System daemon (systemd) is the first process (pid=1) run by linux kernel which starts all other services and daemons
+# Systemctl
 
 
 # systemctl
@@ -14,6 +12,8 @@ System daemon (systemd) is the first process (pid=1) run by linux kernel which s
     - `systemctl status nginx` .. show servie status and logs
     - `systemctl list-units --type=service` .. list all services
 
+# systemd
+System daemon (systemd) is the first process (pid=1) run by linux kernel which starts all other services and daemons
 
 - Difference Between systemctl and systemd
     - systemctl
@@ -73,26 +73,26 @@ till the end of this step, systemd doesnt start anything. it just built the grap
 when you enable the service via `systemctl enable cron` it will add a symlink into `/etc/systemd/system/multi-user.target.wants/cron.service -> /lib/systemd/system/cron.service`.. so that when system boots up and reach target of multi-user.target it will go and read directory `/etc/systemd/system/multi-user.target.wants` and start services inside considering their dependencies
 
 
-```text
+```ini
+#start cron after these two targets are started:
+#remote-fs.target → all remote filesystems are mounted
+#nss-user-lookup.target → user/group name lookup is ready
 [Unit]
 Description=Regular background program processing daemon
 Documentation=man:cron(8)
 After=remote-fs.target nss-user-lookup.target
 
-<!-- start cron after these two targets are started: -->
-<!-- remote-fs.target → all remote filesystems are mounted -->
-<!-- nss-user-lookup.target → user/group name lookup is ready -->
 
 
 [Service]
-EnvironmentFile=-/etc/default/cron <!--Loads environment variables from /etc/default/cron if it exists -->
-ExecStart=/usr/sbin/cron -f -P $EXTRA_OPTS <!-- Command to run on start -->
+EnvironmentFile=-/etc/default/cron #Loads environment variables from /etc/default/cron if it exists
+ExecStart=/usr/sbin/cron -f -P $EXTRA_OPTS # Command to run on start
 IgnoreSIGPIPE=false
 KillMode=process
-Restart=on-failure <!--If crond exits with a failure code, systemd automatically restarts it-->
+Restart=on-failure # If crond exits with a failure code, systemd automatically restarts it
 
 
-<!-- this is the part which instruct on enabling service it would add it to multi-user.target directory -->
+#this is the part which instruct on enabling service it would add it to multi-user.target directory
 [Install]
 WantedBy=multi-user.target
 ```
@@ -103,15 +103,15 @@ targets are checkpoints that happens during boot up most likely, systemd runs al
 
 #### Very early / boot-critical targets
 
-| Target                 | Purpose                                                                                             |
-| ---------------------- | --------------------------------------------------------------------------------------------------- |
-| **`basic.target`**     | All essential system initialization done. This is where most core services start.                   |
-| **`sysinit.target`**   | Core system initialization (mounts, swap, udev, local-fs.target). Usually required by basic.target. |
-| **`local-fs.target`**  | All local filesystems are mounted.                                                                  |
-| **`remote-fs.target`** | All remote/network filesystems (NFS, SMB) are mounted.                                              |
-| **`sockets.target`**   | All socket units are activated (for socket-activated services).                                     |
-| **`paths.target`**     | All path units are activated (path-watching services).                                              |
-| **`timers.target`**    | All timer units are activated (cron-like timers).                                                   |
+| Target             | Purpose                                                                                             |
+| ------------------ | --------------------------------------------------------------------------------------------------- |
+| `basic.target`     | All essential system initialization done. This is where most core services start.                   |
+| `sysinit.target`   | Core system initialization (mounts, swap, udev, local-fs.target). Usually required by basic.target. |
+| `local-fs.target`  | All local filesystems are mounted.                                                                  |
+| `remote-fs.target` | All remote/network filesystems (NFS, SMB) are mounted.                                              |
+| `sockets.target`   | All socket units are activated (for socket-activated services).                                     |
+| `paths.target`     | All path units are activated (path-watching services).                                              |
+| `timers.target`    | All timer units are activated (cron-like timers).                                                   |
 
 
 #### Mid-Stage
@@ -126,20 +126,20 @@ targets are checkpoints that happens during boot up most likely, systemd runs al
 #### Late-Stage
 | Target                 | Purpose                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------- |
-| **`graphical.target`** | graphical desktop login. Wants multi-user.target.                                        |
-| **`default.target`**   | Symlink to the default system target (usually `graphical.target` or `multi-user.target`) |
+| `graphical.target` | graphical desktop login. Wants multi-user.target.                                        |
+| `default.target`   | Symlink to the default system target (usually `graphical.target` or `multi-user.target`) |
 
 
 
 #### Special Purpose Targets
 
-| Target                 | Purpose                                                  |
-| ---------------------- | -------------------------------------------------------- |
-| **`reboot.target`**    | Reboot the system.                                       |
-| **`poweroff.target`**  | Power off the system.                                    |
-| **`halt.target`**      | Halt the system without rebooting.                       |
-| **`rescue.target`**    | Single-user rescue mode (like runlevel 1).               |
-| **`emergency.target`** | Emergency mode — only essential services, minimal shell. |
+| Target             | Purpose                                                  |
+| ------------------ | -------------------------------------------------------- |
+| `reboot.target`    | Reboot the system.                                       |
+| `poweroff.target`  | Power off the system.                                    |
+| `halt.target`      | Halt the system without rebooting.                       |
+| `rescue.target`    | Single-user rescue mode (like runlevel 1).               |
+| `emergency.target` | Emergency mode — only essential services, minimal shell. |
 
 
 
@@ -158,11 +158,10 @@ RestartSec=10
 then reload `sudo systemctl daemon-reload` and `sudo systemctl restart cron.service`
 
 
-Tip: instead of making the file manually, you can do `sudo systemctl edit cron.service` which is doing the same thing
+Tip: `sudo systemctl edit cron.service` will do exact thing instead of creating file manually
 
 
 ### Units Types
-
 
 | Unit Type | File Extension | What it Represents                                    | Example                                 |
 | --------- | -------------- | ---------------------------------------               | ------------------------                |
