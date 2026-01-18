@@ -3,13 +3,12 @@
 ### Users [Explained here](./users.md)
 ### Sudoers [Explained here](./sudo.md)
 ### SystemCtl [Explained Here](./systemctl.md)
+### APT (Advanced Package Tool) [Explained Here](./apt.md)
 
-# JournalCTL
 
-is the tool you use on systemd-based systems (like Ubuntu) to read logs from the system journal.
-reads logs from systemd’s journal, which is a binary log storage managed by the systemd-journald service.
-stored in disk at /var/log/journal/
-- `journalctl -u apache2` View logs for a specific service 
+
+### bash [Explained Here](./bash.md)
+
 
 
 # GNOME, XFCE, KDE, MATE

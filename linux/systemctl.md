@@ -2,15 +2,21 @@
 
 
 # systemctl
-- systemctl is the manager for services (daemons) on Linux using systemd
-    - `systemctl start nginx`
-    - `systemctl stop nginx`
-    - `systemctl reload nginx` .. reload service config
-    - `systemctl enable nginx` .. activate service then it auto start when linux restart
-    - `systemctl disable nginx` .. deactivate service
-    - `systemctl enable nginx --now` .. activate service and start it
-    - `systemctl status nginx` .. show servie status and logs
-    - `systemctl list-units --type=service` .. list all services
+
+systemctl is the manager for services (daemons) on Linux using systemd
+- `systemctl start nginx`
+- `systemctl stop nginx`
+- `systemctl reload nginx` .. reload service config
+- `systemctl enable nginx` .. activate service then it auto start when linux restart
+- `systemctl disable nginx` .. deactivate service
+- `systemctl enable nginx --now` .. activate service and start it
+- `systemctl status nginx` .. show servie status and logs
+- `systemctl list-units --type=service` .. list all services
+
+JournalCTL: is the tool you use on systemd-based systems (like Ubuntu) to read logs from the system journal.
+reads logs from systemd’s journal, which is a binary log storage managed by the systemd-journald service.
+stored in disk at /var/log/journal/
+- `journalctl -u apache2` View logs for a specific unit
 
 # systemd
 System daemon (systemd) is the first process (pid=1) run by linux kernel which starts all other services and daemons
