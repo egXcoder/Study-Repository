@@ -102,3 +102,14 @@ alternatively to all this, you can download your .deb file manually
 ✅ `sudo apt install ./package-name.deb` shall install it and will install dependencies if found any
 
 ❌ `sudo dpkg -i package-name.deb` problem with this, it doesnt install dependencies if needed
+
+
+### Upgrade command
+
+`sudo apt upgrade` Updates all installed packages to the latest version available in your configured repositories.
+
+`sudo apt full-upgrade` can remove or install new packages if needed to complete an upgrade.
+
+If PHP 7.4 requires a new library that isn’t installed yet:
+- apt upgrade → won’t upgrade (because it avoids installing new packages)
+- apt full-upgrade → will upgrade, installing the new library.
