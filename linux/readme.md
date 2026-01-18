@@ -4,7 +4,7 @@
 ### Sudoers [Explained here](./sudo.md)
 ### SystemCtl [Explained Here](./systemctl.md)
 ### APT (Advanced Package Tool) [Explained Here](./apt.md)
-
+### Binaries [Explained Here](./binaries.md)
 
 
 ### bash [Explained Here](./bash.md)
