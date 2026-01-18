@@ -56,14 +56,6 @@ xRDP = the RDP server that Hyper-V Enhanced Session uses
 
 
 
-# apt
-- `apt install pkg` ..install package
-- `apt remove package-name` .. remove package while keeping configs in /etc
-- `apt purge package-name` .. remove package and its configs
-- `apt clean` .. When you install or upgrade packages These .deb files are kept even after the package is installed, so you can reinstall without re-downloading. It removes all cached .deb files
-- `apt autoclean` .. removes only obsolete .deb files, Safer but frees less space.
-
-
 # Socket
 - A special file (not a regular text file) created by the kernel.
 - When Apache connects to /run/php/php8.1-fpm.sock, the kernel opens a socket connection to PHP-FPM.
