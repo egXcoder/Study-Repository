@@ -8,6 +8,7 @@
 
 
 ### bash [Explained Here](./bash.md)
+### Logs [Explained Here](./logs.md)
 
 
 
