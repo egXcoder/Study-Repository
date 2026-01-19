@@ -31,7 +31,7 @@ its considered the foundation concepts in oop (Abstraction .. Polymorphism .. In
 These are 5 guidelines for designing maintainable OOP systems:
 - Single Responsibility.. A class should have only one reason to change [S](./solid/s/readme.md)
 - Open/Closed Principle.. open for extension but closed for modification [O](./solid/o/readme.md)
-- Liskov Substitution.. Subclasses can replace their base classes without breaking the program. [L](./solid/l/readme.md)
+- Liskov Substitution.. Subclasses can substitute their base classes without breaking the program. [L](./solid/l/readme.md)
 - Interface Segregation.. Clients should not be forced to depend on methods they don’t use. [I](./solid/i/readme.md)
 - Dependency Inversion.. High-level modules shouldn’t depend on low-level modules; both should depend on interfaces/contracts [D](./solid/d/readme.md)
 
