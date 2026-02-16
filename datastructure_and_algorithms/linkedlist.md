@@ -11,8 +11,10 @@ Example: You are given two non-empty linked lists representing two non-negative 
 - Output: [7,0,8]
 - Explanation: 342 + 465 = 807.
 
-Tip: module always give you number between 0 and 10 ... 2%10 = 2 , 12%10 = 2
-Tip: 2%10 gives 2 .. not 0
+Tip: modulo a % b is the remainder after dividing a by b
+Tip: modulo by 10 always give you number between 0 and 9
+Tip: such as 0%10 =0, 2%10 = 2 , 12%10 = 2, 10%10 = 0
+
 
 ```java
 public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
