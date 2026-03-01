@@ -13,6 +13,8 @@
 - Mysql [Explained Here](./parts/mysql/ddl.md)
 - Postgres [Explained Here](./parts/postgres/ddl.md)
 
+## Query [Explained Here](./parts/query.md)
+
 ## Explain and Explain Analysis [Explained Here](./parts/explain.md)
 
 ## Indexes [Explained Here](./parts/indexes.md)
